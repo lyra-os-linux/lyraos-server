@@ -77,12 +77,9 @@ Fora de escopo até decisão em contrário:
 
 ## Mecânica de build (KIWI)
 
-Mesma situação de partida que `docs/nvidia-iso.md` já descreveu:
-`kiwi/config.xml` hoje não tem `<profiles>` — é uma única imagem, e nada em
-`scripts/image-build.py` ou nos scripts do `kiwi/` seleciona um profile hoje.
-A rota mais próxima da arquitetura atual continua sendo o mecanismo nativo de
-profiles do KIWI: um profile-base comum (repositórios oficiais + OBS do Lyra,
-kernel-default, branding neutro) e um profile `server` que:
+O `kiwi/config.xml` usa hoje os profiles nativos `desktop` e `server`, com
+uma base comum (repositórios oficiais + OBS do Lyra, kernel-default e branding
+neutro). O profile `server`:
 
 - remove os pacotes de desktop listados acima (`chord`, `beam`, `sulafat`,
   `sheliak`, `fina`, `vega-gtk`, o grupo GNOME, `lyra-os-theme` e os ícones);
@@ -110,14 +107,9 @@ falta de `/usr/lib/lyra-os/server-release`. Isso não exigiu hardcodar
 "server": qualquer profile novo que ganhar um diretório próprio é pego
 automaticamente.
 
-**Ainda não implementado**: uma flag de `--profile` no `image-build.py`
-para efetivamente rodar `kiwi-ng system build --profile server` (o
-comando/CI hoje continua desktop-only), e decidir se `image-build.toml`
-ganha uma seção própria para o server ou se `[obs].package_sources`
-continua compartilhado (compartilharia `lyra`/`vega`, mas não precisa de
-`fina` nem do `Virtualization:Appliances:Builder`). Escopo deliberadamente
-deixado de fora deste primeiro passo — ver `[[server_edition_plan]]` na
-memória do projeto.
+O pipeline de evidência seleciona essa política por
+`image-build-server.toml`; o helper de build passa `--profile server` ao
+`kiwi-ng`. O CI publicado ainda executa somente o fluxo desktop.
 
 ## Instalador em console
 
