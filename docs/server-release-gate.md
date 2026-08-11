@@ -120,9 +120,11 @@ pipeline completo. Confirmado até aqui: instalação de ponta a ponta em VM
 (boot do live → wizard → particiona → copia → chroot → reboot → login →
 `vegad`/`vega-web` ativos e respondendo em `http://localhost:9090`, ver
 `docs/server-edition.md`). Ainda faltam, nesta ordem: rodar
-`scripts/server-release.py check`, `scripts/image-build.py validate/export
+`scripts/server-release.py check`, `scripts/image-build.py validate
 --profile server --release-file release-server.toml --manifest
-image-build-server.toml`, um build real via `kiwi-ng`
+image-build-server.toml`, seguido de `scripts/image-build.py export --profile
+server --release-file release-server.toml --manifest image-build-server.toml
+/caminho/do/export`, um build real via `kiwi-ng`
 (`kiwi/test/build-and-run-vm.sh --profile server`), `lyra-system-smoke
 first-boot --profile server` num disco instalado de verdade (não só a VM de
 desenvolvimento), `obs-release.py health`, e só então
