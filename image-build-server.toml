@@ -1,0 +1,60 @@
+schema = 1
+
+[image]
+# Must match the literal top-level <image name="..."> in kiwi/config.xml,
+# which cannot be scoped per profile the way <preferences>/<packages> can
+# (docs/server-edition.md) - it stays "lyra-os" even for --profile=server.
+# release-server.toml's own image_name ("lyra-os-server") is the source of
+# truth for the actual output ISO filename; kiwi/test/build-and-run-vm.sh
+# renames the kiwi-ng output to match it after the build.
+name = "lyra-os"
+description = "config.xml"
+architecture = "x86_64"
+profile = "server"
+
+[source]
+repository = "https://github.com/britors/Lyra"
+
+[distribution]
+iso_provider = "sourceforge"
+
+[obs]
+api_url = "https://api.opensuse.org"
+role = "packages-only"
+
+[[obs.package_sources]]
+project = "home:rodrigosbrito:lyra"
+repository = "openSUSE_Leap_16.0"
+
+[[obs.package_sources]]
+project = "home:rodrigosbrito:vega"
+repository = "openSUSE_Leap_16.0"
+
+# No home:rodrigosbrito:fina (Fina is desktop-only) and no
+# Virtualization:Appliances:Builder (desktop image test tooling only) -
+# see docs/server-edition.md.
+
+[artifacts]
+required = [
+  "iso",
+  "packages",
+  "verified",
+  "report",
+  "checksum",
+  "checksum_signature",
+  "cyclonedx_sbom",
+  "spdx_sbom",
+]
+
+[evidence]
+# No "rollback": the server profile has no Btrfs/Snapper in v1
+# (docs/server-edition.md - RAID/LVM/Btrfs/Snapper are out of scope
+# without an entry criterion for a v2).
+required_test_results = [
+  "obs-repositories",
+  "live-session",
+  "installer",
+  "first-boot",
+  "uefi-secure-boot",
+  "hardware-matrix",
+]

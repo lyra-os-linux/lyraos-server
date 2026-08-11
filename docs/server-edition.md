@@ -353,13 +353,13 @@ hardware físico real (só VM até agora).
 
 ## Gate e evidência
 
-Reaproveitar o formato de `docs/release-gate.md`/`docs/hardware-matrix.md`,
-como gate próprio da edição server, análogo ao proposto em
-`docs/nvidia-iso.md` para a ISO NVIDIA:
+Formalizado em `docs/server-release-gate.md` (checklist go/no-go completo,
+mesmo formato P0-P3 de `docs/release-gate.md`, sem os itens que não existem
+no server: Lyra Installer gráfico, Btrfs/Snapper/rollback). Resumo:
 
 - boot da imagem, sessão de instalação em console e instalação completam sem
   fallback nem sessão gráfica;
-- `vegad` ativo e `vega-cli` funcional pós-instalação;
+- `vegad`/`vega-web` ativos e `vega-cli` funcional pós-instalação;
 - rede via DHCP funcional pós-instalação, sem intervenção manual;
 - Secure Boot ligado e funcional (shim assinado, entrada NVRAM real) — é
   requisito do v1, não um comportamento a registrar caso a caso;
@@ -367,6 +367,22 @@ como gate próprio da edição server, análogo ao proposto em
   `[[hardware_matrix_single_machine_risk]]`/`docs/hardware-matrix.md` sobre a
   limitação de mantenedor solo com uma única máquina física — mesma restrição
   se aplica aqui, provavelmente via VM/QEMU como cobertura primária).
+
+A evidência é coletada pelo mesmo `kiwi/root/usr/bin/lyra-system-smoke`
+usado no desktop, agora com uma flag `--profile {desktop,server}`: o modo
+`first-boot` compara o filesystem raiz contra `ext4` (não `btrfs`), pula o
+check de Snapper, checa a lista de unidades do server
+(`sshd`/`vegad`/`vega-web`/`firewalld`/`NetworkManager` em vez de
+`gdm`/`cups`/`graphical.target`) e usa uma lista própria de artefatos
+"live-only" (autologin do tty1, o instalador pinado). O pipeline de
+evidência ponta a ponta (`scripts/image-build.py`, `scripts/
+release-artifacts.py`) também ganhou um `--profile`/`--release-file` e um
+manifesto próprio, `image-build-server.toml` (sem `fina`/
+`Virtualization:Appliances:Builder` nas fontes OBS, sem `rollback` nos
+resultados exigidos). `scripts/obs-release.py` não precisou de nenhuma
+mudança: ele opera nos projetos OBS de pacote (lyra/vega/fina), que são
+compartilhados entre as duas edições — não há projeto OBS separado para o
+server.
 
 ## Referências
 
