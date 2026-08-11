@@ -272,6 +272,18 @@ cleanup_mounts() {
 # first act, independent of whatever the outer script's state was.
 trap - ERR
 set +e
+# Kernel messages (partition table re-reads, mount/filesystem events, udev)
+# print straight to the console device, bypassing stdout/stderr and every
+# redirection above entirely - real bug found once services were confirmed
+# working: the gauge display got visibly corrupted by lines like
+# "[  455.135181][  T1187]  vda: vda1" appearing mid-draw. Lowering the
+# console log level for the duration of the gauge (only KERN_EMERG still
+# gets through) and restoring the original value right after is the
+# standard fix; the current value is read back from /proc/sys/kernel/printk
+# instead of assuming a default, so restoring it is exact regardless of
+# what this particular kernel/image started with.
+ORIGINAL_CONSOLE_LOGLEVEL="$(cut -d' ' -f1 /proc/sys/kernel/printk)"
+dmesg -n 1
 clear
 {
     set -euo pipefail
@@ -485,6 +497,7 @@ CHROOT_SCRIPT
     echo "XXX"
 } | dialog --backtitle "$DIALOG_BACKTITLE" --gauge "Preparando instalação..." 10 70 0
 GAUGE_PIPE_STATUS="${PIPESTATUS[0]}"
+dmesg -n "$ORIGINAL_CONSOLE_LOGLEVEL"
 set -e
 trap 'fail "instalação interrompida (linha $LINENO)"' ERR
 clear

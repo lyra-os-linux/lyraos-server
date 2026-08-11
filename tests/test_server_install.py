@@ -63,6 +63,23 @@ class ServerInstallerContentTests(unittest.TestCase):
         self.assertIn('mount --rbind /sys "$TARGET/sys"', self.text)
         self.assertNotIn('mount --bind /sys "$TARGET/sys"', self.text)
 
+    def test_console_loglevel_is_lowered_and_restored_around_the_gauge(self) -> None:
+        # Real bug found once services were confirmed working: kernel
+        # messages (partition table re-reads, mount/udev events) print
+        # straight to the console device, bypassing every stdout/stderr
+        # redirection in this script entirely, and visibly corrupted the
+        # dialog --gauge display. dmesg -n lowers/restores the console log
+        # level; the original value is read back from
+        # /proc/sys/kernel/printk instead of hardcoding a default so the
+        # restore is exact regardless of what the image ships as default.
+        lower_index = self.text.index("dmesg -n 1")
+        restore_index = self.text.index('dmesg -n "$ORIGINAL_CONSOLE_LOGLEVEL"')
+        self.assertLess(lower_index, restore_index)
+        self.assertIn(
+            'ORIGINAL_CONSOLE_LOGLEVEL="$(cut -d\' \' -f1 /proc/sys/kernel/printk)"',
+            self.text,
+        )
+
     def test_firewall_opens_only_ssh_and_vega_web(self) -> None:
         self.assertIn("--add-service=ssh", self.text)
         self.assertIn("--add-port=9090/tcp", self.text)
@@ -331,7 +348,7 @@ class GaugePipeErrorDetectionTests(unittest.TestCase):
     def setUp(self) -> None:
         text = SOURCE.read_text(encoding="utf-8")
         self.prefix = text[
-            text.index("trap - ERR\nset +e\nclear\n{\n    set -euo pipefail")
+            text.index("trap - ERR\nset +e\n")
             : text.index("\n\n    echo 5")
         ]
         end_marker = "avoid a second, redundant message here.\n    exit 1\nfi"

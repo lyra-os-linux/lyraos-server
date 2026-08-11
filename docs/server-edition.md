@@ -322,32 +322,34 @@ mais dois bugs reais no boot do disco instalado:
   `br-nativo(-*)`, `br-nodeadkeys`, `br-thinkpad` — nunca algo com "abnt2".
   `br` sozinho já é o keymap de console real pra um teclado ABNT2 padrão.
   Corrigido trocando a opção `br-abnt2` por `br`.
-- `vegad`/`vega-web` não sobem sozinhos no boot mesmo com `systemctl enable`
-  chamado no chroot durante a instalação — usuário confirmou que iniciar
-  manualmente depois do boot funciona (`vega-web` responde em `localhost:9090`
-  via o `hostfwd` novo). Causa ainda **não identificada**: aguardando saída
-  de `systemctl is-enabled vegad vega-web` / `journalctl -u vegad -u vega-web`
-  rodados no sistema instalado pra saber se o `enable` não gravou o symlink
-  de verdade dentro do chroot, ou se o serviço tenta subir e falha por outro
-  motivo (dependência de rede não pronta, etc.).
+- `vegad`/`vega-web` pareceram não subir sozinhos num boot anterior
+  (contornado manualmente); numa reinstalação seguinte (já com o fix do
+  keymap), os dois **subiram sozinhos normalmente** e `vega-web` respondeu
+  em `localhost:9090` via `hostfwd` sem intervenção. Causa raiz do episódio
+  anterior não identificada com certeza — não investigado mais a fundo já
+  que não reproduziu de novo; se voltar a acontecer, os comandos de
+  diagnóstico ficam registrados aqui: `systemctl is-enabled vegad vega-web`,
+  `journalctl -u vegad -u vega-web`.
+- Barra de progresso corrompida visualmente durante a instalação. Causa:
+  mensagens do **kernel** (releitura de tabela de partição, eventos de
+  mount/udev — as linhas tipo `[ 455.135181][ T1187] vda: vda1` visíveis
+  nos prints anteriores) vão direto pro dispositivo de console, por fora de
+  qualquer redirecionamento de shell (`>>"$LOG" 2>&1` não intercepta isso).
+  Corrigido baixando o nível de log do console (`dmesg -n 1`, só
+  KERN_EMERG passa) durante o gauge, restaurando o valor original
+  (lido de `/proc/sys/kernel/printk`, não um padrão fixo) logo depois.
 
-**Instalação completa confirmada em VM antes da barra de progresso** (boot
-do live → wizard → particiona → copia → chroot → reboot → login no disco
-instalado, incluindo o fix do sudo). A versão com `dialog --gauge` ainda não
-rodou de ponta a ponta numa VM real — só a lógica de detecção de erro foi
-verificada isoladamente; falta confirmar que a barra em si aparece e avança
-como esperado numa instalação de verdade. Também ainda não verificados: se
-`vegad`/`vega-web` de fato sobem depois de
-`systemctl enable` (nomes de unidade continuam suposição, não confirmados
-contra o pacote real — diferente do processo que o desktop usou pra
-confirmar nomes de pacote/unidade contra o OBS de verdade), se
-`ssh -p 2222`/`http://localhost:9090` respondem de fato pelo host via o
-`hostfwd` novo, e a sintaxe exata de `shim-install --config-file=...`
-(citada de memória a partir da descrição do instalador desktop, não
-reverificada aqui contra o `man` da ferramenta — o boot funcionou, mas isso
-não prova que os flags usados são os "certos"/documentados, só que
-funcionaram neste caso). Tratar como não confiável em hardware físico real
-até validar lá também (só testado em VM até agora).
+**Instalação completa confirmada em VM, incluindo `vegad`/`vega-web` subindo
+sozinhos no boot e respondendo em `http://localhost:9090` via o `hostfwd`**
+(boot do live → wizard → particiona → copia → chroot → reboot → login →
+serviços ativos). A versão com `dialog --gauge` ainda não foi reconfirmada
+de ponta a ponta depois do fix de `dmesg -n` (a barra em si funcionava, só
+a corrupção visual foi corrigida depois). Ainda não verificados: a sintaxe
+exata de `shim-install --config-file=...` (citada de memória a partir da
+descrição do instalador desktop, não reverificada aqui contra o `man` da
+ferramenta — o boot funcionou, mas isso não prova que os flags usados são
+os "certos"/documentados, só que funcionaram neste caso) e teste em
+hardware físico real (só VM até agora).
 
 ## Gate e evidência
 
