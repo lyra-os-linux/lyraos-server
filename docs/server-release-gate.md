@@ -133,6 +133,10 @@ desenvolvimento), `obs-release.py health`, e só então
 físico real ainda não aconteceu (só VM até agora) — ver
 `[[hardware_matrix_single_machine_risk]]`.
 
+A Alpha 1 ocupa a janela de 11/08/2026 a 01/09/2026. O cronograma completo
+até a Server 1.0 e os critérios de saída de cada estágio estão em
+[`release-versioning.md`](release-versioning.md#lyra-os-server-10).
+
 ## Referências
 
 - `docs/release-gate.md` — formato original (edição desktop), do qual este
