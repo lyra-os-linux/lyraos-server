@@ -30,7 +30,7 @@ Decisões tomadas em conversa (2026-08-11):
 - **firewall padrão: só SSH e `vega-web` (porta 9090/tcp) abertos**, mais
   nenhuma porta;
 - **nome da edição: "Lyra OS Server", sem codinome** — diferente do desktop
-  (que usa "Odisseia" para a Alpha 2 atual), o server não ganha um nome
+  (que usa "Odisseia" para a Alpha 3 atual), o server não ganha um nome
   próprio de ciclo;
 - **ciclo de release próprio**, não compartilha `release.toml`/calendar
   version com a ISO desktop, mas segue o mesmo esquema alpha/beta/rc/final
