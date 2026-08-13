@@ -580,12 +580,11 @@ firewall-offline-cmd --zone=public --add-port=9090/tcp >/dev/null
 dracut --force --regenerate-all
 
 grub2-mkconfig -o /boot/grub2/grub.cfg
-# shim-install's exact flags are assumed from the desktop installer's
-# description (installer/README.md: "Secure Boot nativo do Leap - o
-# fallback EFI e a entrada NVRAM já saem de graça dessa ferramenta") and
-# have not been independently re-verified against the shim-install
-# man page here; treat as unconfirmed until tested on real UEFI firmware.
-shim-install --config-file=/boot/grub2/grub.cfg
+# Match the invocation exercised by the desktop installer on Leap. The
+# native shim-install creates both the NVRAM entry and fallback
+# EFI/BOOT/BOOTX64.EFI loader; the release gate still verifies both after
+# booting the installed disk with Secure Boot enabled and disabled.
+shim-install --efi-directory=/boot/efi --config-file=/boot/grub2/grub.cfg
 
 : > /etc/machine-id
 CHROOT_SCRIPT

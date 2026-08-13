@@ -99,6 +99,13 @@ class ServerInstallerContentTests(unittest.TestCase):
         self.assertIn('mount --rbind /sys "$TARGET/sys"', self.text)
         self.assertNotIn('mount --bind /sys "$TARGET/sys"', self.text)
 
+    def test_shim_install_uses_the_mounted_efi_system_partition(self) -> None:
+        self.assertIn(
+            "shim-install --efi-directory=/boot/efi "
+            "--config-file=/boot/grub2/grub.cfg",
+            self.text,
+        )
+
     def test_console_loglevel_is_lowered_and_restored_around_the_gauge(self) -> None:
         # Real bug found once services were confirmed working: kernel
         # messages (partition table re-reads, mount/udev events) print
