@@ -42,7 +42,7 @@ Decisões tomadas em conversa (2026-08-11):
 ## Escopo
 
 A ISO desktop já decide o conjunto GNOME + Vega (GTK4) + Sheliak + Fina +
-Chord + Beam/Sulafat como experiência padrão (`kiwi/config.xml`,
+Beam/Sulafat como experiência padrão (`kiwi/config.xml`,
 `PROMPT-LYRA-OS.md`). A edição server inverte isso: mesma base (Leap 16.0,
 kernel-default, repositórios oficiais + OBS do Lyra, mesma política de
 assinatura), mas sem ambiente gráfico e sem os componentes de desktop —
@@ -66,7 +66,8 @@ Fora de escopo até decisão em contrário:
 |---|---|---|
 | Ambiente gráfico | GNOME 48+, Wayland | ausente (headless) |
 | Tema/ícones Lyra | `lyra-os-theme`, ícones custom | ausentes |
-| Chord, Beam, Sulafat | pré-instalados, favoritos GNOME | ausentes |
+| Beam, Sulafat | pré-instalados, favoritos GNOME | ausentes |
+| Chord | não pré-instalado | ausente |
 | Sheliak (dock GNOME) | pré-instalado + schema override | ausente |
 | Fina | pré-instalado | ausente |
 | Vega | `vega-gtk` (frontend GTK4) | `vega-cli` + `vegad` + `vega-web` |
@@ -81,7 +82,7 @@ O `kiwi/config.xml` usa hoje os profiles nativos `desktop` e `server`, com
 uma base comum (repositórios oficiais + OBS do Lyra, kernel-default e branding
 neutro). O profile `server`:
 
-- remove os pacotes de desktop listados acima (`chord`, `beam`, `sulafat`,
+- remove os pacotes de desktop listados acima (`beam`, `sulafat`,
   `sheliak`, `fina`, `vega-gtk`, o grupo GNOME, `lyra-os-theme` e os ícones);
 - adiciona `vega-cli` e `vegad` explicitamente (hoje eles só chegam de forma
   transitiva via dependências do `vega-gtk` — comentário em
@@ -382,7 +383,7 @@ server.
 
 - `PROMPT-LYRA-OS.md` — especificação da ISO desktop atual, base que a
   edição server parte e diverge.
-- `kiwi/config.xml:334-362` — lista de pacotes Vega/Chord/Beam/Sulafat/
+- `kiwi/config.xml` — lista de pacotes Vega/Beam/Sulafat/
   Sheliak/Fina da ISO desktop, ponto de partida para o profile server.
 - `docs/image-builds.md:117-118` — mesmo limite já aplicado à ISO NVIDIA:
   deliverable adicional não pode introduzir flavor de imagem na OBS nem
