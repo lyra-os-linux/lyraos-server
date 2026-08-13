@@ -73,6 +73,27 @@ isso em `required_test_results`:
   única máquina física (mesma restrição do desktop; cobertura primária via
   VM/QEMU é aceita como risco documentado).
 
+Na sessão live Server, antes de iniciar a instalação, gere a evidência de
+console, autologin, identidade da imagem, instalador e journal:
+
+```sh
+lyra-live-smoke --profile server --output live-session-result.json
+```
+
+Depois de reiniciar pelo disco e entrar com o usuário administrativo criado,
+gere a evidência do sistema instalado (o `sudo -v` permite apenas as leituras
+privilegiadas não interativas usadas pelo coletor):
+
+```sh
+sudo -v
+lyra-system-smoke first-boot --profile server --output first-boot-result.json
+```
+
+Ambos os comandos retornam status diferente de zero e escrevem
+`"status": "failed"` se qualquer check obrigatório falhar. Entradas críticas
+do journal só podem ser aceitas explicitamente com `--acknowledge-journal`
+apontando para a issue ou workaround revisado.
+
 ## Chave de assinatura do release
 
 Mesma chave do desktop — não há uma chave separada por edição. Ver
