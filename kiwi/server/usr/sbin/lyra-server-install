@@ -50,40 +50,6 @@ msg() {
         pt:finishing) echo "Finalizando..." ;; pt:completed) echo "Concluído." ;; pt:preparing) echo "Preparando instalação..." ;;
         pt:install_complete) echo "Instalação concluída." ;; pt:restart) echo "Instalação concluída. Reiniciar agora?" ;;
 
-        es:error) echo "Error" ;; es:interrupted) echo "instalación interrumpida" ;; es:root_required) echo "este instalador debe ejecutarse como root" ;;
-        es:uefi_required) echo "el firmware no está en modo UEFI — esta imagen solo admite arranque UEFI" ;; es:console_installer) echo "instalador de consola" ;;
-        es:cancelled) echo "instalación cancelada por el usuario" ;; es:password) echo "Contraseña:" ;; es:confirm_password) echo "Confirme la contraseña:" ;;
-        es:password_short) echo "La contraseña debe tener al menos 8 caracteres." ;; es:password_mismatch) echo "Las contraseñas no coinciden." ;;
-        es:unnamed) echo "sin nombre" ;; es:no_disk) echo "no se encontró ningún disco apto (el medio de instalación no cuenta)" ;;
-        es:target_disk) echo "Disco de destino (se borrará TODO el contenido):" ;; es:invalid_disk) echo "selección de disco no válida" ;;
-        es:no_keymap) echo "no se encontró ninguna distribución de teclado de consola" ;; es:keymap) echo "Distribución del teclado (consola):" ;;
-        es:no_dialog) echo "el paquete 'dialog' no está instalado en esta imagen" ;; es:timezone) echo "Zona horaria:" ;; es:hostname) echo "Nombre del dispositivo:" ;;
-        es:invalid_hostname) echo "Nombre no válido (minúsculas, números y guiones; sin guion al inicio o final)." ;;
-        es:admin_user) echo "Usuario administrador:" ;; es:invalid_user) echo "Usuario no válido (inicie con una letra minúscula; después letras, números, - o _)." ;;
-        es:summary) printf '%s\n' 'Idioma:     %s\nTeclado:    %s\nZona:       %s\nDispositivo:%s\nDisco:      %s (se borrará TODO el contenido)\nUsuario:    %s (grupo wheel/sudo)\n\n¿Confirmar la instalación? Esta operación es IRREVERSIBLE.' ;;
-        es:install_cancelled) echo "Instalación cancelada." ;; es:partitioning) echo "Particionando %s..." ;; es:formatting) echo "Formateando particiones..." ;;
-        es:copying) echo "Copiando el sistema al disco (puede tardar varios minutos)..." ;; es:copy_failed) echo "falló la copia del sistema al disco (tar devolvió %s)" ;;
-        es:mounting) echo "Montando el entorno del sistema instalado..." ;; es:configuring) echo "Configurando usuario, cargador de arranque y servicios..." ;;
-        es:finishing) echo "Finalizando..." ;; es:completed) echo "Completado." ;; es:preparing) echo "Preparando la instalación..." ;;
-        es:install_complete) echo "Instalación completada." ;; es:restart) echo "Instalación completada. ¿Reiniciar ahora?" ;;
-
-        zh:error) echo "错误" ;; zh:interrupted) echo "安装已中断" ;; zh:root_required) echo "此安装程序必须以 root 身份运行" ;;
-        zh:uefi_required) echo "固件未处于 UEFI 模式 — 此镜像仅支持 UEFI 启动" ;; zh:console_installer) echo "控制台安装程序" ;;
-        zh:cancelled) echo "用户取消了安装" ;; zh:password) echo "密码：" ;; zh:confirm_password) echo "确认密码：" ;;
-        zh:password_short) echo "密码必须至少包含 8 个字符。" ;; zh:password_mismatch) echo "两次输入的密码不一致。" ;;
-        zh:unnamed) echo "未命名" ;; zh:no_disk) echo "未找到可用磁盘（安装介质不计入）" ;;
-        zh:target_disk) echo "目标磁盘（其中所有内容都将被清除）：" ;; zh:invalid_disk) echo "磁盘选择无效" ;;
-        zh:no_keymap) echo "镜像中未找到控制台键盘布局" ;; zh:keymap) echo "键盘布局（控制台）：" ;;
-        zh:no_dialog) echo "此镜像中未安装 'dialog' 软件包" ;; zh:timezone) echo "时区：" ;; zh:hostname) echo "设备名称：" ;;
-        zh:invalid_hostname) echo "设备名称无效（仅限小写字母、数字和连字符，且不能以连字符开头或结尾）。" ;;
-        zh:admin_user) echo "管理员用户：" ;; zh:invalid_user) echo "用户名无效（以小写字母开头，之后可使用字母、数字、- 或 _）。" ;;
-        zh:summary) printf '%s\n' '语言：%s\n键盘：%s\n时区：%s\n设备：%s\n磁盘：%s（所有内容都将被清除）\n用户：%s（wheel/sudo 组）\n\n确认安装吗？此操作不可撤销。' ;;
-        zh:install_cancelled) echo "安装已取消。" ;; zh:partitioning) echo "正在对 %s 进行分区..." ;; zh:formatting) echo "正在格式化分区..." ;;
-        zh:copying) echo "正在将系统复制到磁盘（可能需要几分钟）..." ;; zh:copy_failed) echo "将系统复制到磁盘失败（tar 返回 %s）" ;;
-        zh:mounting) echo "正在挂载已安装系统的环境..." ;; zh:configuring) echo "正在配置用户、引导加载程序和服务..." ;;
-        zh:finishing) echo "正在完成..." ;; zh:completed) echo "已完成。" ;; zh:preparing) echo "正在准备安装..." ;;
-        zh:install_complete) echo "安装完成。" ;; zh:restart) echo "安装完成。现在重新启动吗？" ;;
-
         *:error) echo "Error" ;; *:interrupted) echo "installation interrupted" ;; *:root_required) echo "this installer must run as root" ;;
         *:uefi_required) echo "firmware is not in UEFI mode — this image only supports UEFI boot" ;; *:console_installer) echo "console installer" ;;
         *:cancelled) echo "installation cancelled by the user" ;; *:password) echo "Password:" ;; *:confirm_password) echo "Confirm password:" ;;
@@ -303,8 +269,8 @@ if ! command -v dialog >/dev/null 2>&1; then
     fail "$(msg no_dialog)"
 fi
 
-dialog_menu LOCALE_VALUE "System language / Idioma / Idioma / 系统语言:" \
-    "en_US.UTF-8" "pt_BR.UTF-8" "es_ES.UTF-8" "zh_CN.UTF-8"
+dialog_menu LOCALE_VALUE "System language / Idioma do sistema:" \
+    "en_US.UTF-8" "pt_BR.UTF-8"
 UI_LANGUAGE="${LOCALE_VALUE%%_*}"
 DIALOG_BACKTITLE="$LYRA_PRETTY_NAME - $(msg console_installer)"
 choose_keymap

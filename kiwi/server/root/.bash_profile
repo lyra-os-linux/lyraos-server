@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # Lyra OS Server live session: auto-runs the console installer after the
 # tty1 autologin (systemd/getty@tty1.service.d/override.conf). Exiting or
 # interrupting (Ctrl+C) the installer returns here to an interactive root

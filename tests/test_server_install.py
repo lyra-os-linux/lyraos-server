@@ -11,6 +11,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "scripts/server-install.sh"
 PINNED_COPY = ROOT / "kiwi/server/usr/sbin/lyra-server-install"
+LOGIN_INFO = ROOT / "kiwi/server/etc/profile.d/lyra-server-info.sh"
 
 
 class ServerInstallerIdentityTests(unittest.TestCase):
@@ -55,15 +56,20 @@ class ServerInstallerContentTests(unittest.TestCase):
         image_config = (ROOT / "kiwi/config.xml").read_text(encoding="utf-8")
         self.assertIn('<package name="kbd"/>', image_config)
 
-    def test_locale_options_match_the_desktop_installer(self) -> None:
+    def test_server_locale_options_are_limited_to_english_and_portuguese(self) -> None:
         self.assertIn(
-            '"en_US.UTF-8" "pt_BR.UTF-8" "es_ES.UTF-8" "zh_CN.UTF-8"',
+            '"en_US.UTF-8" "pt_BR.UTF-8"',
             self.text,
         )
+        locale_menu = self.text.split("dialog_menu LOCALE_VALUE", 1)[1].split(
+            "choose_keymap", 1
+        )[0]
+        self.assertNotIn("es_ES.UTF-8", locale_menu)
+        self.assertNotIn("zh_CN.UTF-8", locale_menu)
 
     def test_all_user_facing_server_installer_stages_are_localized(self) -> None:
         self.assertIn('UI_LANGUAGE="${LOCALE_VALUE%%_*}"', self.text)
-        for language in ("pt", "es", "zh"):
+        for language in ("pt",):
             for key in (
                 "password",
                 "target_disk",
@@ -184,6 +190,30 @@ class ServerInstallerContentTests(unittest.TestCase):
             text=True,
         )
         self.assertEqual(result.returncode, 0, result.stderr)
+
+
+class ServerLoginLocalizationTests(unittest.TestCase):
+    def test_login_banner_supports_every_installer_locale(self) -> None:
+        text = LOGIN_INFO.read_text(encoding="utf-8")
+        expected = {
+            "en_US": ("no IPv4 address", "Memory", "Disk"),
+            "pt_BR": ("sem endereço IPv4", "Memória", "Disco"),
+        }
+        for locale, messages in expected.items():
+            if locale != "en_US":
+                self.assertIn(f"{locale}*)", text)
+            for message in messages:
+                self.assertIn(message, text)
+
+    def test_login_banner_defaults_to_english_and_follows_lang(self) -> None:
+        self.assertIn('${LANG:-en_US}', LOGIN_INFO.read_text(encoding="utf-8"))
+
+    @unittest.skipUnless(shutil.which("shellcheck"), "shellcheck not installed")
+    def test_login_banner_shellcheck_is_clean(self) -> None:
+        result = subprocess.run(
+            ["shellcheck", str(LOGIN_INFO)], capture_output=True, text=True
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
 
 @unittest.skipUnless(shutil.which("dialog"), "dialog not installed")
