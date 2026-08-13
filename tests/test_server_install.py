@@ -49,7 +49,7 @@ class ServerInstallerContentTests(unittest.TestCase):
         # for a standard Brazilian ABNT2 keyboard.
         self.assertIn("localectl list-keymaps --no-pager", self.text)
         self.assertIn(
-            'dialog_menu KEYMAP_VALUE "Layout de teclado (console):" "${ordered[@]}"',
+            'dialog_menu KEYMAP_VALUE "$(msg keymap)" "${ordered[@]}"',
             self.text,
         )
         image_config = (ROOT / "kiwi/config.xml").read_text(encoding="utf-8")
@@ -60,6 +60,24 @@ class ServerInstallerContentTests(unittest.TestCase):
             '"en_US.UTF-8" "pt_BR.UTF-8" "es_ES.UTF-8" "zh_CN.UTF-8"',
             self.text,
         )
+
+    def test_all_user_facing_server_installer_stages_are_localized(self) -> None:
+        self.assertIn('UI_LANGUAGE="${LOCALE_VALUE%%_*}"', self.text)
+        for language in ("pt", "es", "zh"):
+            for key in (
+                "password",
+                "target_disk",
+                "keymap",
+                "summary",
+                "partitioning",
+                "copying",
+                "configuring",
+                "completed",
+                "restart",
+            ):
+                self.assertIn(f"{language}:{key})", self.text)
+        for key in ("password", "target_disk", "summary", "partitioning", "completed"):
+            self.assertIn(f"*:{key})", self.text)
 
     def test_wipes_signatures_before_repartitioning(self) -> None:
         # Same real bug the desktop installer hit and fixed (commit
@@ -192,9 +210,10 @@ class DialogMenuBehaviorTests(unittest.TestCase):
 
     def setUp(self) -> None:
         text = SOURCE.read_text(encoding="utf-8")
+        localization = text[text.index("UI_LANGUAGE=en") : text.index("RELEASE_METADATA=")]
         start = text.index("# --- prompts")
         end = text.index("# lsblk -e 7,11")
-        self.functions = text[start:end]
+        self.functions = localization + text[start:end]
 
     def _run(self, driver: str, stdin: str) -> subprocess.CompletedProcess:
         script = (
@@ -283,11 +302,12 @@ class TarExitStatusToleranceTests(unittest.TestCase):
         # skipping the root/UEFI checks, the interactive dialog wizard and
         # the partitioning/mount steps before it, none of which this test
         # needs or can satisfy in a sandbox (no root, no real disks).
+        localization = text[text.index("UI_LANGUAGE=en") : text.index("RELEASE_METADATA=")]
         utilities = text[text.index("log() {") : text.index("if [ \"$(id -u)\"")]
-        tar_step_end = text.index('fail "cópia do sistema para o disco falhou')
+        tar_step_end = text.index('fail "$COPY_ERROR"')
         tar_step_end = text.index("done", tar_step_end) + len("done")
         tar_step = text[text.index("    echo 25\n") : tar_step_end]
-        self.functions = utilities + tar_step
+        self.functions = localization + utilities + tar_step
 
     def _run(self, fake_tar_write_exit: int, fake_tar_read_exit: int) -> subprocess.CompletedProcess:
         with tempfile.TemporaryDirectory() as bin_dir, tempfile.TemporaryDirectory() as work_dir:
@@ -313,9 +333,16 @@ class TarExitStatusToleranceTests(unittest.TestCase):
                 "PATH": f"{bin_dir}:/usr/bin:/bin",
                 "FAKE_TAR_WRITE_EXIT": str(fake_tar_write_exit),
                 "FAKE_TAR_READ_EXIT": str(fake_tar_read_exit),
+                "LANG": "C.UTF-8",
+                "LC_ALL": "C.UTF-8",
             }
             return subprocess.run(
-                ["bash", "-c", script], capture_output=True, text=True, env=env
+                ["bash", "-c", script],
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+                env=env,
             )
 
     def test_warning_exit_status_one_does_not_abort_the_install(self) -> None:
@@ -326,7 +353,7 @@ class TarExitStatusToleranceTests(unittest.TestCase):
     def test_fatal_exit_status_two_aborts_with_the_specific_message(self) -> None:
         result = self._run(fake_tar_write_exit=2, fake_tar_read_exit=0)
         self.assertNotEqual(result.returncode, 0)
-        self.assertIn("cópia do sistema para o disco falhou", result.stderr)
+        self.assertIn("copying the system to disk failed", result.stderr)
         self.assertNotIn("REACHED_END", result.stdout)
         # The generic trap message must NOT be what the user sees here -
         # that was exactly the symptom of the bug this test locks in.
