@@ -29,9 +29,10 @@ Decisões tomadas em conversa (2026-08-11):
   via `vega-cli`/`vega-web`, se necessário;
 - **firewall padrão: só SSH e `vega-web` (porta 9090/tcp) abertos**, mais
   nenhuma porta;
-- **nome da edição: "Lyra OS Server", sem codinome** — diferente do desktop
-  (que usa "Odisseia" para a Alpha 3 atual), o server não ganha um nome
-  próprio de ciclo;
+- **nome da edição: "Lyra OS Server"; codinome do ciclo 1.0: "Delos"** — o
+  codinome é identidade humana do produto e não altera nome de pacote, volume,
+  tag ou o schema mecânico de `release-server.toml`; o ciclo Server 1.1 usa
+  o codinome **"Tebas"** sob a mesma regra;
 - **ciclo de release próprio**, não compartilha `release.toml`/calendar
   version com a ISO desktop, mas segue o mesmo esquema alpha/beta/rc/final
   já usado pelo desktop (`docs/release-versioning.md`) — começa em alpha1;
@@ -74,7 +75,7 @@ Fora de escopo até decisão em contrário:
 | Instalador | Lyra Installer nativo (Rust/Tauri, GUI WebKitGTK) | script shell em console, interativo |
 | Storage do instalador | disco único, RAID novo/existente, LVM, Btrfs+Snapper+rollback | v1: disco único, ext4, sem RAID/LVM/rollback |
 | Perfil/target KIWI | único (`config.xml` sem `<profiles>`) | segundo profile reaproveitando a base |
-| Nome/volid da imagem | `lyra-os` "Odisseia" / `LYRA_OS_...` | "Lyra OS Server", sem codinome; ciclo alpha/beta/rc/final próprio, começando em alpha1 |
+| Nome/volid da imagem | `lyra-os` "Odisseia" / `LYRA_OS_...` | "Lyra OS Server 1.0 Delos" na comunicação; nome técnico e volid permanecem sem codinome; ciclo alpha/beta/rc/final próprio, começando em alpha1 |
 
 ## Mecânica de build (KIWI)
 
