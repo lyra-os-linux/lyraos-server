@@ -1,4 +1,4 @@
-# Gate de release — Lyra OS Server alpha1
+# Gate de release — Lyra OS Server Alpha 2
 
 Este checklist é o contrato de go/no-go da edição server, análogo a
 `docs/release-gate.md` (edição desktop) mas recortado para o que realmente se
@@ -29,7 +29,7 @@ server:
 
 Nenhum P0 ou P1 pode ficar aberto na publicação. Um P2 só é aceito quando o
 registro de decisão nomeia issue, workaround, responsável e risco residual —
-sendo alpha1, é esperado ter arestas (P2/P3), mas não P0/P1.
+sendo Alpha 2, é esperado ter arestas (P2/P3), mas não P0/P1.
 
 ## Identidade do candidato
 
@@ -109,7 +109,7 @@ UID atuais; importar `docs/release-signing-key.asc` antes de confiar em
 - [ ] SHA-256 gerado, assinado com a chave acima e verificado de forma
   independente;
 - [ ] notas de release listam requisitos, limitações, issues P2/P3 aceitas e
-  workarounds testados — para alpha1, deixar explícito que é uma build
+  workarounds testados — para Alpha 2, deixar explícito que é uma build
   inicial com arestas esperadas;
 - [ ] manifesto de evidência gerado a partir de um commit limpo e contém
   todos os resultados verdes exigidos;
@@ -134,27 +134,24 @@ Issues P2/P3 aceitas e workarounds:
 Riscos residuais:
 ```
 
-## Estado atual (alpha1)
+## Estado atual (Alpha 2)
 
-**NO-GO** — nenhum candidato ISO real foi construído e assinado ainda pelo
-pipeline completo. Confirmado até aqui: instalação de ponta a ponta em VM
-(boot do live → wizard → particiona → copia → chroot → reboot → login →
-`vegad`/`vega-web` ativos e respondendo em `http://localhost:9090`, ver
-`docs/server-edition.md`). Ainda faltam, nesta ordem: rodar
+**NO-GO** — a validação funcional foi concluída, mas o candidato rastreável
+ainda não foi construído, assinado e publicado pelo pipeline completo.
+Confirmado pelo mantenedor: quatro instalações consecutivas, sessão live e
+primeiro boot aprovados, Secure Boot ligado/desligado, SSH e Vega Web
+acessíveis e log do instalador sem erros. Ainda faltam, nesta ordem: rodar
 `scripts/server-release.py check`, `scripts/image-build.py validate
 --profile server --release-file release-server.toml --manifest
 image-build-server.toml`, seguido de `scripts/image-build.py export --profile
 server --release-file release-server.toml --manifest image-build-server.toml
-/caminho/do/export`, um build real via `kiwi-ng`
-(`kiwi/test/build-and-run-vm.sh --profile server`), `lyra-system-smoke
-first-boot --profile server` num disco instalado de verdade (não só a VM de
-desenvolvimento), `obs-release.py health`, e só então
+/caminho/do/export`, um build final via `kiwi-ng`, `obs-release.py health`, e só então
 `release-artifacts.py generate --release-file release-server.toml --product
 "Lyra OS Server"` + `image-build.py artifact-manifest`. Teste em hardware
-físico real ainda não aconteceu (só VM até agora) — ver
+físico real permanece como risco residual (a cobertura aceita foi em VM) — ver
 `[[hardware_matrix_single_machine_risk]]`.
 
-A Alpha 1 ocupa a janela de 11/08/2026 a 01/09/2026. O cronograma completo
+A Alpha 2 ocupa a janela planejada de 01/09/2026 a 22/09/2026. O cronograma completo
 até a Server 1.0 e os critérios de saída de cada estágio estão em
 [`release-versioning.md`](release-versioning.md#lyra-os-server-10).
 
