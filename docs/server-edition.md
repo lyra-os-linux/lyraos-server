@@ -152,8 +152,10 @@ como decidido em conversa. Fluxo real:
    squashfs original à parte;
 5. chroot no destino: timezone/locale/teclado/hostname, criação do usuário
    (grupo `wheel`, sudo sem senha para o grupo), habilita
-   `NetworkManager`/`firewalld`/`sshd`/`vegad`/`vega-web`, abre só
-   `ssh` e `9090/tcp` no firewalld, `dracut --force --regenerate-all`;
+   `NetworkManager`/`firewalld`/`sshd`/`vegad`/`vega-web`, reduz os
+   repositórios Lyra/Vega para prioridade 90 no sistema instalado, abre só
+   `ssh` e `9090/tcp` no firewalld, gera chaves SSH exclusivas e executa
+   `dracut --force --regenerate-all`;
 6. bootloader: `grub2-mkconfig` + `shim-install`, com bind mount
    **recursivo** de `/sys` no chroot (`mount --rbind`, não `--bind`) — é a
    mesma causa raiz que o instalador desktop documentou e corrigiu

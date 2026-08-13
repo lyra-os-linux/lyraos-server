@@ -16,7 +16,6 @@ FILES=(
   "$PREFIX.iso"
   "$PREFIX.iso.manifest.json"
   "$PREFIX.iso.sha256"
-  "$PREFIX.iso.sha256.asc"
   "$PREFIX.packages"
   "$PREFIX.report"
   "$PREFIX.spdx.json"
@@ -38,7 +37,6 @@ for file in "${FILES[@]}"; do
 done
 
 sha256sum -c "$PREFIX.iso.sha256"
-gpg --verify "$PREFIX.iso.sha256.asc" "$PREFIX.iso.sha256"
 
 echo "Destino: $REMOTE"
 echo "O rsync solicitará a senha ou passphrase SSH da conta SourceForge."

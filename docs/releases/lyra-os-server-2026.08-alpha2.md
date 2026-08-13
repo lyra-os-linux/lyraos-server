@@ -46,12 +46,13 @@ Arquivo esperado:
 lyra-os-server.x86_64-2026.08-alpha2.iso
 ```
 
-Verifique checksum e assinatura destacada:
+Verifique o checksum:
 
 ```sh
 sha256sum -c lyra-os-server.x86_64-2026.08-alpha2.iso.sha256
-gpg --verify lyra-os-server.x86_64-2026.08-alpha2.iso.sha256.asc \
-  lyra-os-server.x86_64-2026.08-alpha2.iso.sha256
 ```
+
+Conforme a ADR 0005, as versões Alpha não possuem assinatura destacada da
+ISO. Ela se torna obrigatória a partir da Beta 1.
 
 O gate completo e os riscos aceitos estão em `docs/server-release-gate.md`.

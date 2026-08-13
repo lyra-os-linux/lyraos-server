@@ -41,7 +41,6 @@ required = [
   "verified",
   "report",
   "checksum",
-  "checksum_signature",
   "cyclonedx_sbom",
   "spdx_sbom",
 ]

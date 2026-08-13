@@ -21,10 +21,10 @@
 # does not propagate it, and Secure Boot's NVRAM entry silently ends up
 # missing without it).
 #
-# First-pass status: exercised by shellcheck and read-review only so far,
-# not yet against a real disk in a VM. Per docs/server-edition.md's gate,
-# treat this as untrusted until it has been run at least once against
-# kiwi/test/build-and-run-vm.sh (or equivalent) end to end.
+# Validation status: exercised repeatedly end to end in QEMU through live
+# boot, installation and first boot. Physical-hardware diversity remains a
+# documented release risk; keep destructive-path changes covered by both the
+# behavioral tests and another full installation before publishing.
 
 set -euo pipefail
 
@@ -43,6 +43,9 @@ msg() {
         pt:no_dialog) echo "o pacote 'dialog' não está instalado nesta imagem" ;; pt:timezone) echo "Fuso horário:" ;; pt:hostname) echo "Hostname:" ;;
         pt:invalid_hostname) echo "Hostname inválido (minúsculas, números e hífen, sem começar/terminar em hífen)." ;;
         pt:admin_user) echo "Usuário administrativo:" ;; pt:invalid_user) echo "Usuário inválido (letra minúscula inicial, depois letras/números/-/_)." ;;
+        pt:user_exists) echo "Este nome de usuário já existe no sistema live. Escolha outro." ;;
+        pt:disk_unavailable) echo "O disco selecionado não está mais disponível ou está em uso." ;; pt:disk_too_small) echo "O disco selecionado precisa ter pelo menos 8 GiB." ;;
+        pt:cleanup_failed) echo "não foi possível desmontar completamente o sistema de destino" ;;
         pt:summary) printf '%s\n' 'Idioma:    %s\nTeclado:   %s\nFuso:      %s\nHostname:  %s\nDisco:     %s (TODO o conteúdo será apagado)\nUsuário:   %s (grupo wheel/sudo)\n\nConfirma a instalação? Esta operação é IRREVERSÍVEL.' ;;
         pt:install_cancelled) echo "Instalação cancelada." ;; pt:partitioning) echo "Particionando %s..." ;; pt:formatting) echo "Formatando partições..." ;;
         pt:copying) echo "Copiando o sistema para o disco (pode levar alguns minutos)..." ;; pt:copy_failed) echo "cópia do sistema para o disco falhou (tar retornou %s)" ;;
@@ -61,6 +64,9 @@ msg() {
         *:no_dialog) echo "the 'dialog' package is not installed in this image" ;; *:timezone) echo "Time zone:" ;; *:hostname) echo "Device name:" ;;
         *:invalid_hostname) echo "Invalid device name (lowercase letters, numbers and hyphens; no leading or trailing hyphen)." ;;
         *:admin_user) echo "Administrator user:" ;; *:invalid_user) echo "Invalid user (start with a lowercase letter, followed by letters, numbers, - or _)." ;;
+        *:user_exists) echo "This user name already exists in the live system. Choose another one." ;;
+        *:disk_unavailable) echo "The selected disk is no longer available or is in use." ;; *:disk_too_small) echo "The selected disk must be at least 8 GiB." ;;
+        *:cleanup_failed) echo "the target system could not be completely unmounted" ;;
         *:summary) printf '%s\n' 'Language:   %s\nKeyboard:   %s\nTime zone:  %s\nDevice:     %s\nDisk:       %s (ALL contents will be erased)\nUser:       %s (wheel/sudo group)\n\nConfirm installation? This operation is IRREVERSIBLE.' ;;
         *:install_cancelled) echo "Installation cancelled." ;; *:partitioning) echo "Partitioning %s..." ;; *:formatting) echo "Formatting partitions..." ;;
         *:copying) echo "Copying the system to disk (this may take several minutes)..." ;; *:copy_failed) echo "copying the system to disk failed (tar returned %s)" ;;
@@ -248,13 +254,16 @@ prompt_password() {
 # partitions on it, which is fine to offer since this is a destructive
 # reinstall by design.
 list_eligible_disks() {
-    local name size model mounted
-    while read -r name size model; do
+    local name size type read_only model mounted
+    while read -r name size type read_only model; do
+        if [ "$type" != disk ] || [ "$read_only" != 0 ]; then
+            continue
+        fi
         mounted=$(lsblk -no MOUNTPOINT "/dev/$name" 2>/dev/null | tr -d ' \n')
         if [ -z "$mounted" ]; then
             printf '%s\t%s\t%s\n' "$name" "$size" "${model:-$(msg unnamed)}"
         fi
-    done < <(lsblk -dno NAME,SIZE,MODEL -e 7,11 2>/dev/null)
+    done < <(lsblk -dno NAME,SIZE,TYPE,RO,MODEL -e 7,11 2>/dev/null)
 }
 
 choose_disk() {
@@ -319,9 +328,15 @@ dialog_inputbox HOSTNAME_VALUE "$(msg hostname)" \
     '^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$' \
     "$(msg invalid_hostname)"
 choose_disk
-dialog_inputbox USERNAME_VALUE "$(msg admin_user)" \
-    '^[a-z][a-z0-9_-]{0,31}$' \
-    "$(msg invalid_user)"
+while true; do
+    dialog_inputbox USERNAME_VALUE "$(msg admin_user)" \
+        '^[a-z][a-z0-9_-]{0,31}$' \
+        "$(msg invalid_user)"
+    if ! getent passwd "$USERNAME_VALUE" >/dev/null; then
+        break
+    fi
+    dialog_msgbox "$(msg user_exists)"
+done
 prompt_password
 
 SUMMARY="$(msgf summary "$LOCALE_VALUE" "$KEYMAP_VALUE" "$TIMEZONE_VALUE" \
@@ -350,12 +365,32 @@ ESP="$(partition_path "$DISK" 1)"
 ROOT_PART="$(partition_path "$DISK" 2)"
 
 cleanup_mounts() {
-    local mnt
+    local mnt status=0
     for mnt in "$TARGET/run/udev" "$TARGET/run" "$TARGET/proc" "$TARGET/sys" "$TARGET/dev/pts" "$TARGET/dev" "$TARGET/boot/efi" "$TARGET"; do
         if mountpoint -q "$mnt"; then
-            umount -R "$mnt" 2>/dev/null || true
+            if ! umount -R "$mnt" 2>>"$LOG"; then
+                log "WARN status=1 stage=cleanup mount=$mnt message=unmount-failed"
+                status=1
+            fi
         fi
     done
+    return "$status"
+}
+
+validate_target_disk() {
+    local mounted disk_size
+    if [ ! -b "$DISK" ] || [ "$(lsblk -dno TYPE "$DISK" 2>/dev/null)" != disk ] ||
+        [ "$(lsblk -dno RO "$DISK" 2>/dev/null)" != 0 ]; then
+        fail "$(msg disk_unavailable)"
+    fi
+    mounted=$(lsblk -no MOUNTPOINT "$DISK" 2>/dev/null | tr -d ' \n')
+    if [ -n "$mounted" ]; then
+        fail "$(msg disk_unavailable)"
+    fi
+    disk_size=$(lsblk -bdno SIZE "$DISK" 2>/dev/null)
+    if ! [[ "$disk_size" =~ ^[0-9]+$ ]] || [ "$disk_size" -lt 8589934592 ]; then
+        fail "$(msg disk_too_small)"
+    fi
 }
 
 # Everything from here down runs inside a dialog --gauge (the left side of
@@ -386,6 +421,7 @@ cleanup_mounts() {
 # first act, independent of whatever the outer script's state was.
 trap - ERR
 set +e
+validate_target_disk
 # Kernel messages (partition table re-reads, mount/filesystem events, udev)
 # print straight to the console device, bypassing stdout/stderr and every
 # redirection above entirely - real bug found once services were confirmed
@@ -450,14 +486,9 @@ clear
     # filesystems than the root overlay - no separate squashfs extraction
     # step needed.
     #
-    # GNU tar exits 1 (not 2) for non-fatal warnings, not just success - a
-    # real example hit here: "tar: ./sys: file changed as we read it", from
-    # tar stat-ing the /sys mountpoint itself (to decide whether to skip it)
-    # while the live kernel's sysfs metadata is constantly changing
-    # underneath it. set -e + pipefail would otherwise treat that exit 1 as
-    # a hard failure of the whole pipe, so both sides are checked explicitly
-    # instead and only exit >=2 (tar's own "fatal error" convention) aborts
-    # the install.
+    # Exclude volatile mountpoints explicitly instead of accepting every tar
+    # status 1. The latter can also mean a partial copy, which must never be
+    # reported as a successful installation.
     #
     # set +e alone is not enough here: the ERR trap fires on any
     # nonzero-returning command regardless of errexit state (it is only
@@ -469,13 +500,15 @@ clear
     # first time this was tested in a VM (2026-08-11).
     trap - ERR
     set +e
-    { tar --one-file-system --xattrs --acls --numeric-owner -cf - -C / . \
+    { tar --one-file-system --xattrs --acls --numeric-owner \
+        --exclude=./dev --exclude=./proc --exclude=./run --exclude=./sys \
+        --exclude=./mnt -cf - -C / . \
         | tar --xattrs --acls --numeric-owner -xf - -C "$TARGET"; } >>"$LOG" 2>&1
     TAR_EXIT_STATUSES=("${PIPESTATUS[@]}")
     set -e
     trap 'report_error $? "$LINENO" "$BASH_COMMAND"' ERR
     for TAR_EXIT_STATUS in "${TAR_EXIT_STATUSES[@]}"; do
-        if [ "$TAR_EXIT_STATUS" -gt 1 ]; then
+        if [ "$TAR_EXIT_STATUS" -ne 0 ]; then
             COPY_ERROR="$(msgf copy_failed "$TAR_EXIT_STATUS")"
             fail "$COPY_ERROR"
         fi
@@ -572,10 +605,19 @@ systemctl enable sshd
 systemctl enable vegad
 systemctl enable vega-web
 
+# Image-build priorities let Lyra packages win while composing the ISO. On
+# the installed system, official Leap repositories must win normal updates.
+zypper --non-interactive modifyrepo --priority 90 repo-lyra
+zypper --non-interactive modifyrepo --priority 90 repo-vega
+
 # Only ssh and vega-web (9090/tcp) are open by default
 # (docs/server-edition.md).
 firewall-offline-cmd --zone=public --add-service=ssh >/dev/null
 firewall-offline-cmd --zone=public --add-port=9090/tcp >/dev/null
+
+# Never carry host identity from the live image into installed machines.
+rm -f /etc/ssh/ssh_host_*
+ssh-keygen -A
 
 dracut --force --regenerate-all
 
@@ -606,10 +648,11 @@ CHROOT_SCRIPT
         rm -f "$TARGET/root/.bash_profile"
         rm -f "$TARGET/usr/sbin/lyra-server-install"
         rm -f "$TARGET/root/lyra-server-install.log"
-
-        trap - ERR
-        cleanup_mounts
     } >>"$LOG" 2>&1
+    trap - ERR
+    if ! cleanup_mounts; then
+        fail "$(msg cleanup_failed)"
+    fi
 
     echo 100
     echo "XXX"

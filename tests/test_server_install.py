@@ -127,6 +127,38 @@ class ServerInstallerContentTests(unittest.TestCase):
         self.assertIn("--add-service=ssh", self.text)
         self.assertIn("--add-port=9090/tcp", self.text)
 
+    def test_installed_repositories_prefer_official_leap_updates(self) -> None:
+        self.assertIn(
+            "zypper --non-interactive modifyrepo --priority 90 repo-lyra",
+            self.text,
+        )
+        self.assertIn(
+            "zypper --non-interactive modifyrepo --priority 90 repo-vega",
+            self.text,
+        )
+
+    def test_each_install_generates_unique_ssh_host_keys(self) -> None:
+        remove_index = self.text.index("rm -f /etc/ssh/ssh_host_*")
+        generate_index = self.text.index("ssh-keygen -A")
+        self.assertLess(remove_index, generate_index)
+
+    def test_destructive_step_revalidates_disk_size_and_availability(self) -> None:
+        validation_index = self.text.index("validate_target_disk\n")
+        wipe_index = self.text.index('wipefs -a "$DISK"')
+        self.assertLess(validation_index, wipe_index)
+        self.assertIn("8589934592", self.text)
+        self.assertIn('lsblk -dno RO "$DISK"', self.text)
+
+    def test_existing_live_account_is_rejected_before_useradd(self) -> None:
+        check_index = self.text.index('getent passwd "$USERNAME_VALUE"')
+        useradd_index = self.text.index('useradd -m -G wheel')
+        self.assertLess(check_index, useradd_index)
+
+    def test_tar_copy_is_fail_closed_and_excludes_virtual_mounts(self) -> None:
+        for path in ("dev", "proc", "run", "sys", "mnt"):
+            self.assertIn(f"--exclude=./{path}", self.text)
+        self.assertIn('[ "$TAR_EXIT_STATUS" -ne 0 ]', self.text)
+
     def test_vega_services_are_enabled_on_the_target(self) -> None:
         self.assertIn("systemctl enable vegad", self.text)
         self.assertIn("systemctl enable vega-web", self.text)
@@ -359,12 +391,13 @@ class ServerInstallerFailureReportingTests(unittest.TestCase):
         self.assertIn("Diagnostic log:", result.stderr)
 
 
-class TarExitStatusToleranceTests(unittest.TestCase):
+class TarExitStatusHandlingTests(unittest.TestCase):
     # Real bug found running --profile server end to end in a VM
     # (2026-08-11), on the very first attempt to fix the *previous* real
-    # bug: GNU tar exits 1 (not 2) for non-fatal warnings ("tar: ./sys:
-    # file changed as we read it" reading a live sysfs mountpoint), and the
-    # first fix attempt only wrapped the pipe in `set +e` before checking
+    # bug: GNU tar exited 1 for "./sys: file changed as we read it" while
+    # inspecting a live sysfs mountpoint. Volatile mountpoints are now
+    # excluded explicitly and every nonzero status fails closed. The first
+    # fix attempt only wrapped the pipe in `set +e` before checking
     # PIPESTATUS. That was not enough: bash's ERR trap fires on any
     # nonzero-returning command independently of errexit state (`set +e`
     # does not suppress it - only if/while/&&/|| conditions and `!` do),
@@ -431,10 +464,10 @@ class TarExitStatusToleranceTests(unittest.TestCase):
                 env=env,
             )
 
-    def test_warning_exit_status_one_does_not_abort_the_install(self) -> None:
+    def test_exit_status_one_aborts_to_prevent_a_partial_install(self) -> None:
         result = self._run(fake_tar_write_exit=1, fake_tar_read_exit=0)
-        self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertIn("REACHED_END", result.stdout)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertNotIn("REACHED_END", result.stdout)
 
     def test_fatal_exit_status_two_aborts_with_the_specific_message(self) -> None:
         result = self._run(fake_tar_write_exit=2, fake_tar_read_exit=0)
