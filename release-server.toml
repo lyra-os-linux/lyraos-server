@@ -3,6 +3,6 @@ schema = 1
 [release]
 calendar_version = "2026.08"
 stage = "alpha"
-iteration = 1
+iteration = 2
 image_name = "lyra-os-server"
 architecture = "x86_64"

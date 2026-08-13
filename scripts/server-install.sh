@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Lyra OS Server - console installer (alpha1).
+# Lyra OS Server - console installer.
 #
 # Single disk, ext4 (no RAID/LVM/Btrfs/Snapper in v1), UEFI + Secure Boot
 # (shim), DHCP network (no static IP prompt), vegad/vega-cli/vega-web
