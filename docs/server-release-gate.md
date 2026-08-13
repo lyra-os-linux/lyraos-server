@@ -94,9 +94,11 @@ Ambos os comandos retornam status diferente de zero e escrevem
 do journal só podem ser aceitas explicitamente com `--acknowledge-journal`
 apontando para a issue ou workaround revisado.
 
-## Chave de assinatura do release
+## Chave de assinatura do release (Beta 1 em diante)
 
-Mesma chave do desktop — não há uma chave separada por edição. Ver
+Não há assinatura destacada durante a fase Alpha, conforme a ADR 0005. A
+partir da Beta 1 será usada a mesma chave do desktop — não há uma chave
+separada por edição. Ver
 `docs/release-gate.md` (seção "Release signing key") para a fingerprint e o
 UID atuais; importar `docs/release-signing-key.asc` antes de confiar em
 `*.iso.sha256.asc`.
@@ -106,8 +108,8 @@ UID atuais; importar `docs/release-signing-key.asc` antes de confiar em
 - [ ] ISO, inventário de pacotes, relatório/verificação do KIWI e ambos os
   formatos de SBOM presentes (mesma lista de `[artifacts] required` de
   `image-build-server.toml`);
-- [ ] SHA-256 gerado, assinado com a chave acima e verificado de forma
-  independente;
+- [ ] SHA-256 gerado e verificado de forma independente; conforme a ADR 0005,
+  assinatura destacada passa a ser obrigatória na Beta 1;
 - [ ] notas de release listam requisitos, limitações, issues P2/P3 aceitas e
   workarounds testados — para Alpha 2, deixar explícito que é uma build
   inicial com arestas esperadas;
