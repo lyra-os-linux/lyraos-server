@@ -154,7 +154,7 @@ físico real permanece como risco residual (a cobertura aceita foi em VM) — ve
 `[[hardware_matrix_single_machine_risk]]`.
 
 A Alpha 2 ocupa a janela planejada de 01/09/2026 a 22/09/2026. O cronograma completo
-até a Server 1.0 e os critérios de saída de cada estágio estão em
+até a Server 1.0 “Delos” e os critérios de saída de cada estágio estão em
 [`release-versioning.md`](release-versioning.md#lyra-os-server-10).
 
 ## Referências
