@@ -100,11 +100,15 @@ dialog_menu() {
     # dialog_menu <out_var> <prompt> <opt1> <opt2> ...
     local __out="$1" prompt="$2"
     shift 2
-    local __labels=("$@") __menu_args=() __i __result
+    local __labels=("$@") __menu_args=() __i __result __menu_height
     for __i in "${!__labels[@]}"; do
         __menu_args+=("$((__i + 1))" "${__labels[$__i]}")
     done
-    __result="$(dialog_run --menu "$prompt" 20 70 "${#__labels[@]}" "${__menu_args[@]}")"
+    __menu_height=${#__labels[@]}
+    if [ "$__menu_height" -gt 14 ]; then
+        __menu_height=14
+    fi
+    __result="$(dialog_run --menu "$prompt" 20 70 "$__menu_height" "${__menu_args[@]}")"
     printf -v "$__out" '%s' "${__labels[$((__result - 1))]}"
 }
 
@@ -182,19 +186,41 @@ choose_disk() {
     fail "seleção de disco inválida"
 }
 
+choose_keymap() {
+    # Console keymaps and desktop XKB layouts use different namespaces.
+    # Ask systemd for the complete set shipped by this image so every item
+    # offered here is accepted by loadkeys and systemd-vconsole-setup.
+    local keymaps=() keymap preferred ordered=()
+    mapfile -t keymaps < <(localectl list-keymaps --no-pager 2>/dev/null)
+    if [ "${#keymaps[@]}" -eq 0 ]; then
+        fail "nenhum layout de teclado de console foi encontrado na imagem"
+    fi
+
+    # Keep the two most common Lyra choices at the top; the remaining list
+    # stays in localectl's stable alphabetical order.
+    for preferred in br us; do
+        for keymap in "${keymaps[@]}"; do
+            if [ "$keymap" = "$preferred" ]; then
+                ordered+=("$keymap")
+                break
+            fi
+        done
+    done
+    for keymap in "${keymaps[@]}"; do
+        if [ "$keymap" != br ] && [ "$keymap" != us ]; then
+            ordered+=("$keymap")
+        fi
+    done
+    dialog_menu KEYMAP_VALUE "Layout de teclado (console):" "${ordered[@]}"
+}
+
 if ! command -v dialog >/dev/null 2>&1; then
     fail "o pacote 'dialog' não está instalado nesta imagem"
 fi
 
-dialog_menu LOCALE_VALUE "Idioma do sistema:" "pt_BR.UTF-8" "en_US.UTF-8"
-# "br-abnt2" is an X11/XKB layout+variant name, not a valid Linux console
-# keymap - real bug found in a VM install: systemd-vconsole-setup.service
-# failed at boot because no such keymap exists for loadkeys/vconsole.conf.
-# Confirmed against this repo's own dev machine (a real Lyra OS install):
-# `localectl list-keymaps | grep ^br` only lists br, br-dvorak, br-nativo(-*),
-# br-nodeadkeys, br-thinkpad - plain "br" is the real console keymap for a
-# standard Brazilian ABNT2 keyboard.
-dialog_menu KEYMAP_VALUE "Layout de teclado (console):" "us" "br"
+dialog_menu LOCALE_VALUE "Idioma do sistema:" \
+    "en_US.UTF-8" "pt_BR.UTF-8" "es_ES.UTF-8" "zh_CN.UTF-8"
+choose_keymap
 dialog_menu TIMEZONE_VALUE "Fuso horário:" "America/Sao_Paulo" "UTC"
 dialog_inputbox HOSTNAME_VALUE "Hostname:" \
     '^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$' \

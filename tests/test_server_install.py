@@ -39,7 +39,7 @@ class ServerInstallerContentTests(unittest.TestCase):
     def test_refuses_non_uefi_firmware(self) -> None:
         self.assertIn("/sys/firmware/efi", self.text)
 
-    def test_keymap_options_are_valid_console_keymaps_not_x11_layouts(self) -> None:
+    def test_all_installed_console_keymaps_are_offered(self) -> None:
         # Real bug found in a VM install: systemd-vconsole-setup.service
         # failed at boot because "br-abnt2" is an X11/XKB layout+variant
         # name, not a valid Linux console keymap (loadkeys/vconsole.conf
@@ -47,7 +47,19 @@ class ServerInstallerContentTests(unittest.TestCase):
         # dev machine: `localectl list-keymaps | grep ^br` never lists
         # anything named "abnt2" - plain "br" is the real console keymap
         # for a standard Brazilian ABNT2 keyboard.
-        self.assertIn('dialog_menu KEYMAP_VALUE "Layout de teclado (console):" "us" "br"', self.text)
+        self.assertIn("localectl list-keymaps --no-pager", self.text)
+        self.assertIn(
+            'dialog_menu KEYMAP_VALUE "Layout de teclado (console):" "${ordered[@]}"',
+            self.text,
+        )
+        image_config = (ROOT / "kiwi/config.xml").read_text(encoding="utf-8")
+        self.assertIn('<package name="kbd"/>', image_config)
+
+    def test_locale_options_match_the_desktop_installer(self) -> None:
+        self.assertIn(
+            '"en_US.UTF-8" "pt_BR.UTF-8" "es_ES.UTF-8" "zh_CN.UTF-8"',
+            self.text,
+        )
 
     def test_wipes_signatures_before_repartitioning(self) -> None:
         # Same real bug the desktop installer hit and fixed (commit
