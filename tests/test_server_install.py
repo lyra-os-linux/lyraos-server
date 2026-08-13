@@ -56,6 +56,27 @@ class ServerInstallerContentTests(unittest.TestCase):
         image_config = (ROOT / "kiwi/config.xml").read_text(encoding="utf-8")
         self.assertIn('<package name="kbd"/>', image_config)
 
+    def test_all_system_iana_timezones_are_offered(self) -> None:
+        self.assertIn(
+            "timedatectl list-timezones --no-pager",
+            self.text,
+        )
+        self.assertIn(
+            'dialog_menu TIMEZONE_VALUE "$(msg timezone)" "${ordered[@]}"',
+            self.text,
+        )
+        self.assertNotIn(
+            'dialog_menu TIMEZONE_VALUE "$(msg timezone)" "America/Sao_Paulo" "UTC"',
+            self.text,
+        )
+        timezone_function = self.text.split("choose_timezone()", 1)[1].split(
+            "if ! command -v dialog", 1
+        )[0]
+        self.assertLess(
+            timezone_function.index("America/Sao_Paulo UTC"),
+            timezone_function.index('for timezone in "${timezones[@]}"'),
+        )
+
     def test_server_locale_options_are_limited_to_english_and_portuguese(self) -> None:
         self.assertIn(
             '"en_US.UTF-8" "pt_BR.UTF-8"',
@@ -92,12 +113,33 @@ class ServerInstallerContentTests(unittest.TestCase):
         sgdisk_index = self.text.index("sgdisk --zap-all")
         self.assertLess(wipefs_index, sgdisk_index)
 
-    def test_sys_bind_mount_is_recursive(self) -> None:
-        # A plain non-recursive bind of /sys does not propagate the live
-        # session's efivarfs, which is exactly the bug the desktop
-        # installer's README documents having fixed (MountVirtualFs).
-        self.assertIn('mount --rbind /sys "$TARGET/sys"', self.text)
-        self.assertNotIn('mount --bind /sys "$TARGET/sys"', self.text)
+    def test_sys_bind_has_an_explicit_efivarfs_mount(self) -> None:
+        # A recursive bind imports every /sys submount and failed cleanup in
+        # a real VM. A plain bind plus explicit efivarfs gives shim access to
+        # NVRAM without inheriting unrelated live-session mounts.
+        sys_index = self.text.index('mount --bind /sys "$TARGET/sys"')
+        efivars_index = self.text.index(
+            'mount -t efivarfs efivarfs "$TARGET/sys/firmware/efi/efivars"'
+        )
+        self.assertLess(sys_index, efivars_index)
+        self.assertNotIn('mount --rbind /sys "$TARGET/sys"', self.text)
+
+        cleanup = self.text.split("cleanup_mounts()", 1)[1].split(
+            "validate_target_disk()", 1
+        )[0]
+        self.assertLess(
+            cleanup.index('"$TARGET/sys/firmware/efi/efivars"'),
+            cleanup.index('"$TARGET/sys"'),
+        )
+
+    def test_virtual_filesystem_mount_points_exist_before_bind_mounts(self) -> None:
+        # The tar copy excludes dev/proc/sys/run. They are not guaranteed to
+        # exist in the target, and mount --bind fails with status 32 when its
+        # destination is absent (reproduced in the Alpha 2 VM installer).
+        mkdir_index = self.text.index('mkdir -p "$TARGET/dev/pts" "$TARGET/proc"')
+        self.assertIn('"$TARGET/sys/firmware/efi/efivars"', self.text)
+        first_bind_index = self.text.index('mount --bind /dev "$TARGET/dev"')
+        self.assertLess(mkdir_index, first_bind_index)
 
     def test_shim_install_uses_the_mounted_efi_system_partition(self) -> None:
         self.assertIn(

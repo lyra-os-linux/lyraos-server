@@ -40,6 +40,7 @@ msg() {
         pt:unnamed) echo "sem nome" ;; pt:no_disk) echo "nenhum disco elegível encontrado (a mídia de instalação não conta)" ;;
         pt:target_disk) echo "Disco de destino (TODO o conteúdo será apagado):" ;; pt:invalid_disk) echo "seleção de disco inválida" ;;
         pt:no_keymap) echo "nenhum layout de teclado de console foi encontrado na imagem" ;; pt:keymap) echo "Layout de teclado (console):" ;;
+        pt:no_timezone) echo "nenhum fuso horário IANA foi encontrado na imagem" ;;
         pt:no_dialog) echo "o pacote 'dialog' não está instalado nesta imagem" ;; pt:timezone) echo "Fuso horário:" ;; pt:hostname) echo "Hostname:" ;;
         pt:invalid_hostname) echo "Hostname inválido (minúsculas, números e hífen, sem começar/terminar em hífen)." ;;
         pt:admin_user) echo "Usuário administrativo:" ;; pt:invalid_user) echo "Usuário inválido (letra minúscula inicial, depois letras/números/-/_)." ;;
@@ -61,6 +62,7 @@ msg() {
         *:unnamed) echo "unnamed" ;; *:no_disk) echo "no eligible disk found (the installation media does not count)" ;;
         *:target_disk) echo "Target disk (ALL contents will be erased):" ;; *:invalid_disk) echo "invalid disk selection" ;;
         *:no_keymap) echo "no console keyboard layout was found in the image" ;; *:keymap) echo "Keyboard layout (console):" ;;
+        *:no_timezone) echo "no IANA time zone was found in the image" ;;
         *:no_dialog) echo "the 'dialog' package is not installed in this image" ;; *:timezone) echo "Time zone:" ;; *:hostname) echo "Device name:" ;;
         *:invalid_hostname) echo "Invalid device name (lowercase letters, numbers and hyphens; no leading or trailing hyphen)." ;;
         *:admin_user) echo "Administrator user:" ;; *:invalid_user) echo "Invalid user (start with a lowercase letter, followed by letters, numbers, - or _)." ;;
@@ -314,6 +316,31 @@ choose_keymap() {
     dialog_menu KEYMAP_VALUE "$(msg keymap)" "${ordered[@]}"
 }
 
+choose_timezone() {
+    local timezones=() timezone preferred ordered=()
+    mapfile -t timezones < <(timedatectl list-timezones --no-pager 2>/dev/null)
+    if [ "${#timezones[@]}" -eq 0 ]; then
+        fail "$(msg no_timezone)"
+    fi
+
+    # Put Lyra's current primary test region and the universal fallback at
+    # the top. Keep every other IANA identifier in timedatectl's stable order.
+    for preferred in America/Sao_Paulo UTC; do
+        for timezone in "${timezones[@]}"; do
+            if [ "$timezone" = "$preferred" ]; then
+                ordered+=("$timezone")
+                break
+            fi
+        done
+    done
+    for timezone in "${timezones[@]}"; do
+        if [ "$timezone" != America/Sao_Paulo ] && [ "$timezone" != UTC ]; then
+            ordered+=("$timezone")
+        fi
+    done
+    dialog_menu TIMEZONE_VALUE "$(msg timezone)" "${ordered[@]}"
+}
+
 if ! command -v dialog >/dev/null 2>&1; then
     fail "$(msg no_dialog)"
 fi
@@ -323,7 +350,7 @@ dialog_menu LOCALE_VALUE "System language / Idioma do sistema:" \
 UI_LANGUAGE="${LOCALE_VALUE%%_*}"
 DIALOG_BACKTITLE="$LYRA_PRETTY_NAME - $(msg console_installer)"
 choose_keymap
-dialog_menu TIMEZONE_VALUE "$(msg timezone)" "America/Sao_Paulo" "UTC"
+choose_timezone
 dialog_inputbox HOSTNAME_VALUE "$(msg hostname)" \
     '^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$' \
     "$(msg invalid_hostname)"
@@ -366,7 +393,7 @@ ROOT_PART="$(partition_path "$DISK" 2)"
 
 cleanup_mounts() {
     local mnt status=0
-    for mnt in "$TARGET/run/udev" "$TARGET/run" "$TARGET/proc" "$TARGET/sys" "$TARGET/dev/pts" "$TARGET/dev" "$TARGET/boot/efi" "$TARGET"; do
+    for mnt in "$TARGET/run/udev" "$TARGET/run" "$TARGET/proc" "$TARGET/sys/firmware/efi/efivars" "$TARGET/sys" "$TARGET/dev/pts" "$TARGET/dev" "$TARGET/boot/efi" "$TARGET"; do
         if mountpoint -q "$mnt"; then
             if ! umount -R "$mnt" 2>>"$LOG"; then
                 log "WARN status=1 stage=cleanup mount=$mnt message=unmount-failed"
@@ -520,15 +547,22 @@ clear
     msg mounting
     echo "XXX"
     {
+        # The copy deliberately excludes the live session's virtual
+        # filesystems, so their mount points do not necessarily exist in the
+        # freshly populated target. Create the complete directory hierarchy
+        # before the first bind mount (real VM failure: mount exited 32 on
+        # $TARGET/dev because that path was absent).
+        mkdir -p "$TARGET/dev/pts" "$TARGET/proc" \
+            "$TARGET/sys/firmware/efi/efivars" "$TARGET/run/udev"
         mount --bind /dev "$TARGET/dev"
         mount --bind /dev/pts "$TARGET/dev/pts"
-        # Recursive bind: also propagates the live session's already-mounted
-        # efivarfs. A plain non-recursive `mount --bind /sys` does not,
-        # which is exactly the bug the desktop's Rust installer found and
-        # fixed (MountVirtualFs, installer/README.md) - efibootmgr then has
-        # nowhere to write the UEFI NVRAM entry and the install "succeeds"
-        # with only the removable-media shim fallback, no real boot entry.
-        mount --rbind /sys "$TARGET/sys"
+        # Bind only sysfs itself. Recursively binding /sys also imports every
+        # live-session submount and proved impossible to cleanly unmount in a
+        # real Alpha 2 VM. Mount efivarfs explicitly, matching the desktop
+        # installer: shim/efibootmgr still sees the UEFI variable store, while
+        # cleanup has one deterministic child mount to remove before sysfs.
+        mount --bind /sys "$TARGET/sys"
+        mount -t efivarfs efivarfs "$TARGET/sys/firmware/efi/efivars"
         mount --bind /proc "$TARGET/proc"
         mount -t tmpfs tmpfs "$TARGET/run"
         mkdir -p "$TARGET/run/udev"
