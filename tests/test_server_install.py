@@ -303,6 +303,55 @@ class DialogMenuBehaviorTests(unittest.TestCase):
 
 
 @unittest.skipUnless(shutil.which("bash"), "bash not installed")
+class ServerInstallerFailureReportingTests(unittest.TestCase):
+    def setUp(self) -> None:
+        text = SOURCE.read_text(encoding="utf-8")
+        localization = text[text.index("UI_LANGUAGE=en") : text.index("RELEASE_METADATA=")]
+        utilities = text[text.index("log() {") : text.index('if [ "$(id -u)"')]
+        self.functions = localization + utilities
+
+    def _run(self, command: str) -> subprocess.CompletedProcess:
+        with tempfile.TemporaryDirectory() as work_dir:
+            log_path = Path(work_dir) / "install.log"
+            script = (
+                "set -euo pipefail\n"
+                f"LOG={log_path}\n"
+                ': > "$LOG"\n'
+                "CURRENT_STAGE=configuring\n"
+                f"{self.functions}\n"
+                f"{command}\n"
+            )
+            result = subprocess.run(
+                ["bash", "-c", script], capture_output=True, text=True
+            )
+            result.stdout += log_path.read_text(encoding="utf-8")
+            return result
+
+    def test_password_is_redacted_from_command_and_log(self) -> None:
+        secret = "server-secret-123"
+        result = self._run(
+            f"PASSWORD_VALUE={secret}; "
+            'report_error 23 456 "configure --password $PASSWORD_VALUE"'
+        )
+        self.assertEqual(result.returncode, 23)
+        self.assertNotIn(secret, result.stdout + result.stderr)
+        self.assertIn(
+            "FAIL status=23 stage=configuring line=456", result.stdout
+        )
+        self.assertIn("[REDACTED]", result.stdout)
+        self.assertIn("Diagnostic log:", result.stderr)
+
+    def test_cleanup_failure_does_not_replace_original_status(self) -> None:
+        result = self._run(
+            'cleanup_mounts() { return 71; }; '
+            'report_error_with_cleanup 29 789 "configure target"'
+        )
+        self.assertEqual(result.returncode, 29)
+        self.assertIn("WARN status=71 stage=cleanup", result.stdout)
+        self.assertIn("FAIL status=29 stage=configuring line=789", result.stdout)
+        self.assertIn("Diagnostic log:", result.stderr)
+
+
 class TarExitStatusToleranceTests(unittest.TestCase):
     # Real bug found running --profile server end to end in a VM
     # (2026-08-11), on the very first attempt to fix the *previous* real
@@ -430,9 +479,11 @@ class GaugePipeErrorDetectionTests(unittest.TestCase):
         script = (
             "set -euo pipefail\n"
             "LOG=/dev/null\n"
+            "CURRENT_STAGE=test\n"
             "DIALOG_BACKTITLE='Test'\n"
-            'fail() { echo "FAIL: $*" >&2; exit 1; }\n'
-            "trap 'fail \"instalação interrompida (linha $LINENO)\"' ERR\n"
+            "msg() { echo \"$1\"; }\n"
+            'report_error() { local status="$1"; echo "FAIL status=$status" >&2; exit "$status"; }\n'
+            "trap 'report_error $? \"$LINENO\" \"$BASH_COMMAND\"' ERR\n"
             f"{self.prefix}\n{body}\n{self.suffix}\n"
             'echo "REACHED_END"\n'
         )

@@ -49,6 +49,7 @@ msg() {
         pt:mounting) echo "Montando o ambiente do sistema instalado..." ;; pt:configuring) echo "Configurando usuário, bootloader e serviços..." ;;
         pt:finishing) echo "Finalizando..." ;; pt:completed) echo "Concluído." ;; pt:preparing) echo "Preparando instalação..." ;;
         pt:install_complete) echo "Instalação concluída." ;; pt:restart) echo "Instalação concluída. Reiniciar agora?" ;;
+        pt:log_path) echo "Log de diagnóstico: %s" ;;
 
         *:error) echo "Error" ;; *:interrupted) echo "installation interrupted" ;; *:root_required) echo "this installer must run as root" ;;
         *:uefi_required) echo "firmware is not in UEFI mode — this image only supports UEFI boot" ;; *:console_installer) echo "console installer" ;;
@@ -66,6 +67,7 @@ msg() {
         *:mounting) echo "Mounting the installed system environment..." ;; *:configuring) echo "Configuring user, bootloader and services..." ;;
         *:finishing) echo "Finishing..." ;; *:completed) echo "Completed." ;; *:preparing) echo "Preparing installation..." ;;
         *:install_complete) echo "Installation completed." ;; *:restart) echo "Installation completed. Restart now?" ;;
+        *:log_path) echo "Diagnostic log: %s" ;;
         *) echo "$key" ;;
     esac
 }
@@ -90,18 +92,56 @@ fi
 TARGET=/mnt/lyra-target
 LOG=/root/lyra-server-install.log
 : > "$LOG"
+CURRENT_STAGE=preflight
 
 log() {
     echo "$(date -u '+%Y-%m-%dT%H:%M:%SZ') $*" >> "$LOG"
 }
 
 fail() {
-    echo "$(msg error): $*" >&2
-    log "FAIL: $*"
+    local message
+    message="$(redact_command "$*")"
+    echo "$(msg error): $message" >&2
+    msgf log_path "$LOG" >&2
+    echo >&2
+    log "FAIL status=1 stage=$CURRENT_STAGE message=$message"
     exit 1
 }
 
-trap 'fail "$(msg interrupted) (line $LINENO)"' ERR
+redact_command() {
+    local command="$1"
+    if [ -n "${PASSWORD_VALUE:-}" ]; then
+        command=${command//"$PASSWORD_VALUE"/[REDACTED]}
+    fi
+    printf '%s' "$command"
+}
+
+report_error() {
+    local status="$1" line="$2" command="$3" safe_command message
+    trap - ERR
+    safe_command="$(redact_command "$command")"
+    message="$(msg interrupted) (line $line)"
+    log "FAIL status=$status stage=$CURRENT_STAGE line=$line command=$safe_command"
+    echo "$(msg error): $message" >&2
+    msgf log_path "$LOG" >&2
+    echo >&2
+    exit "$status"
+}
+
+report_error_with_cleanup() {
+    local status="$1" line="$2" command="$3" cleanup_status
+    trap - ERR
+    set +e
+    cleanup_mounts
+    cleanup_status=$?
+    set -e
+    if [ "$cleanup_status" -ne 0 ]; then
+        log "WARN status=$cleanup_status stage=cleanup message=cleanup-after-failure"
+    fi
+    report_error "$status" "$line" "$command"
+}
+
+trap 'report_error $? "$LINENO" "$BASH_COMMAND"' ERR
 
 if [ "$(id -u)" -ne 0 ]; then
     fail "$(msg root_required)"
@@ -293,6 +333,7 @@ if ! dialog_yesno "$SUMMARY" 16 70; then
 fi
 
 log "starting install on $DISK, hostname=$HOSTNAME_VALUE"
+CURRENT_STAGE=partitioning
 
 # --- partitioning / deploy / target configuration -------------------------
 
@@ -360,7 +401,7 @@ dmesg -n 1
 clear
 {
     set -euo pipefail
-    trap 'fail "$(msg interrupted) (line $LINENO)"' ERR
+    trap 'report_error $? "$LINENO" "$BASH_COMMAND"' ERR
 
     echo 5
     echo "XXX"
@@ -385,6 +426,7 @@ clear
     } >>"$LOG" 2>&1
 
     echo 15
+    CURRENT_STAGE=formatting
     echo "XXX"
     msg formatting
     echo "XXX"
@@ -398,6 +440,7 @@ clear
     } >>"$LOG" 2>&1
 
     echo 25
+    CURRENT_STAGE=copying
     echo "XXX"
     msg copying
     echo "XXX"
@@ -430,7 +473,7 @@ clear
         | tar --xattrs --acls --numeric-owner -xf - -C "$TARGET"; } >>"$LOG" 2>&1
     TAR_EXIT_STATUSES=("${PIPESTATUS[@]}")
     set -e
-    trap 'fail "$(msg interrupted) (line $LINENO)"' ERR
+    trap 'report_error $? "$LINENO" "$BASH_COMMAND"' ERR
     for TAR_EXIT_STATUS in "${TAR_EXIT_STATUSES[@]}"; do
         if [ "$TAR_EXIT_STATUS" -gt 1 ]; then
             COPY_ERROR="$(msgf copy_failed "$TAR_EXIT_STATUS")"
@@ -439,6 +482,7 @@ clear
     done
 
     echo 70
+    CURRENT_STAGE=mounting
     echo "XXX"
     msg mounting
     echo "XXX"
@@ -457,7 +501,7 @@ clear
         mkdir -p "$TARGET/run/udev"
         mount --bind /run/udev "$TARGET/run/udev"
     } >>"$LOG" 2>&1
-    trap 'cleanup_mounts; fail "$(msg interrupted) (line $LINENO)"' ERR
+    trap 'report_error_with_cleanup $? "$LINENO" "$BASH_COMMAND"' ERR
 
     {
         esp_uuid=$(blkid -s UUID -o value "$ESP")
@@ -469,6 +513,7 @@ EOF
     } >>"$LOG" 2>&1
 
     echo 85
+    CURRENT_STAGE=configuring
     echo "XXX"
     msg configuring
     echo "XXX"
@@ -547,6 +592,7 @@ CHROOT_SCRIPT
     } >>"$LOG" 2>&1
 
     echo 95
+    CURRENT_STAGE=cleanup
     echo "XXX"
     msg finishing
     echo "XXX"
@@ -574,7 +620,7 @@ CHROOT_SCRIPT
 GAUGE_PIPE_STATUS="${PIPESTATUS[0]}"
 dmesg -n "$ORIGINAL_CONSOLE_LOGLEVEL"
 set -e
-trap 'fail "$(msg interrupted) (line $LINENO)"' ERR
+trap 'report_error $? "$LINENO" "$BASH_COMMAND"' ERR
 clear
 
 if [ "$GAUGE_PIPE_STATUS" -ne 0 ]; then
