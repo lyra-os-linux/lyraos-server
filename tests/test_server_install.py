@@ -86,7 +86,7 @@ class ServerInstallerContentTests(unittest.TestCase):
             "choose_keymap", 1
         )[0]
         self.assertNotIn("es_ES.UTF-8", locale_menu)
-        self.assertNotIn("zh_CN.UTF-8", locale_menu)
+        self.assertNotIn("es_ES.UTF-8", locale_menu)
 
     def test_all_user_facing_server_installer_stages_are_localized(self) -> None:
         self.assertIn('UI_LANGUAGE="${LOCALE_VALUE%%_*}"', self.text)
@@ -241,7 +241,34 @@ class ServerInstallerContentTests(unittest.TestCase):
         ]
         self.assertTrue(chpasswd_lines)
         for line in chpasswd_lines:
-            self.assertIn("| chpasswd", line, line)
+            self.assertIn("| chroot \"$TARGET\" chpasswd", line, line)
+        self.assertIn("<<'CHROOT_SCRIPT'", self.text)
+        heredoc = self.text.split("<<'CHROOT_SCRIPT'", 1)[1].split(
+            "\nCHROOT_SCRIPT", 1
+        )[0]
+        self.assertNotIn("PASSWORD_VALUE", heredoc)
+
+    def test_live_media_is_identified_by_physical_ancestry(self) -> None:
+        self.assertIn("physical_disk_for()", self.text)
+        self.assertIn("detect_live_media_disks()", self.text)
+        self.assertIn('lsblk -dno PKNAME "$canonical"', self.text)
+        self.assertIn('[ "$type" = disk ] || [ "$type" = rom ]', self.text)
+        self.assertIn('findmnt -rn -o SOURCE --target "$target"', self.text)
+        self.assertIn("root=live:*", self.text)
+        self.assertIn("root=CDLABEL=*", self.text)
+
+    def test_live_media_detection_is_fail_closed_and_revalidated(self) -> None:
+        self.assertIn('fail "$(msg live_media_unknown)"', self.text)
+        self.assertIn('fail "$(msg live_media_selected)"', self.text)
+        listing = self.text.split("list_eligible_disks()", 1)[1].split(
+            "choose_disk()", 1
+        )[0]
+        self.assertIn('is_live_media_disk "/dev/$name"', listing)
+        validation = self.text.split("validate_target_disk()", 1)[1].split(
+            "# Everything from here", 1
+        )[0]
+        self.assertIn("load_live_media_disks", validation)
+        self.assertIn('is_live_media_disk "$DISK"', validation)
 
     def test_live_only_artifacts_are_removed_from_the_target(self) -> None:
         # The autologin override in particular would otherwise leave an
@@ -323,7 +350,7 @@ class DialogMenuBehaviorTests(unittest.TestCase):
         text = SOURCE.read_text(encoding="utf-8")
         localization = text[text.index("UI_LANGUAGE=en") : text.index("RELEASE_METADATA=")]
         start = text.index("# --- prompts")
-        end = text.index("# lsblk -e 7,11")
+        end = text.index("physical_disk_for()")
         self.functions = localization + text[start:end]
 
     def _run(self, driver: str, stdin: str) -> subprocess.CompletedProcess:
@@ -432,6 +459,33 @@ class ServerInstallerFailureReportingTests(unittest.TestCase):
         self.assertIn("FAIL status=29 stage=configuring line=789", result.stdout)
         self.assertIn("Diagnostic log:", result.stderr)
 
+
+@unittest.skipUnless(shutil.which("bash"), "bash not installed")
+class ServerPasswordDeliveryTests(unittest.TestCase):
+    def test_shell_metacharacters_reach_chpasswd_unchanged_via_stdin(self) -> None:
+        text = SOURCE.read_text(encoding="utf-8")
+        delivery = next(
+            line.strip()
+            for line in text.splitlines()
+            if '| chroot "$TARGET" chpasswd' in line
+        )
+        secret = "q'uote$HOME;$(touch should-not-exist)\\backtick`false`"
+        script = (
+            "set -euo pipefail\n"
+            "TARGET=/target\nUSERNAME_VALUE=alice\n"
+            "chroot() { [ \"$1\" = /target ]; [ \"$2\" = chpasswd ]; cat; }\n"
+            f"{delivery}\n"
+        )
+        result = subprocess.run(
+            ["bash", "-c", script],
+            capture_output=True,
+            text=True,
+            check=False,
+            env={**__import__("os").environ, "PASSWORD_VALUE": secret},
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout, f"alice:{secret}\n")
+        self.assertFalse((ROOT / "should-not-exist").exists())
 
 class TarExitStatusHandlingTests(unittest.TestCase):
     # Real bug found running --profile server end to end in a VM

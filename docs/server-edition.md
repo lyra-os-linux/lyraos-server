@@ -386,12 +386,10 @@ server.
   edição server parte e diverge.
 - `kiwi/config.xml` — lista de pacotes Vega/Beam/Sulafat/
   Sheliak/Fina da ISO desktop, ponto de partida para o profile server.
-- `docs/image-builds.md:117-118` — mesmo limite já aplicado à ISO NVIDIA:
-  deliverable adicional não pode introduzir flavor de imagem na OBS nem
-  bloquear a ISO padrão; vale confirmar se essa regra também se aplica à
-  edição server.
-- `docs/nvidia-iso.md` — precedente direto de rascunho de arquitetura de uma
-  variante de imagem, mesma estrutura de documento.
+- `docs/image-builds.md` — a OBS publica pacotes; imagens continuam sendo
+  produzidas e qualificadas fora dela.
+- `docs/nvidia-iso.md` — registro da decisão de manter uma única ISO Desktop e
+  das descobertas de lockstep reutilizadas pelo fluxo NVIDIA do Vega.
 - `installer/README.md` e `docs/installer-architecture.md` — arquitetura do
   instalador desktop (`lyra-installer-core`/`service`/`src-tauri`) que o
   instalador shell do server deliberadamente não reaproveita.

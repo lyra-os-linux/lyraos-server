@@ -46,6 +46,8 @@ msg() {
         pt:admin_user) echo "Usuário administrativo:" ;; pt:invalid_user) echo "Usuário inválido (letra minúscula inicial, depois letras/números/-/_)." ;;
         pt:user_exists) echo "Este nome de usuário já existe no sistema live. Escolha outro." ;;
         pt:disk_unavailable) echo "O disco selecionado não está mais disponível ou está em uso." ;; pt:disk_too_small) echo "O disco selecionado precisa ter pelo menos 8 GiB." ;;
+        pt:live_media_unknown) echo "não foi possível identificar com segurança a mídia live; nenhum disco será apagado" ;;
+        pt:live_media_selected) echo "o disco selecionado pertence à mídia live e não pode ser apagado" ;;
         pt:cleanup_failed) echo "não foi possível desmontar completamente o sistema de destino" ;;
         pt:summary) printf '%s\n' 'Idioma:    %s\nTeclado:   %s\nFuso:      %s\nHostname:  %s\nDisco:     %s (TODO o conteúdo será apagado)\nUsuário:   %s (grupo wheel/sudo)\n\nConfirma a instalação? Esta operação é IRREVERSÍVEL.' ;;
         pt:install_cancelled) echo "Instalação cancelada." ;; pt:partitioning) echo "Particionando %s..." ;; pt:formatting) echo "Formatando partições..." ;;
@@ -68,6 +70,8 @@ msg() {
         *:admin_user) echo "Administrator user:" ;; *:invalid_user) echo "Invalid user (start with a lowercase letter, followed by letters, numbers, - or _)." ;;
         *:user_exists) echo "This user name already exists in the live system. Choose another one." ;;
         *:disk_unavailable) echo "The selected disk is no longer available or is in use." ;; *:disk_too_small) echo "The selected disk must be at least 8 GiB." ;;
+        *:live_media_unknown) echo "the live media could not be identified safely; no disk will be erased" ;;
+        *:live_media_selected) echo "the selected disk belongs to the live media and cannot be erased" ;;
         *:cleanup_failed) echo "the target system could not be completely unmounted" ;;
         *:summary) printf '%s\n' 'Language:   %s\nKeyboard:   %s\nTime zone:  %s\nDevice:     %s\nDisk:       %s (ALL contents will be erased)\nUser:       %s (wheel/sudo group)\n\nConfirm installation? This operation is IRREVERSIBLE.' ;;
         *:install_cancelled) echo "Installation cancelled." ;; *:partitioning) echo "Partitioning %s..." ;; *:formatting) echo "Formatting partitions..." ;;
@@ -248,17 +252,84 @@ prompt_password() {
     done
 }
 
-# lsblk -e 7,11 excludes loop devices (major 7 - the live squashfs) and
-# optical drives (major 11). A disk is eligible only if none of its
-# partitions are currently mounted, which is what actually distinguishes
-# the live boot medium (its partition holding the ISO/squashfs is always
-# mounted) from every other disk - including a disk that already has old
-# partitions on it, which is fine to offer since this is a destructive
-# reinstall by design.
+physical_disk_for() {
+    local device="$1" canonical parent type
+    canonical="$(readlink -f -- "$device" 2>/dev/null)" || return 1
+    [ -b "$canonical" ] || return 1
+    while true; do
+        type="$(lsblk -dno TYPE "$canonical" 2>/dev/null)" || return 1
+        if [ "$type" = disk ] || [ "$type" = rom ]; then
+            printf '%s\n' "$canonical"
+            return 0
+        fi
+        parent="$(lsblk -dno PKNAME "$canonical" 2>/dev/null | tr -d '[:space:]')"
+        [ -n "$parent" ] || return 1
+        canonical="/dev/$parent"
+    done
+}
+
+live_source_candidates() {
+    local target source token value
+    for target in / /run/initramfs/live /run/initramfs/squashfs /run/overlay; do
+        source="$(findmnt -rn -o SOURCE --target "$target" 2>/dev/null || true)"
+        [ -n "$source" ] && printf '%s\n' "${source%%\[*}"
+    done
+    while read -r token; do
+        case "$token" in
+            root=live:*|root=liveiso:*|root=CDLABEL=*|root=LABEL=*|root=UUID=*)
+                value="${token#root=}"
+                value="${value#live:}"
+                value="${value#liveiso:}"
+                case "$value" in
+                    CDLABEL=*) value="LABEL=${value#CDLABEL=}" ;;
+                esac
+                findfs "$value" 2>/dev/null || true
+                ;;
+        esac
+    done < <(tr ' ' '\n' </proc/cmdline)
+}
+
+detect_live_media_disks() {
+    local source disk found=0
+    declare -A seen=()
+    while IFS= read -r source; do
+        [ -n "$source" ] || continue
+        if disk="$(physical_disk_for "$source")"; then
+            if [ -z "${seen[$disk]:-}" ]; then
+                seen[$disk]=1
+                printf '%s\n' "$disk"
+                found=1
+            fi
+        fi
+    done < <(live_source_candidates)
+    [ "$found" -eq 1 ]
+}
+
+load_live_media_disks() {
+    mapfile -t LIVE_MEDIA_DISKS < <(detect_live_media_disks)
+    if [ "${#LIVE_MEDIA_DISKS[@]}" -eq 0 ]; then
+        fail "$(msg live_media_unknown)"
+    fi
+    log "live media disks: ${LIVE_MEDIA_DISKS[*]}"
+}
+
+is_live_media_disk() {
+    local candidate canonical live_disk
+    candidate="$(physical_disk_for "$1")" || return 0
+    canonical="$(readlink -f -- "$candidate")"
+    for live_disk in "${LIVE_MEDIA_DISKS[@]}"; do
+        [ "$canonical" = "$(readlink -f -- "$live_disk")" ] && return 0
+    done
+    return 1
+}
+
+# Mountpoint checks still exclude disks in active use, but live-media
+# identity is mandatory and independent so copy-to-RAM cannot expose the
+# boot device as an installation target.
 list_eligible_disks() {
     local name size type read_only model mounted
     while read -r name size type read_only model; do
-        if [ "$type" != disk ] || [ "$read_only" != 0 ]; then
+        if [ "$type" != disk ] || [ "$read_only" != 0 ] || is_live_media_disk "/dev/$name"; then
             continue
         fi
         mounted=$(lsblk -no MOUNTPOINT "/dev/$name" 2>/dev/null | tr -d ' \n')
@@ -345,6 +416,9 @@ if ! command -v dialog >/dev/null 2>&1; then
     fail "$(msg no_dialog)"
 fi
 
+declare -a LIVE_MEDIA_DISKS=()
+load_live_media_disks
+
 dialog_menu LOCALE_VALUE "System language / Idioma do sistema:" \
     "en_US.UTF-8" "pt_BR.UTF-8"
 UI_LANGUAGE="${LOCALE_VALUE%%_*}"
@@ -409,6 +483,12 @@ validate_target_disk() {
     if [ ! -b "$DISK" ] || [ "$(lsblk -dno TYPE "$DISK" 2>/dev/null)" != disk ] ||
         [ "$(lsblk -dno RO "$DISK" 2>/dev/null)" != 0 ]; then
         fail "$(msg disk_unavailable)"
+    fi
+    # Resolve identity again immediately before wipefs. A mount disappearing
+    # or device names changing after the menu must never weaken this check.
+    load_live_media_disks
+    if is_live_media_disk "$DISK"; then
+        fail "$(msg live_media_selected)"
     fi
     mounted=$(lsblk -no MOUNTPOINT "$DISK" 2>/dev/null | tr -d ' \n')
     if [ -n "$mounted" ]; then
@@ -584,11 +664,20 @@ EOF
     echo "XXX"
     msg configuring
     echo "XXX"
-    # root/senha nunca em argv, só via stdin do chpasswd - mesma regra do
-    # instalador desktop (installer/README.md).
+    # The quoted heredoc prevents the outer shell from expanding the password
+    # into code interpreted by the chroot shell. The secret is sent later,
+    # exclusively through chpasswd's stdin.
     {
-        chroot "$TARGET" /bin/bash <<CHROOT_SCRIPT
+        chroot "$TARGET" /bin/bash -s -- \
+            "$TIMEZONE_VALUE" "$LOCALE_VALUE" "$KEYMAP_VALUE" \
+            "$HOSTNAME_VALUE" "$USERNAME_VALUE" <<'CHROOT_SCRIPT'
 set -euo pipefail
+
+TIMEZONE_VALUE="$1"
+LOCALE_VALUE="$2"
+KEYMAP_VALUE="$3"
+HOSTNAME_VALUE="$4"
+USERNAME_VALUE="$5"
 
 ln -sf "/usr/share/zoneinfo/$TIMEZONE_VALUE" /etc/localtime
 echo "$TIMEZONE_VALUE" > /etc/timezone
@@ -612,7 +701,6 @@ echo "$HOSTNAME_VALUE" > /etc/hostname
 # is ever already present, so it's safe either way.
 groupadd -f wheel
 useradd -m -G wheel -s /bin/bash "$USERNAME_VALUE"
-printf '%s:%s\n' "$USERNAME_VALUE" "$PASSWORD_VALUE" | chpasswd
 
 # Leap's vendor /usr/etc/sudoers ships "Defaults targetpw" active (asks
 # for the *target* user's password, i.e. root's, by default) plus a
@@ -664,6 +752,7 @@ shim-install --efi-directory=/boot/efi --config-file=/boot/grub2/grub.cfg
 
 : > /etc/machine-id
 CHROOT_SCRIPT
+        printf '%s:%s\n' "$USERNAME_VALUE" "$PASSWORD_VALUE" | chroot "$TARGET" chpasswd
     } >>"$LOG" 2>&1
 
     echo 95
