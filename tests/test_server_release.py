@@ -125,6 +125,18 @@ class ServerBeta1GateTests(unittest.TestCase):
         self.assertIn('test("\\\\[P[01]\\\\]"; "i")', uploader)
         self.assertIn("release-decision.json", uploader)
 
+    def test_release_scripts_pin_the_canonical_signing_key(self) -> None:
+        fingerprint = "01B63EEDBE6B079126A0116EFA7353A131ECEFEB"
+        builder = (ROOT / "scripts/build-server-beta1.sh").read_text(encoding="utf-8")
+        uploader = (ROOT / "scripts/upload-server-beta1-sourceforge.sh").read_text(
+            encoding="utf-8"
+        )
+        for script in (builder, uploader):
+            self.assertIn(fingerprint, script)
+            self.assertIn("VALIDSIG", script)
+            self.assertIn("verify_release_signature", script)
+        self.assertIn('--local-user "$RELEASE_SIGNING_FINGERPRINT"', builder)
+
 
 if __name__ == "__main__":
     unittest.main()

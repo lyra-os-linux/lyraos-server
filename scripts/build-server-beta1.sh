@@ -10,6 +10,17 @@ BUILD_DIR="$WORK_DIR/build"
 ARTIFACT_DIR="$WORK_DIR/iso"
 EVIDENCE_DIR=""
 ARTIFACTS_ONLY=0
+RELEASE_SIGNING_FINGERPRINT="01B63EEDBE6B079126A0116EFA7353A131ECEFEB"
+
+verify_release_signature() {
+  local signature="$1" signed_file="$2" valid_fingerprint
+  valid_fingerprint="$(gpg --batch --status-fd 1 --verify "$signature" "$signed_file" 2>/dev/null \
+    | awk '$1 == "[GNUPG:]" && $2 == "VALIDSIG" { print $3 }')"
+  [ "$valid_fingerprint" = "$RELEASE_SIGNING_FINGERPRINT" ] || {
+    echo "ERRO: assinatura não pertence à chave oficial $RELEASE_SIGNING_FINGERPRINT." >&2
+    exit 1
+  }
+}
 
 usage() {
   echo "Uso: $0 [--artifacts-only] --evidence-dir DIRETÓRIO" >&2
@@ -82,9 +93,11 @@ install -m 0644 "$BUILD_DIR/$PREFIX.verified" "$ARTIFACT_DIR/$PREFIX.verified"
 install -m 0644 "$REPO_ROOT/docs/releases/lyra-os-server-2026.08-beta1.md" \
   "$ARTIFACT_DIR/README.md"
 
-gpg --detach-sign --armor --output "$ARTIFACT_DIR/$PREFIX.iso.sha256.asc" \
+gpg --batch --local-user "$RELEASE_SIGNING_FINGERPRINT" --detach-sign --armor \
+  --output "$ARTIFACT_DIR/$PREFIX.iso.sha256.asc" \
   "$ARTIFACT_DIR/$PREFIX.iso.sha256"
-gpg --verify "$ARTIFACT_DIR/$PREFIX.iso.sha256.asc" "$ARTIFACT_DIR/$PREFIX.iso.sha256"
+verify_release_signature "$ARTIFACT_DIR/$PREFIX.iso.sha256.asc" \
+  "$ARTIFACT_DIR/$PREFIX.iso.sha256"
 (cd "$ARTIFACT_DIR" && sha256sum -c "$PREFIX.iso.sha256")
 
 TEST_ARGS=()
