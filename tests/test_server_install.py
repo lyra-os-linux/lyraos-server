@@ -354,11 +354,43 @@ class DialogMenuBehaviorTests(unittest.TestCase):
         self.functions = localization + text[start:end]
 
     def _run(self, driver: str, stdin: str) -> subprocess.CompletedProcess:
+        # dialog is a terminal UI, so driving the real ncurses program through
+        # subprocess pipes is inherently racy: it may consume input intended
+        # for the next widget and then wait forever.  This stub preserves the
+        # interface the helpers rely on (widget results on stderr and the
+        # yes/no exit status) while making the shell behavior deterministic.
+        dialog_stub = r'''dialog() {
+    local __widget __arg
+    for __arg in "$@"; do
+        case "$__arg" in
+            --menu|--inputbox|--passwordbox|--msgbox|--yesno)
+                __widget="$__arg"
+                break
+                ;;
+        esac
+    done
+    case "$__widget" in
+        --menu|--inputbox|--passwordbox)
+            IFS= read -r __dialog_answer
+            printf '%s' "$__dialog_answer" >&2
+            ;;
+        --msgbox)
+            IFS= read -r __dialog_dismiss
+            ;;
+        --yesno)
+            IFS= read -r __dialog_answer
+            ;;
+        *)
+            return 2
+            ;;
+    esac
+}
+'''
         script = (
             "set -euo pipefail\n"
             "LYRA_PRETTY_NAME='Test'\n"
             'fail() { echo "FAIL: $*" >&2; exit 1; }\n'
-            f"{self.functions}\n{driver}\n"
+            f"{dialog_stub}\n{self.functions}\n{driver}\n"
         )
         return subprocess.run(
             ["bash", "-c", script],
@@ -366,6 +398,7 @@ class DialogMenuBehaviorTests(unittest.TestCase):
             capture_output=True,
             text=True,
             env={**__import__("os").environ, "TERM": "xterm"},
+            timeout=5,
         )
 
     def test_output_variable_named_choice_is_not_shadowed(self) -> None:
