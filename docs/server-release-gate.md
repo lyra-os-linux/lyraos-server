@@ -147,7 +147,26 @@ ordem: exportar uma árvore limpa, executar o build final via `kiwi-ng`, gerar
 registrar a matriz de hardware, gerar os artefatos derivados, assinar o
 checksum e produzir o manifesto final com `scripts/build-server-beta1.sh`.
 Somente depois ocorre a publicação e verificação pós-download por
-`scripts/upload-server-beta1-sourceforge.sh`. Teste em hardware
+`scripts/upload-server-beta1-sourceforge.sh --decision-file ARQUIVO.json`.
+O arquivo de decisão usa schema 1 e vincula o GO ao candidato exato:
+
+```json
+{
+  "schema": 1,
+  "decision": "GO",
+  "source_commit": "COMMIT_SHA_COMPLETO",
+  "iso_filename": "lyra-os-server.x86_64-2026.08-beta1.iso",
+  "iso_sha256": "SHA256_DA_ISO",
+  "evidence_manifest": "lyra-os-server.x86_64-2026.08-beta1.evidence.json",
+  "coordinator": "NOME",
+  "decided_at_utc": "AAAA-MM-DDTHH:MM:SSZ",
+  "accepted_p2_p3": [],
+  "residual_risks": []
+}
+```
+
+O upload falha fechado se esse registro não corresponder ao manifesto ou se
+o GitHub ainda tiver uma issue Server P0/P1 aberta. Teste em hardware
 físico real permanece como risco residual (a cobertura aceita foi em VM) — ver
 `[[hardware_matrix_single_machine_risk]]`.
 
