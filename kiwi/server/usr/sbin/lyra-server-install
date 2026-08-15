@@ -720,10 +720,9 @@ visudo -cf /etc/sudoers.d/10-server-installer
 systemctl enable NetworkManager
 systemctl enable firewalld
 systemctl enable sshd
-# vegad/vega-web unit names assumed (not yet verified against the real
-# home:rodrigosbrito:vega packages) - confirm before trusting this against
-# real hardware, same caution the desktop installer's README applies to
-# every package-specific assumption it made.
+# These unit names were confirmed against the packaged services and in the
+# previous cycle's complete VM install. The Beta 1 gate still rechecks that
+# both units are enabled, active after reboot and reachable as documented.
 systemctl enable vegad
 systemctl enable vega-web
 

@@ -338,14 +338,12 @@ mais dois bugs reais no boot do disco instalado:
 **Instalação completa confirmada em VM, incluindo `vegad`/`vega-web` subindo
 sozinhos no boot e respondendo em `http://localhost:9090` via o `hostfwd`**
 (boot do live → wizard → particiona → copia → chroot → reboot → login →
-serviços ativos). A versão com `dialog --gauge` ainda não foi reconfirmada
-de ponta a ponta depois do fix de `dmesg -n` (a barra em si funcionava, só
-a corrupção visual foi corrigida depois). Ainda não verificados: a sintaxe
-exata de `shim-install --config-file=...` (citada de memória a partir da
-descrição do instalador desktop, não reverificada aqui contra o `man` da
-ferramenta — o boot funcionou, mas isso não prova que os flags usados são
-os "certos"/documentados, só que funcionaram neste caso) e teste em
-hardware físico real (só VM até agora).
+serviços ativos). Essa evidência pertence ao ciclo anterior e confirma os
+nomes das unidades e o fluxo básico, mas não substitui a repetição integral
+com a ISO candidata da Beta 1. O novo candidato precisa reconfirmar o gauge,
+os argumentos reais do `shim-install`, UEFI/Secure Boot, copy-to-RAM e a
+proteção da mídia live. Teste em hardware físico real também permanece
+pendente; a cobertura registrada até agora foi em VM.
 
 ## Gate e evidência
 
