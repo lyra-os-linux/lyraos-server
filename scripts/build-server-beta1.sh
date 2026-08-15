@@ -63,6 +63,16 @@ print(c)
 PY
 )"
 git cat-file -e "$COMMIT^{commit}"
+HEAD_COMMIT="$(git rev-parse HEAD)"
+[ -z "$(git status --porcelain --untracked-files=normal)" ] || {
+  echo "ERRO: o bundle final exige uma árvore de código limpa." >&2
+  exit 1
+}
+[ "$COMMIT" = "$HEAD_COMMIT" ] || {
+  echo "ERRO: a ISO foi construída de $COMMIT, mas o HEAD atual é $HEAD_COMMIT." >&2
+  echo "Reconstrua a ISO a partir do commit atual ou restaure o commit candidato." >&2
+  exit 1
+}
 install -m 0644 "$BUILD_DIR/$PREFIX.packages" "$ARTIFACT_DIR/$PREFIX.packages"
 install -m 0644 "$BUILD_DIR/$PREFIX.verified" "$ARTIFACT_DIR/$PREFIX.verified"
 ./scripts/release-artifacts.py generate --iso "$ISO" \

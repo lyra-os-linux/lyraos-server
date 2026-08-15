@@ -17,3 +17,6 @@ desassistida continuam fora de escopo.
 
 Esta Beta não deve ser publicada enquanto houver P0/P1 aberto ou qualquer
 evidência obrigatória ausente. Ver `docs/server-release-gate.md`.
+A publicação também exige um registro formal de GO que corresponda ao commit,
+nome e SHA-256 exatos da ISO candidata; o script de upload consulta o estado
+das issues Server e falha fechado enquanto existir P0/P1 aberta.
