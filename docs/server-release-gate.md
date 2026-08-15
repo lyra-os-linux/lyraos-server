@@ -139,16 +139,15 @@ Riscos residuais:
 
 **NO-GO** — o mantenedor declarou o congelamento funcional da Beta 1. As
 correções bloqueantes #89 (senha no chroot) e #93 (identidade da mídia live)
-integram a estabilização e precisam passar pela regressão completa antes de
-qualificar o candidato. Depois disso, ainda faltam, nesta ordem: rodar
-`scripts/server-release.py check`, `scripts/image-build.py validate
---profile server --release-file release-server.toml --manifest
-image-build-server.toml`, seguido de `scripts/image-build.py export --profile
-server --release-file release-server.toml --manifest image-build-server.toml
-/caminho/do/export`, um build final via `kiwi-ng`, `obs-release.py health`, e só então
-`release-artifacts.py generate --release-file release-server.toml --product
-"Lyra OS Server"`, assinar o checksum e executar `image-build.py
-artifact-manifest`. Teste em hardware
+foram implementadas no commit `303a3b0`; a regressão automatizada, o
+`shellcheck`, a sincronização dos metadados e a política de assinatura estão
+verdes. Isso valida o código-fonte, não a imagem candidata. Ainda faltam, nesta
+ordem: exportar uma árvore limpa, executar o build final via `kiwi-ng`, gerar
+`obs-release.py health`, repetir live/installer/first-boot e UEFI/Secure Boot,
+registrar a matriz de hardware, gerar os artefatos derivados, assinar o
+checksum e produzir o manifesto final com `scripts/build-server-beta1.sh`.
+Somente depois ocorre a publicação e verificação pós-download por
+`scripts/upload-server-beta1-sourceforge.sh`. Teste em hardware
 físico real permanece como risco residual (a cobertura aceita foi em VM) — ver
 `[[hardware_matrix_single_machine_risk]]`.
 
