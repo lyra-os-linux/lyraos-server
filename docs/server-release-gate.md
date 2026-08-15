@@ -1,4 +1,4 @@
-# Gate de release — Lyra OS Server Alpha 2
+# Gate de release — Lyra OS Server Beta 1
 
 Este checklist é o contrato de go/no-go da edição server, análogo a
 `docs/release-gate.md` (edição desktop) mas recortado para o que realmente se
@@ -29,7 +29,8 @@ server:
 
 Nenhum P0 ou P1 pode ficar aberto na publicação. Um P2 só é aceito quando o
 registro de decisão nomeia issue, workaround, responsável e risco residual —
-sendo Alpha 2, é esperado ter arestas (P2/P3), mas não P0/P1.
+sendo Beta 1, somente P2/P3 documentadas podem ser aceitas; não pode haver
+P0/P1 na publicação.
 
 ## Identidade do candidato
 
@@ -94,11 +95,10 @@ Ambos os comandos retornam status diferente de zero e escrevem
 do journal só podem ser aceitas explicitamente com `--acknowledge-journal`
 apontando para a issue ou workaround revisado.
 
-## Chave de assinatura do release (Beta 1 em diante)
+## Chave de assinatura do release
 
-Não há assinatura destacada durante a fase Alpha, conforme a ADR 0005. A
-partir da Beta 1 será usada a mesma chave do desktop — não há uma chave
-separada por edição. Ver
+A assinatura destacada é obrigatória nesta Beta 1, conforme a ADR 0005. É
+usada a mesma chave do desktop — não há uma chave separada por edição. Ver
 `docs/release-gate.md` (seção "Release signing key") para a fingerprint e o
 UID atuais; importar `docs/release-signing-key.asc` antes de confiar em
 `*.iso.sha256.asc`.
@@ -108,11 +108,10 @@ UID atuais; importar `docs/release-signing-key.asc` antes de confiar em
 - [ ] ISO, inventário de pacotes, relatório/verificação do KIWI e ambos os
   formatos de SBOM presentes (mesma lista de `[artifacts] required` de
   `image-build-server.toml`);
-- [ ] SHA-256 gerado e verificado de forma independente; conforme a ADR 0005,
-  assinatura destacada passa a ser obrigatória na Beta 1;
+- [ ] SHA-256 gerado e verificado de forma independente e assinatura
+  destacada validada contra a chave de release;
 - [ ] notas de release listam requisitos, limitações, issues P2/P3 aceitas e
-  workarounds testados — para Alpha 2, deixar explícito que é uma build
-  inicial com arestas esperadas;
+  workarounds testados;
 - [ ] manifesto de evidência gerado a partir de um commit limpo e contém
   todos os resultados verdes exigidos;
 - [ ] ISO e evidência sobem para o SourceForge e são baixados de novo para
@@ -136,25 +135,25 @@ Issues P2/P3 aceitas e workarounds:
 Riscos residuais:
 ```
 
-## Estado atual (Alpha 2)
+## Estado atual (Beta 1)
 
-**NO-GO** — a validação funcional foi concluída, mas o candidato rastreável
-ainda não foi construído, assinado e publicado pelo pipeline completo.
-Confirmado pelo mantenedor: quatro instalações consecutivas, sessão live e
-primeiro boot aprovados, Secure Boot ligado/desligado, SSH e Vega Web
-acessíveis e log do instalador sem erros. Ainda faltam, nesta ordem: rodar
+**NO-GO** — o mantenedor declarou o congelamento funcional da Beta 1. As
+correções bloqueantes #89 (senha no chroot) e #93 (identidade da mídia live)
+integram a estabilização e precisam passar pela regressão completa antes de
+qualificar o candidato. Depois disso, ainda faltam, nesta ordem: rodar
 `scripts/server-release.py check`, `scripts/image-build.py validate
 --profile server --release-file release-server.toml --manifest
 image-build-server.toml`, seguido de `scripts/image-build.py export --profile
 server --release-file release-server.toml --manifest image-build-server.toml
 /caminho/do/export`, um build final via `kiwi-ng`, `obs-release.py health`, e só então
 `release-artifacts.py generate --release-file release-server.toml --product
-"Lyra OS Server"` + `image-build.py artifact-manifest`. Teste em hardware
+"Lyra OS Server"`, assinar o checksum e executar `image-build.py
+artifact-manifest`. Teste em hardware
 físico real permanece como risco residual (a cobertura aceita foi em VM) — ver
 `[[hardware_matrix_single_machine_risk]]`.
 
-A Alpha 2 ocupa a janela planejada de 01/09/2026 a 22/09/2026. O cronograma completo
-até a Server 1.0 “Delos” e os critérios de saída de cada estágio estão em
+O ciclo está em Beta 1 e sob congelamento funcional. O cronograma completo
+até a Server 1.0 “Delos” e os critérios de saída estão em
 [`release-versioning.md`](release-versioning.md#lyra-os-server-10).
 
 ## Referências
