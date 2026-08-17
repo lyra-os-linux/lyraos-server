@@ -43,7 +43,7 @@ _lyra_server_mem=$(free -h 2>/dev/null | awk -v used="$_lyra_server_used_label" 
 _lyra_server_disk=$(df -h / 2>/dev/null | awk -v used="$_lyra_server_used_label" -v total="$_lyra_server_total_label" 'NR==2 {print $3" "used" / "$2" "total" ("$5")"}')
 
 echo
-echo "== $(hostname) =="
+echo "== $(uname -n) =="
 echo "IP:       ${_lyra_server_ips:-$_lyra_server_no_ip}"
 echo "CPU:      ${_lyra_server_cpu:-$_lyra_server_unknown} (${_lyra_server_cores:-?} $_lyra_server_cores_label)"
 echo "$_lyra_server_memory_label:  ${_lyra_server_mem:-$_lyra_server_unavailable}"
