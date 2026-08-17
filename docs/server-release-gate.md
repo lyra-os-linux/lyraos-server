@@ -64,7 +64,8 @@ isso em `required_test_results`:
   cópia, chroot, grub) sem cair para um fallback manual;
 - [ ] `first-boot`: `kiwi/root/usr/bin/lyra-system-smoke first-boot
   --profile server` — disco instalado boota, root em ext4, conta criada
-  funciona, `sshd`/`vegad`/`vega-web`/`firewalld`/`NetworkManager` ativos,
+  funciona, `sshd`/`vega-web`/`firewalld`/`NetworkManager` ativos, `vegad`
+  disponível por ativação D-Bus (`org.lyraos.Vega1`),
   nenhum artefato live remanescente;
 - [ ] `uefi-secure-boot`: cenários suportados de UEFI e Secure Boot passam
   (`lyra-system-smoke secure-boot` — mesmo check do desktop, não é
