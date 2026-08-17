@@ -103,6 +103,7 @@ fi
 
 TARGET=/mnt/lyra-target
 LOG=/root/lyra-server-install.log
+INSTALLER_RESULT=/root/installer-result.json
 : > "$LOG"
 CURRENT_STAGE=preflight
 
@@ -720,10 +721,9 @@ visudo -cf /etc/sudoers.d/10-server-installer
 systemctl enable NetworkManager
 systemctl enable firewalld
 systemctl enable sshd
-# These unit names were confirmed against the packaged services and in the
-# previous cycle's complete VM install. The Beta 1 gate still rechecks that
-# both units are enabled, active after reboot and reachable as documented.
-systemctl enable vegad
+# vegad.service is static by design: D-Bus starts it on demand through
+# org.lyraos.Vega1.service and the daemon exits after its idle timeout. It has
+# no [Install] section and must not be treated as a persistent boot service.
 systemctl enable vega-web
 
 # Image-build priorities let Lyra packages win while composing the ISO. On
@@ -794,6 +794,26 @@ if [ "$GAUGE_PIPE_STATUS" -ne 0 ]; then
 fi
 
 log "install finished successfully"
+umask 077
+cat > "$INSTALLER_RESULT.tmp" <<'INSTALLER_RESULT_JSON'
+{
+  "schema": 1,
+  "status": "passed",
+  "mode": "installer",
+  "checks": [
+    {"id": "target-revalidated-before-wipe", "status": "passed"},
+    {"id": "gpt-esp-ext4-created", "status": "passed"},
+    {"id": "system-copy-completed", "status": "passed"},
+    {"id": "administrator-configured", "status": "passed"},
+    {"id": "network-firewall-vega-enabled", "status": "passed"},
+    {"id": "shim-bootloader-installed", "status": "passed"},
+    {"id": "live-artifacts-removed", "status": "passed"},
+    {"id": "target-cleanly-unmounted", "status": "passed"}
+  ]
+}
+INSTALLER_RESULT_JSON
+mv "$INSTALLER_RESULT.tmp" "$INSTALLER_RESULT"
+log "installer evidence written to $INSTALLER_RESULT"
 echo
 msg install_complete
 if dialog_yesno "$(msg restart)" 8 50; then

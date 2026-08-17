@@ -113,6 +113,18 @@ class ServerInstallerContentTests(unittest.TestCase):
         sgdisk_index = self.text.index("sgdisk --zap-all")
         self.assertLess(wipefs_index, sgdisk_index)
 
+    def test_success_writes_structured_installer_evidence(self) -> None:
+        self.assertIn("INSTALLER_RESULT=/root/installer-result.json", self.text)
+        self.assertIn('"schema": 1', self.text)
+        self.assertIn('"status": "passed"', self.text)
+        self.assertIn('"mode": "installer"', self.text)
+        self.assertIn('"id": "target-revalidated-before-wipe"', self.text)
+        self.assertIn('"id": "target-cleanly-unmounted"', self.text)
+        self.assertLess(
+            self.text.index('log "install finished successfully"'),
+            self.text.index('mv "$INSTALLER_RESULT.tmp" "$INSTALLER_RESULT"'),
+        )
+
     def test_sys_bind_has_an_explicit_efivarfs_mount(self) -> None:
         # A recursive bind imports every /sys submount and failed cleanup in
         # a real VM. A plain bind plus explicit efivarfs gives shim access to
@@ -201,8 +213,9 @@ class ServerInstallerContentTests(unittest.TestCase):
             self.assertIn(f"--exclude=./{path}", self.text)
         self.assertIn('[ "$TAR_EXIT_STATUS" -ne 0 ]', self.text)
 
-    def test_vega_services_are_enabled_on_the_target(self) -> None:
-        self.assertIn("systemctl enable vegad", self.text)
+    def test_vega_service_lifecycle_matches_packaged_units(self) -> None:
+        self.assertNotIn("systemctl enable vegad", self.text)
+        self.assertIn("vegad.service is static by design", self.text)
         self.assertIn("systemctl enable vega-web", self.text)
 
     def test_wheel_group_is_created_before_useradd(self) -> None:

@@ -168,7 +168,8 @@ como decidido em conversa. Fluxo real:
    getty, `.bash_profile`, o próprio script instalador) — mesma lógica do
    `LIVE_ONLY_ARTIFACTS` do instalador desktop. Esquecer isso deixaria um
    shell de root sem autenticação em todo boot do sistema instalado;
-8. reboot no sistema instalado, com `vegad`/`vega-web` habilitados.
+8. reboot no sistema instalado, com `vega-web` habilitado e `vegad`
+   disponível sob demanda por ativação D-Bus.
 
 O binário shipado na imagem (`kiwi/server/usr/sbin/lyra-server-install`,
 overlay por profile do KIWI — só entra quando o profile `server` está
