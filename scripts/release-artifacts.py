@@ -148,7 +148,7 @@ def write_spdx_sbom(
         "dataLicense": "CC0-1.0",
         "SPDXID": "SPDXRef-DOCUMENT",
         "name": document_id,
-        "documentNamespace": f"https://github.com/britors/lyra-os-server/spdx/{document_id}",
+        "documentNamespace": f"https://github.com/lyra-os-linux/lyraos-server/spdx/{document_id}",
         "creationInfo": {
             "created": built_at,
             "creators": ["Tool: lyra-release-artifacts", "Organization: Lyra OS Project"],

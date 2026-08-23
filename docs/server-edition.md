@@ -9,7 +9,7 @@ Decisões tomadas em conversa (2026-08-11):
 
 - mesmo repositório Lyra, não um repositório novo — **revertido em
   2026-08-23**: o mantenedor decidiu separar a edição server em
-  repositório próprio (`github.com/britors/lyra-os-server`, este
+  repositório próprio (`github.com/lyra-os-linux/lyraos-server`, este
   repositório). A decisão de 2026-08-11 não é apagada, só superada, seguindo
   o mesmo princípio dos ADRs do repositório desktop ("uma decisão nova não
   apaga a anterior"). O restante deste documento descreve a arquitetura da

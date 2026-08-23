@@ -1,7 +1,7 @@
 # Lyra OS Server
 
 Lyra OS Server é a edição headless do Lyra OS, baseada no mesmo openSUSE Leap
-16 do desktop ([`github.com/britors/Lyra`](https://github.com/britors/Lyra)),
+16 do desktop ([`github.com/lyra-os-linux/lyraos-desktop`](https://github.com/lyra-os-linux/lyraos-desktop)),
 sem GNOME e sem os componentes desktop do ecossistema Lyra. Este repositório
 contém a descrição KIWI usada para gerar a ISO live e o instalador em console
 da edição **Beta 1** para computadores x86_64.
@@ -58,4 +58,4 @@ python3 -m pytest tests/ -v
 
 A contraparte gráfica desta edição, com GNOME, Vega (GTK4), instalador nativo
 Rust/Tauri e Btrfs/Snapper, vive em
-[`github.com/britors/Lyra`](https://github.com/britors/Lyra).
+[`github.com/lyra-os-linux/lyraos-desktop`](https://github.com/lyra-os-linux/lyraos-desktop).

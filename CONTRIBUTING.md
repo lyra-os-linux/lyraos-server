@@ -27,7 +27,7 @@ repositório nem incorporados ao script.
 Na instalação nova, execute como usuário normal, sem `sudo` antes de `bash`:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/britors/Lyra/main/scripts/bootstrap-development.sh | bash
+curl -fsSL https://raw.githubusercontent.com/lyra-os-linux/lyraos-desktop/main/scripts/bootstrap-development.sh | bash
 ```
 
 O próprio script solicita `sudo` somente para instalar pacotes, configurar
@@ -37,7 +37,7 @@ executado novamente após uma atualização.
 Para conferir as ações sem modificar o sistema:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/britors/Lyra/main/scripts/bootstrap-development.sh \
+curl -fsSL https://raw.githubusercontent.com/lyra-os-linux/lyraos-desktop/main/scripts/bootstrap-development.sh \
   | bash -s -- --dry-run
 ```
 
@@ -97,7 +97,7 @@ osc ls home:rodrigosbrito:fina
 Outro contribuidor pode substituir o usuário durante o bootstrap:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/britors/Lyra/main/scripts/bootstrap-development.sh \
+curl -fsSL https://raw.githubusercontent.com/lyra-os-linux/lyraos-desktop/main/scripts/bootstrap-development.sh \
   | OBS_USER=outro-usuario bash
 ```
 

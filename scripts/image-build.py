@@ -93,7 +93,7 @@ class Manifest:
     def validate(self) -> None:
         if self.api_url != "https://api.opensuse.org":
             raise PolicyError("only the canonical HTTPS OBS API is allowed")
-        if self.source_repository != "https://github.com/britors/lyra-os-server":
+        if self.source_repository != "https://github.com/lyra-os-linux/lyraos-server":
             raise PolicyError("GitHub must remain the canonical image source")
         if self.iso_provider != "sourceforge":
             raise PolicyError("SourceForge must remain the ISO distribution provider")

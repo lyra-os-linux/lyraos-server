@@ -65,7 +65,7 @@ class ImagePolicyTests(unittest.TestCase):
 
     def test_distribution_policy_uses_github_and_sourceforge(self) -> None:
         self.assertEqual(
-            self.manifest.source_repository, "https://github.com/britors/lyra-os-server"
+            self.manifest.source_repository, "https://github.com/lyra-os-linux/lyraos-server"
         )
         self.assertEqual(self.manifest.iso_provider, "sourceforge")
         help_text = image_build.parser().format_help()

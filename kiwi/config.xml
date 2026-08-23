@@ -9,7 +9,7 @@
   scripts/server-install.sh instead of the Rust/Tauri Lyra Installer. See
   docs/server-edition.md for the full rationale.
 
-  Split out of the Lyra OS desktop repository (github.com/britors/Lyra) on
+  Split out of the Lyra OS desktop repository (github.com/lyra-os-linux/lyraos-desktop) on
   2026-08-23 - docs/server-edition.md keeps the history of that decision.
 -->
 <image schemaversion="8.3" name="lyra-os" displayname="Lyra OS Server">

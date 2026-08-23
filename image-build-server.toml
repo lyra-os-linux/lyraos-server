@@ -10,7 +10,7 @@ description = "config.xml"
 architecture = "x86_64"
 
 [source]
-repository = "https://github.com/britors/lyra-os-server"
+repository = "https://github.com/lyra-os-linux/lyraos-server"
 
 [distribution]
 iso_provider = "sourceforge"
