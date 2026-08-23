@@ -56,6 +56,18 @@ class ImagePolicyTests(unittest.TestCase):
     def test_canonical_sources_pass_repository_and_signature_policy(self) -> None:
         image_build.validate_sources(self.manifest)
 
+    def test_vm_helper_renames_kiwi_output_to_the_server_release_name(self) -> None:
+        helper = (ROOT / "kiwi/test/build-and-run-vm.sh").read_text(encoding="utf-8")
+        self.assertIn("scripts/server-release.py", helper)
+        self.assertIn("IMAGE_SERVER_INSTALL", helper)
+        self.assertIn("IMAGE_GETTY_OVERRIDE", helper)
+        self.assertIn("kiwi-ng output:", helper)
+
+    def test_kiwi_readme_documents_the_console_installer_and_vm_helper(self) -> None:
+        readme = (ROOT / "kiwi/README.md").read_text(encoding="utf-8")
+        self.assertIn("lyra-server-install", readme)
+        self.assertIn("build-and-run-vm.sh", readme)
+
     def test_obs_is_restricted_to_ordered_rpm_package_sources(self) -> None:
         self.assertEqual(self.manifest.obs_role, "packages-only")
         projects = [source.project for source in self.manifest.package_sources]
