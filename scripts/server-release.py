@@ -201,27 +201,26 @@ def render_files(release: ServerRelease) -> dict[Path, str]:
 
     xml_path = REPOSITORY / "kiwi/config.xml"
     xml = xml_path.read_text(encoding="utf-8")
-    server_preferences_block = r'<preferences profiles="server">.*?</preferences>'
-    xml = replace_once_in_block(
+    # kiwi/config.xml has a single <preferences> block in this repo (no more
+    # per-profile split - see docs/server-edition.md's 2026-08-23 note), so
+    # <version>/volid are each unique file-wide.
+    xml = replace_once(
         xml,
-        server_preferences_block,
         r"^[ \t]*<version>[^<]+</version>$",
         f"    <version>{release.version_id}</version>",
         xml_path,
     )
-    xml = replace_once_in_block(
+    xml = replace_once(
         xml,
-        server_preferences_block,
         r'volid="[^"]+"',
         f'volid="{release.volume_id}"',
         xml_path,
     )
     rendered[xml_path] = xml
 
-    # Overlaid into the image root only when the server profile is active
-    # (kiwi/<profile>/ overlay convention); kiwi/config.sh sources it in
-    # its server branch instead of kiwi/root/usr/lib/lyra-os/release.
-    rendered[REPOSITORY / "kiwi/server/usr/lib/lyra-os/server-release"] = release_environment(
+    # kiwi/root/ is the (only) overlay directory KIWI applies on top of the
+    # installed packages; kiwi/config.sh sources this path directly.
+    rendered[REPOSITORY / "kiwi/root/usr/lib/lyra-os/server-release"] = release_environment(
         release
     )
     return rendered

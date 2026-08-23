@@ -10,8 +10,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "scripts/server-install.sh"
-PINNED_COPY = ROOT / "kiwi/server/usr/sbin/lyra-server-install"
-LOGIN_INFO = ROOT / "kiwi/server/etc/profile.d/lyra-server-info.sh"
+PINNED_COPY = ROOT / "kiwi/root/usr/sbin/lyra-server-install"
+LOGIN_INFO = ROOT / "kiwi/root/etc/profile.d/lyra-server-info.sh"
 
 
 class ServerInstallerIdentityTests(unittest.TestCase):

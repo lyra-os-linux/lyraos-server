@@ -1,0 +1,54 @@
+schema = 1
+api_url = "https://api.opensuse.org"
+maintainer = "rodrigosbrito"
+
+[signing]
+project = "home:rodrigosbrito"
+fingerprint = "399218A6E088C4053F4533BE58097F767EDCA82E"
+
+[baseline]
+tag = "v2026.08-beta2-stable-20260809"
+
+[baseline.projects.vega]
+vega-cli = "0399bf5a9f143e3ad42d2e1223e97752"
+vega-gtk = "382c4cbc9e2a2f5ea19c3733609e840e"
+vega-web = "ae93ad319ee2b154b8da878d6f7b9f30"
+vegad = "8b25259ad1aed3a0c03fbbf22160a636"
+
+[priorities]
+official_oss = 20
+official_non_oss = 21
+lyra_image = 1
+vega_image = 2
+
+[[projects]]
+id = "lyra"
+release = "home:rodrigosbrito:lyra"
+staging = "home:rodrigosbrito:lyra:staging"
+iso_consumer = true
+# Declared as an approved package source (image-build-server.toml,
+# kiwi/config.xml's repo-lyra) even though no package from this project is
+# currently installed by name in the server image - see
+# docs/server-edition.md.
+packages = []
+
+[[projects.targets]]
+name = "openSUSE_Leap_16.0"
+upstream_project = "openSUSE:Leap:16.0"
+upstream_repository = "standard"
+architectures = ["x86_64"]
+iso_consumer = true
+
+[[projects]]
+id = "vega"
+release = "home:rodrigosbrito:vega"
+staging = "home:rodrigosbrito:vega:staging"
+iso_consumer = true
+packages = ["vega-cli", "vega-gtk", "vega-web", "vegad"]
+
+[[projects.targets]]
+name = "openSUSE_Leap_16.0"
+upstream_project = "openSUSE:Leap:16.0"
+upstream_repository = "standard"
+architectures = ["x86_64"]
+iso_consumer = true

@@ -1,0 +1,36 @@
+# KIWI build work/output directories
+.kiwi/
+kiwi-build/
+/build/
+/out/
+
+# RPM build artifacts
+*.rpm
+*.src.rpm
+rpmbuild/
+/installer/packaging/output/
+/upgrade/packaging/output/
+/legal-review-packet/
+
+# ISO images and checksums
+*.iso
+*.iso.sha256
+*.packages
+
+# QEMU scratch (test boots)
+.qemu/
+
+# Logs and temp files
+*.log
+.DS_Store
+
+# Rust build output
+target/
+
+# cargo vendor output (regenerated for OBS packaging, see
+# installer/packaging/lyra-installer.spec - not meant to be committed)
+vendor/
+
+# Python bytecode cache
+__pycache__/
+*.pyc

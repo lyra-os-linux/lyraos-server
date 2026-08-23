@@ -71,26 +71,15 @@ class ServerRepositoryMetadataTests(unittest.TestCase):
             self.assertTrue(path.exists(), path)
             self.assertEqual(path.read_text(encoding="utf-8"), expected, path)
 
-    def test_desktop_and_server_version_blocks_do_not_collide(self) -> None:
-        # scripts/release.py and scripts/server-release.py each scope their
-        # <version>/volid rewrite to their own <preferences profiles="..">
-        # block; rendering the server release must not touch the desktop
-        # block's values, and vice versa (see scripts/release.py's
-        # replace_once_in_block).
+    def test_version_and_volid_are_unique_in_the_single_profile_config(self) -> None:
+        # kiwi/config.xml has a single <preferences> block in this repo (no
+        # more per-profile split - docs/server-edition.md's 2026-08-23
+        # note), so <version>/volid are each unique file-wide.
         xml_path = ROOT / "kiwi/config.xml"
         xml = xml_path.read_text(encoding="utf-8")
-        self.assertEqual(xml.count("<version>"), 2)
-        self.assertEqual(xml.count('volid="'), 2)
-        self.assertIn('LYRA_OS_SERVER_', xml)
-        desktop_release_spec = importlib.util.spec_from_file_location(
-            "lyra_release_for_server_test", ROOT / "scripts/release.py"
-        )
-        assert desktop_release_spec and desktop_release_spec.loader
-        desktop_release_module = importlib.util.module_from_spec(desktop_release_spec)
-        sys.modules[desktop_release_spec.name] = desktop_release_module
-        desktop_release_spec.loader.exec_module(desktop_release_module)
-        desktop_release = desktop_release_module.Release.from_file()
-        self.assertIn(desktop_release.volume_id, xml)
+        self.assertEqual(xml.count("<version>"), 1)
+        self.assertEqual(xml.count('volid="'), 1)
+        self.assertIn("LYRA_OS_SERVER_", xml)
 
     def test_build_manifest_is_traceable(self) -> None:
         release = ServerRelease.from_file()

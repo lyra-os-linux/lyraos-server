@@ -7,7 +7,14 @@ componentes de desktop do ecossistema Lyra, com `vegad` + `vega-cli` +
 
 Decisões tomadas em conversa (2026-08-11):
 
-- mesmo repositório Lyra, não um repositório novo;
+- mesmo repositório Lyra, não um repositório novo — **revertido em
+  2026-08-23**: o mantenedor decidiu separar a edição server em
+  repositório próprio (`github.com/britors/lyra-os-server`, este
+  repositório). A decisão de 2026-08-11 não é apagada, só superada, seguindo
+  o mesmo princípio dos ADRs do repositório desktop ("uma decisão nova não
+  apaga a anterior"). O restante deste documento descreve a arquitetura da
+  edição server e permanece válido; apenas a decisão de hospedá-la no mesmo
+  repositório do desktop foi revertida;
 - imagem headless: sem GNOME, sem tema Lyra, sem ícones, sem a extensão
   Sheliak, sem Chord (terminal), sem Beam nem Sulafat (clientes de acesso
   remoto), sem Fina;

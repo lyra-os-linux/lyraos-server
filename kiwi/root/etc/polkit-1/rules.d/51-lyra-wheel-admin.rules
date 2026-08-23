@@ -1,0 +1,19 @@
+// Lyra OS - Odisseia (v1)
+//
+// polkit's stock /usr/share/polkit-1/rules.d/50-default.rules starts
+// polkit._suse_admin_groups as an empty array; empty means its
+// addAdminRule falls back to ["unix-user:0"] - i.e. every auth_admin
+// pkexec/polkit action prompts for root's password specifically. root is
+// locked ("!" in kiwi/config.xml) on both the live session and the
+// installed system (installer/src/service/operations/deploy.rs disables
+// it), so that prompt is impossible to satisfy - the polkit analog of the
+// sudo "Defaults targetpw" issue fixed for sudoers/10-installer.
+//
+// liveuser and the sudo user the installer creates are both in "wheel"
+// (kiwi/config.xml, deploy.rs REQUIRED_USER_GROUPS), so adding wheel here
+// lets them authenticate admin actions with their own password instead.
+//
+// Filename must sort after "50-default.rules" - rule files from /etc and
+// /usr/share are merged into one alphabetically ordered list, and this
+// only takes effect if it runs after that file's `= []` reset.
+polkit._suse_admin_groups.push("wheel");

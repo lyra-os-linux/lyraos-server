@@ -1,19 +1,16 @@
 schema = 1
 
 [image]
-# Must match the literal top-level <image name="..."> in kiwi/config.xml,
-# which cannot be scoped per profile the way <preferences>/<packages> can
-# (docs/server-edition.md) - it stays "lyra-os" even for --profile=server.
+# Must match the literal top-level <image name="..."> in kiwi/config.xml.
 # release-server.toml's own image_name ("lyra-os-server") is the source of
 # truth for the actual output ISO filename; kiwi/test/build-and-run-vm.sh
 # renames the kiwi-ng output to match it after the build.
 name = "lyra-os"
 description = "config.xml"
 architecture = "x86_64"
-profile = "server"
 
 [source]
-repository = "https://github.com/britors/Lyra"
+repository = "https://github.com/britors/lyra-os-server"
 
 [distribution]
 iso_provider = "sourceforge"

@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Lyra OS Server
+  KIWI appliance description for the x86_64 headless live/installer ISO,
+  based on the same openSUSE Leap 16 base as Lyra OS Desktop (official Leap
+  repos, kernel-default, partitioning/bootloader tooling), without GNOME,
+  theme/icons, or the desktop's graphical installer: vega-cli + vegad +
+  vega-web instead of vega-gtk, console installer in
+  scripts/server-install.sh instead of the Rust/Tauri Lyra Installer. See
+  docs/server-edition.md for the full rationale.
+
+  Split out of the Lyra OS desktop repository (github.com/britors/Lyra) on
+  2026-08-23 - docs/server-edition.md keeps the history of that decision.
+-->
+<image schemaversion="8.3" name="lyra-os" displayname="Lyra OS Server">
+
+  <description type="system">
+    <author>Rodrigo Brito</author>
+    <contact>rodrigo@w3ti.com.br</contact>
+    <specification>Lyra OS Server "Delos" Beta 1 - headless live/installer ISO, openSUSE Leap 16 base, vega-cli/vegad/vega-web administration, x86_64</specification>
+  </description>
+
+  <preferences>
+    <packagemanager>zypper</packagemanager>
+    <rpm-excludedocs>true</rpm-excludedocs>
+    <rpm-check-signatures>true</rpm-check-signatures>
+    <!-- The first locale is the live session default; keep en-US first. -->
+    <locale>en_US,pt_BR,es_ES</locale>
+    <keytable>us</keytable>
+    <timezone>UTC</timezone>
+    <!-- Generated from release-server.toml by scripts/server-release.py.
+         Server runs its own alpha/beta/rc/final cycle
+         (docs/release-versioning.md), independent from the desktop repo. -->
+    <version>2026.08-beta1</version>
+    <type
+      image="iso"
+      primary="true"
+      flags="overlay"
+      filesystem="squashfs"
+      squashfscompression="zstd"
+      firmware="uefi"
+      editbootconfig="edit_boot_config.sh"
+      volid="LYRA_OS_SERVER_2026_08_BETA1"
+      application_id="LyraOSServer"
+      publisher="Lyra OS Project">
+      <bootloader name="grub2" timeout="10"/>
+    </type>
+  </preferences>
+
+  <users>
+    <!--
+      root is locked in the image itself (build/live concern only). The
+      "root disabled, sudo user created at install time" model is an
+      installer behavior on the installed system, not this file. This
+      image autologs into a root console via a systemd getty override
+      (kiwi/server/etc/systemd/system/getty@tty1.service.d/) - a locked
+      password does not block that.
+    -->
+    <user name="root" password="!" pwdformat="encrypted" home="/root" shell="/bin/bash"/>
+  </users>
+
+  <!--
+    Official Leap 16 base repos. Leap 16 deliberately has no separate
+    update repository: official maintenance updates are published through
+    repo-oss itself.
+  -->
+  <repository alias="repo-oss" priority="20" type="rpm-md" imageinclude="true"
+              repository_gpgcheck="true" package_gpgcheck="true">
+    <source path="https://download.opensuse.org/distribution/leap/16.0/repo/oss/"/>
+  </repository>
+  <repository alias="repo-non-oss" priority="21" type="rpm-md" imageinclude="true"
+              repository_gpgcheck="true" package_gpgcheck="true">
+    <source path="https://download.opensuse.org/distribution/leap/16.0/repo/non-oss/"/>
+  </repository>
+
+  <!--
+    Lyra and Vega OBS projects, hosted on the `rodrigosbrito` OBS account -
+    both are approved package sources in image-build-server.toml. vega-cli/
+    vegad/vega-web ship from repo-vega; repo-lyra is kept declared even
+    though no package in this image's list currently comes from it by name,
+    matching the approved source policy (image-build-server.toml validates
+    against a fixed allowlist, not against the literal package list).
+    Priorities 1-2 are deliberately lower than repo-oss/repo-non-oss (20-21)
+    above - in zypper, lower number wins. The installer resets these
+    priorities to 90 in the installed system, so normal updates continue to
+    prefer official Leap packages when a same-name package exists.
+  -->
+  <repository alias="repo-lyra" priority="1" type="rpm-md" imageinclude="true"
+              repository_gpgcheck="true" package_gpgcheck="true">
+    <source path="https://download.opensuse.org/repositories/home:/rodrigosbrito:/lyra/openSUSE_Leap_16.0/"/>
+  </repository>
+  <repository alias="repo-vega" priority="2" type="rpm-md" imageinclude="true"
+              repository_gpgcheck="true" package_gpgcheck="true">
+    <source path="https://download.opensuse.org/repositories/home:/rodrigosbrito:/vega/openSUSE_Leap_16.0/"/>
+  </repository>
+
+  <packages type="bootstrap">
+    <package name="ca-certificates"/>
+    <package name="ca-certificates-mozilla"/>
+    <package name="filesystem"/>
+    <package name="glibc-locale"/>
+    <package name="Leap-release"/>
+  </packages>
+
+  <packages type="image" patternType="onlyRequired">
+    <!--
+      onlyRequired: pull in each pattern's Requires only, not its long
+      Recommends lists. Everything actually wanted is added back
+      explicitly below instead of trying to block-list from a much larger
+      default set.
+
+      Base Leap system, kernel, bootloader/Secure Boot tooling, and the
+      partitioning/filesystem/network tools the installer needs.
+    -->
+
+    <!-- Base system -->
+    <namedCollection name="base"/>
+    <namedCollection name="enhanced_base"/>
+    <package name="kernel-default"/>
+    <!-- Keep the live dracut module in the image package set, matching the
+         official openSUSE live recipe. OBS then stages its RPM for KIWI and
+         the module remains available to both live boot and the installer. -->
+    <package name="dracut-kiwi-live"/>
+    <!-- kernel-default only Recommends firmware; onlyRequired would produce
+         an ISO that boots in the VM but loses Wi-Fi/GPU/storage support on
+         common physical hardware. CPU microcode is likewise explicit. -->
+    <package name="kernel-firmware-all"/>
+    <package name="ucode-amd"/>
+    <package name="ucode-intel"/>
+    <package name="grub2"/>
+    <package name="grub2-x86_64-efi"/>
+    <!-- shim + mokutil: Secure Boot is in scope for v1, same route as the
+         desktop image (docs/server-edition.md). -->
+    <package name="shim"/>
+    <package name="mokutil"/>
+    <!-- Neither is pulled in as a hard Requires under onlyRequired, but
+         dracut's network module (needed by kiwi-live for the live boot)
+         hard-requires the `ip` and `curl` binaries. -->
+    <package name="iproute2"/>
+    <package name="curl"/>
+    <!-- Used by the local-only, on-demand /usr/bin/lyra-report archive. -->
+    <package name="tar"/>
+    <package name="gzip"/>
+    <package name="python3-base"/>
+    <package name="pciutils"/>
+    <package name="usbutils"/>
+    <package name="less"/>
+    <!-- Command-line documentation is a baseline administration facility;
+         onlyRequired does not guarantee it. -->
+    <package name="man"/>
+    <!-- Keep familiar modal and approachable terminal editors for recovery
+         and offline administration. -->
+    <package name="vim"/>
+    <!-- vim's base package ships almost no language syntax files (7 total,
+         e.g. sh.vim) - python.vim, c.vim, javascript.vim and the rest all
+         live in this optional 37 MiB package. Neovim needs no equivalent
+         package: its language syntax/runtime files ship inside the neovim
+         package itself. -->
+    <package name="vim-data"/>
+    <package name="neovim"/>
+    <package name="nano"/>
+
+    <!-- Opt-in local performance capture and aggregation (issue #49). -->
+    <package name="procps"/>
+
+    <!--
+      Required for the "root disabled, sudo user created at install" model
+      to work on the installed system: scripts/server-install.sh writes
+      /etc/sudoers.d/10-installer on the target. Without this package the
+      directory is absent. The image doubles as the target rootfs, so sudo
+      is also present in the live session even though it is never used
+      there.
+    -->
+    <package name="sudo"/>
+
+    <!-- Provides mke2fs for the ext4 root filesystem (docs/server-edition.md). -->
+    <package name="e2fsprogs"/>
+    <!-- The installer creates a FAT32 EFI System Partition and deploys the
+         live squashfs into the target. These tools are runtime
+         requirements, not merely image-build utilities. -->
+    <package name="dosfstools"/>
+    <package name="squashfs"/>
+    <!-- sgdisk currently arrives transitively, but the installer invokes it
+         directly, so keep its provider explicit under onlyRequired. -->
+    <package name="gptfdisk"/>
+    <!-- mount/blkid and friends, needed by the installer. -->
+    <package name="util-linux"/>
+
+    <!-- ZRAM is the default swap mechanism; it activates its own systemd
+         generator at boot with no service to enable (see kiwi/config.sh).
+         There is no swap prompt in v1 (docs/server-edition.md). -->
+    <package name="zram-generator"/>
+
+    <!-- Leap defaults, listed explicitly so a minimal bootstrap doesn't
+         drop them. firewalld's default policy is set in kiwi/config.sh,
+         not the package set. -->
+    <package name="NetworkManager"/>
+    <package name="firewalld"/>
+
+    <!--
+      Vega's headless components, all from the home:rodrigosbrito:vega OBS
+      project (repo-vega, declared above). vega-web is the admin interface
+      (docs/server-edition.md); it listens on 9090/tcp, opened by
+      scripts/server-install.sh on the installed target
+      (firewall-offline-cmd in the chroot step, not here - this file only
+      affects the live image).
+    -->
+    <package name="vega-cli"/>
+    <package name="vegad"/>
+    <package name="vega-web"/>
+
+    <!-- SSH is the only other port opened by default (alongside
+         vega-web/9090) per docs/server-edition.md; the package providing
+         sshd in Leap is "openssh". -->
+    <package name="openssh"/>
+
+    <!-- scripts/server-install.sh's TUI. kbd is explicit because the
+         installer enumerates every console keymap shipped by that package;
+         this must not depend on an indirect base-pattern dependency.
+         onlyRequired under gptfdisk (above) does not pull in partprobe
+         either - that binary is provided by parted, not gptfdisk or
+         util-linux, confirmed against a real dev machine
+         (`rpm -ql parted | grep partprobe`) after a real VM install run
+         hit "partprobe: command not found". -->
+    <package name="dialog"/>
+    <package name="kbd"/>
+    <package name="parted"/>
+  </packages>
+
+</image>
