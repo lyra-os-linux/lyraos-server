@@ -1,7 +1,7 @@
 schema = 1
 
 [release]
-calendar_version = "2026.08"
+calendar_version = "27.02"
 stage = "beta"
 iteration = 1
 image_name = "lyra-os-server"

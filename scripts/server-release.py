@@ -63,8 +63,8 @@ class ServerRelease:
             raise ValueError("release text fields must be strings")
         if isinstance(self.iteration, bool) or not isinstance(self.iteration, int):
             raise ValueError("iteration must be an integer")
-        if not re.fullmatch(r"20\d{2}\.(?:0[1-9]|1[0-2])", self.calendar_version):
-            raise ValueError("calendar_version must use YYYY.MM")
+        if not re.fullmatch(r"\d{2}\.(?:0[1-9]|1[0-2])", self.calendar_version):
+            raise ValueError("calendar_version must use YY.MM")
         if self.stage not in {"alpha", "beta", "rc", "release"}:
             raise ValueError("stage must be alpha, beta, rc, or release")
         if self.stage == "release" and self.iteration != 0:
@@ -93,7 +93,7 @@ class ServerRelease:
     def display_version(self) -> str:
         if self.stage == "release":
             return self.calendar_version
-        return self.stage_label
+        return f"{self.calendar_version} {self.stage_label}"
 
     @property
     def pretty_name(self) -> str:
@@ -109,7 +109,7 @@ class ServerRelease:
     @property
     def tag(self) -> str:
         # "server-v..." keeps this product's git tags in a distinct
-        # namespace from the desktop's "vYYYY.MM-stageN" tags.
+        # namespace from the desktop's "vYY.MM-stageN" tags.
         return f"server-v{self.version_id}"
 
     @property

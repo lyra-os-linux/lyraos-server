@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import os
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -62,6 +64,37 @@ class ImagePolicyTests(unittest.TestCase):
         self.assertIn("IMAGE_SERVER_INSTALL", helper)
         self.assertIn("IMAGE_GETTY_OVERRIDE", helper)
         self.assertIn("kiwi-ng output:", helper)
+
+    def test_vm_helper_keeps_build_output_outside_checkout_and_audits_rootfs(self) -> None:
+        helper = (ROOT / "kiwi/test/build-and-run-vm.sh").read_text(encoding="utf-8")
+        self.assertIn("/var/tmp/lyraos-server-test-$CURRENT_UID", helper)
+        self.assertIn("Work directory must be outside the repository", helper)
+        self.assertEqual(helper.count("audit_live_rootfs \\\n"), 2)
+        self.assertIn("generated-rootfs-audit.json", helper)
+        self.assertIn("reused-rootfs-audit.json", helper)
+        for wrapper in (
+            "scripts/build-server-alpha1.sh",
+            "scripts/build-server-alpha2.sh",
+            "scripts/build-server-beta1.sh",
+        ):
+            self.assertNotIn("build-and-run-vm.sh --build-only --profile", (ROOT / wrapper).read_text(encoding="utf-8"))
+
+    def test_vm_helper_rejects_work_directory_inside_checkout_before_creating_it(self) -> None:
+        forbidden = ROOT / "forbidden-test-workdir"
+        self.assertFalse(forbidden.exists())
+        environment = os.environ.copy()
+        environment["LYRA_TEST_WORK_DIR"] = str(forbidden)
+        result = subprocess.run(
+            [str(ROOT / "kiwi/test/build-and-run-vm.sh"), "--build-only"],
+            cwd=ROOT,
+            env=environment,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("Work directory must be outside the repository", result.stderr)
+        self.assertFalse(forbidden.exists())
 
     def test_kiwi_readme_documents_the_console_installer_and_vm_helper(self) -> None:
         readme = (ROOT / "kiwi/README.md").read_text(encoding="utf-8")

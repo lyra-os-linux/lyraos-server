@@ -31,7 +31,7 @@
     <!-- Generated from release-server.toml by scripts/server-release.py.
          Server runs its own alpha/beta/rc/final cycle
          (docs/release-versioning.md), independent from the desktop repo. -->
-    <version>2026.08-beta1</version>
+    <version>27.02-beta1</version>
     <type
       image="iso"
       primary="true"
@@ -40,7 +40,7 @@
       squashfscompression="zstd"
       firmware="uefi"
       editbootconfig="edit_boot_config.sh"
-      volid="LYRA_OS_SERVER_2026_08_BETA1"
+      volid="LYRA_OS_SERVER_27_02_BETA1"
       application_id="LyraOSServer"
       publisher="Lyra OS Project">
       <bootloader name="grub2" timeout="10"/>

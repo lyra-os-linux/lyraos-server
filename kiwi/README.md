@@ -33,8 +33,10 @@ Boot pela mesma rota do desktop). Veja "Instalador em console" em
 
 `kiwi/test/build-and-run-vm.sh` builda a ISO com `kiwi-ng`, valida o
 resultado (SquashFS íntegro, `/etc/os-release` e `build-info` batendo com
-`release-server.toml`, overlay do instalador de console presente) e sobe uma
-VM QEMU/KVM descartável:
+`release-server.toml`, overlay do instalador de console presente, nenhum home
+ou caminho do host incorporado) e sobe uma VM QEMU/KVM descartável. O workdir
+padrão é `/var/tmp/lyraos-server-test-$UID`; qualquer
+`LYRA_TEST_WORK_DIR` dentro do checkout é recusado antes de ser criado:
 
 ```bash
 ./kiwi/test/build-and-run-vm.sh

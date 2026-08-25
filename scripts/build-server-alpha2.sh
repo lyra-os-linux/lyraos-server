@@ -5,8 +5,9 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
 REPO_ROOT="$(dirname "$SCRIPT_DIR")"
-BUILD_DIR="$REPO_ROOT/kiwi/.kiwi/test-$(id -u)-server/build"
-ARTIFACT_DIR="$REPO_ROOT/kiwi/.kiwi/test-$(id -u)-server/iso"
+WORK_DIR="${LYRA_TEST_WORK_DIR:-/var/tmp/lyraos-server-test-$(id -u)}"
+BUILD_DIR="$WORK_DIR/build"
+ARTIFACT_DIR="$WORK_DIR/iso"
 EXPECTED_VERSION="2026.08-alpha2"
 ARTIFACTS_ONLY=0
 
@@ -50,7 +51,7 @@ if [ "$ARTIFACTS_ONLY" -eq 0 ]; then
   echo "Autenticando sudo para o build KIWI..."
   sudo -v
   echo "Iniciando o build da ISO Server (a VM existente não será alterada)..."
-  ./kiwi/test/build-and-run-vm.sh --build-only --profile server
+  ./kiwi/test/build-and-run-vm.sh --build-only
 fi
 
 ISO="$ARTIFACT_DIR/$ISO_NAME"
