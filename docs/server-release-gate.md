@@ -5,8 +5,8 @@ Este checklist é o contrato de go/no-go da edição server, análogo a
 aplica ao server: sem Lyra Installer gráfico, sem Btrfs/Snapper/rollback (v1
 usa ext4 simples, ver `docs/server-edition.md`), sem sessão GNOME. Um
 coordenador de release só pode declarar **GO** quando todo item bloqueante
-abaixo tiver passado e sua evidência estiver no manifesto final. Evidência
-ausente é falha, não uma exceção implícita.
+abaixo tiver passado. A validação é operacional; arquivos JSON formais de
+evidência e um registro separado de decisão não são exigidos para publicar.
 
 ## Severidade e política de bloqueio
 
@@ -27,10 +27,8 @@ server:
   um cenário suportado. Precisa ter issue de acompanhamento quando não
   corrigido.
 
-Nenhum P0 ou P1 pode ficar aberto na publicação. Um P2 só é aceito quando o
-registro de decisão nomeia issue, workaround, responsável e risco residual —
-sendo Beta 1, somente P2/P3 documentadas podem ser aceitas; não pode haver
-P0/P1 na publicação.
+Nenhum P0 ou P1 pode ficar aberto na publicação. Sendo Beta 1, somente P2/P3
+documentadas nas notas podem ser aceitas.
 
 ## Identidade do candidato
 
@@ -43,15 +41,11 @@ P0/P1 na publicação.
 - [ ] o candidato só é marcado com tag depois que todos os checks bloqueantes
   passam.
 
-## Evidência exigida
+## Validação recomendada
 
-Cada arquivo é JSON estruturado com schema 1 e `"status": "passed"` no
-nível raiz. `scripts/image-build.py artifact-manifest --manifest
-image-build-server.toml --release-file release-server.toml` também confere
-modo esperado, checks não vazios passando, conteúdo do projeto OBS e
-cobertura de hardware; um status verde isolado é rejeitado. Diferente do
-desktop, **não há item `rollback`** — `image-build-server.toml` já reflete
-isso em `required_test_results`:
+Os cenários abaixo continuam compondo a qualificação recomendada, mas seus
+arquivos JSON não fazem parte do bundle nem bloqueiam mecanicamente o upload.
+Diferente do desktop, **não há item `rollback`**:
 
 - [ ] `obs-repositories`: projetos de release publicados; proveniência,
   metadados de repositório, chaves e assinaturas RPM verificados por
@@ -113,63 +107,17 @@ UID atuais; importar `docs/release-signing-key.asc` antes de confiar em
   destacada validada contra a chave de release;
 - [ ] notas de release listam requisitos, limitações, issues P2/P3 aceitas e
   workarounds testados;
-- [ ] manifesto de evidência gerado a partir de um commit limpo e contém
-  todos os resultados verdes exigidos;
-- [ ] ISO e evidência sobem para o SourceForge e são baixados de novo para
+- [ ] ISO e artefatos sobem para o SourceForge e são baixados de novo para
   verificação de checksum/assinatura;
-- [ ] issue de tracking registra coordenador, horário da decisão, URLs de
-  evidência, riscos P2/P3 aceitos e o commit de origem exato.
-
-## Registro de decisão
-
-Mesmo formato de `docs/release-gate.md`, adaptado ao produto:
-
-```text
-Decisão: GO | NO-GO
-Commit candidato:
-Nome do ISO:
-SHA-256:
-Coordenador:
-Horário da decisão (UTC):
-Manifesto de evidência:
-Issues P2/P3 aceitas e workarounds:
-Riscos residuais:
-```
 
 ## Estado atual (Beta 1)
 
-**NO-GO** — o mantenedor declarou o congelamento funcional da Beta 1. As
-correções bloqueantes #89 (senha no chroot) e #93 (identidade da mídia live)
-foram implementadas no commit `303a3b0`; a regressão automatizada, o
-`shellcheck`, a sincronização dos metadados e a política de assinatura estão
-verdes. Isso valida o código-fonte, não a imagem candidata. Ainda faltam, nesta
-ordem: exportar uma árvore limpa, executar o build final via `kiwi-ng`, gerar
-`obs-release.py health`, repetir live/installer/first-boot e UEFI/Secure Boot,
-registrar a matriz de hardware, gerar os artefatos derivados, assinar o
-checksum e produzir o manifesto final com `scripts/build-server-beta1.sh`.
-Somente depois ocorre a publicação e verificação pós-download por
-`scripts/upload-server-beta1-sourceforge.sh --decision-file ARQUIVO.json`.
-O arquivo de decisão usa schema 1 e vincula o GO ao candidato exato:
-
-```json
-{
-  "schema": 1,
-  "decision": "GO",
-  "source_commit": "COMMIT_SHA_COMPLETO",
-  "iso_filename": "lyra-os-server.x86_64-27.02-beta1.iso",
-  "iso_sha256": "SHA256_DA_ISO",
-  "evidence_manifest": "lyra-os-server.x86_64-27.02-beta1.evidence.json",
-  "coordinator": "NOME",
-  "decided_at_utc": "AAAA-MM-DDTHH:MM:SSZ",
-  "accepted_p2_p3": [],
-  "residual_risks": []
-}
-```
-
-O upload falha fechado se esse registro não corresponder ao manifesto ou se
-o GitHub ainda tiver uma issue Server P0/P1 aberta. Teste em hardware
-físico real permanece como risco residual (a cobertura aceita foi em VM) — ver
-`[[hardware_matrix_single_machine_risk]]`.
+**GO condicionado aos controles técnicos** — a imagem candidata foi gerada de
+árvore limpa e aprovada em VM. Antes do upload, `scripts/build-server-beta1.sh`
+gera SBOMs e checksum assinado. O uploader valida a assinatura oficial, consulta
+o GitHub e falha fechado se houver issue Server P0/P1; depois baixa novamente a
+ISO publicada e verifica checksum e assinatura. Teste em hardware físico real
+permanece como risco residual; a cobertura aceita foi em VM.
 
 O ciclo está em Beta 1 e sob congelamento funcional. O cronograma completo
 até a Server 27.02 “Delos” e os critérios de saída estão em

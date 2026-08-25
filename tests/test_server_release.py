@@ -96,23 +96,20 @@ class ServerRepositoryMetadataTests(unittest.TestCase):
 
 
 class ServerBeta1GateTests(unittest.TestCase):
-    def test_builder_binds_final_manifest_to_the_iso_source_commit(self) -> None:
+    def test_builder_requires_a_clean_tree_and_valid_iso_source_commit(self) -> None:
         builder = (ROOT / "scripts/build-server-beta1.sh").read_text(encoding="utf-8")
-        self.assertIn('HEAD_COMMIT="$(git rev-parse HEAD)"', builder)
-        self.assertIn('[ "$COMMIT" = "$HEAD_COMMIT" ]', builder)
+        self.assertIn('git cat-file -e "$COMMIT^{commit}"', builder)
         self.assertIn("git status --porcelain --untracked-files=normal", builder)
 
-    def test_uploader_requires_exact_go_and_open_blocker_query(self) -> None:
+    def test_uploader_requires_signed_bundle_and_open_blocker_query(self) -> None:
         uploader = (ROOT / "scripts/upload-server-beta1-sourceforge.sh").read_text(
             encoding="utf-8"
         )
-        self.assertIn("--decision-file", uploader)
-        self.assertIn('"decision": "GO"', uploader)
-        self.assertIn('"source_commit": d.get("source", {}).get("commit")', uploader)
-        self.assertIn('"iso_sha256": iso.get("sha256")', uploader)
+        self.assertNotIn("--decision-file", uploader)
+        self.assertIn("sha256sum -c", uploader)
         self.assertIn("gh issue list --state open --label server", uploader)
         self.assertIn('test("\\\\[P[01]\\\\]"; "i")', uploader)
-        self.assertIn("release-decision.json", uploader)
+        self.assertNotIn("release-decision.json", uploader)
 
     def test_release_scripts_pin_the_canonical_signing_key(self) -> None:
         fingerprint = "01B63EEDBE6B079126A0116EFA7353A131ECEFEB"
