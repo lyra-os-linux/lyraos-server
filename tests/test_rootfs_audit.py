@@ -38,6 +38,12 @@ class RootfsAuditTests(unittest.TestCase):
         metadata.write_text("/home/builder/Git/Lyra/source\n", encoding="utf-8")
         link = self.rootfs / "opt/source"
         link.parent.mkdir()
-        os.symlink("/home/builder/Projects/server", link)
+        os.symlink("/home/builder/Projects/lyraos-server", link)
         kinds = {finding["kind"] for finding in audit.scan(self.rootfs)["findings"]}
         self.assertTrue({"host-path-content", "host-path-symlink"} <= kinds)
+
+    def test_packaged_generic_home_example_is_not_a_lyra_checkout_leak(self) -> None:
+        documentation = self.rootfs / "usr/share/doc/example.txt"
+        documentation.parent.mkdir(parents=True)
+        documentation.write_text("Example: /home/jdoe/src/plugin\n", encoding="utf-8")
+        self.assertEqual(audit.scan(self.rootfs)["result"], "pass")
