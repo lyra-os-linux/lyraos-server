@@ -47,6 +47,16 @@ julgar explicitamente que elas fazem sentido para o Lyra e que o benefício é
 compatível com o risco de regressão. Essa exceção não autoriza completar
 silenciosamente partes incompletas do produto nem adicionar novos componentes.
 
+### Exceção aprovada para o ciclo 27.02
+
+No Desktop e no Server 27.02, o mantenedor autoriza programar melhorias durante
+as Betas porque os ganhos esperados compensam os riscos. Cada melhoria ainda
+deve ter benefício concreto registrado, impacto e risco avaliados, testes de
+regressão proporcionais e plano de reversão. A autorização não dispensa os
+gates, não permite promover com P0/P1 aberto e termina no início da RC1. Novos
+aplicativos ou mudanças amplas de arquitetura continuam exigindo decisão
+explícita do mantenedor.
+
 A partir do início da RC1 — incluindo todas as RCs e a versão estável — pacotes
 já distribuídos podem receber correções de bugs, de travamentos e de
 segurança, além de melhorias de performance quando forem consideradas

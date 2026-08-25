@@ -92,8 +92,8 @@ aberto.
 | alpha1 | 3 semanas | 11/ago/2026 → 01/set/2026 | Reconfirmar instalação completa após os últimos ajustes da TUI e produzir o primeiro candidato rastreável. |
 | alpha2 | 3 semanas | 01/set/2026 → 22/set/2026 | Consolidar a integração do fluxo Server e preparar as correções e evidências do gate seguinte. |
 | alpha3 | cancelada | — | Etapa absorvida pela Beta 1 por decisão do mantenedor em 15/08/2026. |
-| beta1 | em andamento | desde 15/ago/2026 | Congelamento funcional, correção dos bloqueadores e validação do fluxo suportado em disco inteiro/ext4. |
-| beta2 | 4 semanas | 10/nov/2026 → 08/dez/2026 | Estabilidade, atualização dos pacotes, rede e administração remota em execuções repetidas. |
+| beta1 | em andamento | desde 15/ago/2026 | Correção dos bloqueadores, validação do fluxo suportado e melhorias aprovadas com risco, testes e reversão registrados. |
+| beta2 | 4 semanas | 10/nov/2026 → 08/dez/2026 | Rebase para Leap 16.1 e requalificação de build, instalação, Secure Boot, atualização, rede e administração remota. |
 | beta3 | 4 semanas | 08/dez/2026 → 05/jan/2027 | Internacionalização dos componentes próprios aplicáveis ao Server e fechamento da documentação operacional. |
 | rc1 | 2 semanas | 05/jan/2027 → 19/jan/2027 | Candidato completo, assinado e exercitado em VM e hardware físico, sem P0/P1. |
 | rc2 | 2 semanas | 19/jan/2027 → 02/fev/2027 | Somente correções bloqueantes e repetição integral do gate. |
@@ -106,6 +106,22 @@ não precisa esperar o Desktop nem ser publicado no mesmo dia; cada edição só
 avança com o próprio gate verde. Mantida essa antecipação nas etapas seguintes,
 o alvo antecipado da final permanece em **~26/jan/2027**; o buffer integral
 continua até aproximadamente 16/02/2027.
+
+Por decisão posterior do mantenedor, as Betas do Server 27.02 também podem
+receber melhorias programadas quando os ganhos compensarem os riscos. Cada
+mudança exige benefício concreto, análise de impacto, testes de regressão e
+plano de reversão registrados. A autorização termina na RC1; novos aplicativos
+e mudanças amplas de arquitetura continuam dependendo de aprovação explícita.
+
+### Rebase planejado para o Server 27.02
+
+O Server 27.02 migra de Leap 16.0 para Leap 16.1 na Beta 2. A Beta 1 já
+publicada permanece reproduzível na base anterior. A primeira candidata na
+nova base só pode ser promovida depois de reconstruir os RPMs consumidos pela
+imagem e repetir os gates de instalação em disco inteiro/ext4, UEFI Secure
+Boot, primeiro boot, atualização, rollback, DHCP, SSH, firewall, `vegad`,
+`vega-cli` e `vega-web`. O rebase é uma exceção de infraestrutura aprovada
+para este ciclo; não autoriza novas funcionalidades.
 
 ### Estado na entrada da Alpha 1
 
@@ -123,10 +139,10 @@ Alpha 1:
 - registrar a matriz de hardware, incluindo ao menos o risco explícito da
   cobertura física disponível.
 
-## Lyra OS Server 27.10 "Tebas"
+## Lyra OS Server 28.02 "Tebas"
 
-O ciclo Server 27.10 usa o codinome de produto **Tebas** e faz o rebase para
-openSUSE Leap 16.1. O codinome não altera o schema mecânico de
+O ciclo Server 28.02 usa o codinome de produto **Tebas** sobre a base
+openSUSE Leap 16.1 já qualificada na 27.02. O codinome não altera o schema mecânico de
 `release-server.toml`, os nomes de pacote ou o volume da imagem.
 
 | Estágio | Cadência | Datas | Objetivo de saída |
@@ -139,9 +155,10 @@ openSUSE Leap 16.1. O codinome não altera o schema mecânico de
 | beta3 | 4 semanas | 28/jun/2027 → 26/jul/2027 | QA linguístico, documentação operacional e correções finais. |
 | rc1 | 2 semanas | 26/jul/2027 → 09/ago/2027 | Candidato completo, assinado e exercitado em VM e hardware. |
 | rc2 | 2 semanas | 09/ago/2027 → 23/ago/2027 | Somente bloqueadores P0/P1 e repetição integral do gate. |
-| final estável (buffer) | até 2 meses | 23/ago/2027 → **out/2027** | Estabilização final e publicação do Lyra OS Server 27.10 "Tebas" em outubro. |
+| estabilização prolongada | ~5 meses | 23/ago/2027 → 01/fev/2028 | Repetição dos gates e correções sem ampliar escopo. |
+| final estável (buffer) | 2 semanas | 01/fev/2028 → **~15/fev/2028** | Publicação do Lyra OS Server 28.02 "Tebas" em fevereiro. |
 
-`27.02` e `27.10` são as versões canônicas dos ciclos, tanto para o produto
+`27.02` e `28.02` são as versões canônicas dos ciclos, tanto para o produto
 quanto para o campo mecânico `calendar_version` (`AA.MM`) em
 `release-server.toml`. Não há uma numeração semântica `1.x` paralela.
 
