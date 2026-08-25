@@ -10,7 +10,11 @@ import re
 from pathlib import Path
 
 
-HOST_PATH = re.compile(rb"/(?:home|Users)/[A-Za-z0-9._-]+/(?:Git|Projects|src|workspace)/")
+HOST_PATH = re.compile(
+    rb"/(?:home|Users)/[A-Za-z0-9._-]+/(?:Git|Projects|src|workspace)/"
+    rb"(?:Lyra|lyraos-server)(?:/|\b)",
+    re.IGNORECASE,
+)
 SCAN_LIMIT = 8 * 1024 * 1024
 
 
