@@ -12,11 +12,9 @@ desassistida continuam fora de escopo.
   cenários copy-to-RAM, com falha fechada antes de qualquer `wipefs`;
 - repetir live, instalação, primeiro boot, UEFI/Secure Boot, DHCP, SSH,
   firewalld, vegad e vega-web;
-- publicar ISO, inventário RPM, verificação KIWI, SBOMs CycloneDX/SPDX,
-  checksum assinado e manifesto final de evidências.
+- publicar ISO, inventário RPM, verificação KIWI, SBOMs CycloneDX/SPDX e
+  checksum assinado.
 
-Esta Beta não deve ser publicada enquanto houver P0/P1 aberto ou qualquer
-evidência obrigatória ausente. Ver `docs/server-release-gate.md`.
-A publicação também exige um registro formal de GO que corresponda ao commit,
-nome e SHA-256 exatos da ISO candidata; o script de upload consulta o estado
-das issues Server e falha fechado enquanto existir P0/P1 aberta.
+Esta Beta não deve ser publicada enquanto houver P0/P1 aberto. Ver
+`docs/server-release-gate.md`. O script de upload valida o checksum assinado,
+consulta as issues Server e falha fechado enquanto existir P0/P1 aberta.

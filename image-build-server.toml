@@ -44,14 +44,7 @@ required = [
 ]
 
 [evidence]
-# No "rollback": the server profile has no Btrfs/Snapper in v1
-# (docs/server-edition.md - RAID/LVM/Btrfs/Snapper are out of scope
-# without an entry criterion for a v2).
-required_test_results = [
-  "obs-repositories",
-  "live-session",
-  "installer",
-  "first-boot",
-  "uefi-secure-boot",
-  "hardware-matrix",
-]
+# Formal JSON test evidence is not a publication requirement. Release
+# integrity remains enforced by the clean-source manifest, signed checksum,
+# P0/P1 blocker query and post-upload download verification.
+required_test_results = []

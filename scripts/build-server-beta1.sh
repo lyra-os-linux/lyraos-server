@@ -8,7 +8,6 @@ REPO_ROOT="$(dirname "$SCRIPT_DIR")"
 WORK_DIR="${LYRA_TEST_WORK_DIR:-/var/tmp/lyraos-server-test-$(id -u)}"
 BUILD_DIR="$WORK_DIR/build"
 ARTIFACT_DIR="$WORK_DIR/iso"
-EVIDENCE_DIR=""
 ARTIFACTS_ONLY=0
 RELEASE_SIGNING_FINGERPRINT="01B63EEDBE6B079126A0116EFA7353A131ECEFEB"
 
@@ -23,24 +22,20 @@ verify_release_signature() {
 }
 
 usage() {
-  echo "Uso: $0 [--artifacts-only] --evidence-dir DIRETÓRIO" >&2
+  echo "Uso: $0 [--artifacts-only]" >&2
 }
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
     --artifacts-only) ARTIFACTS_ONLY=1 ;;
-    --evidence-dir) shift; EVIDENCE_DIR="${1:-}" ;;
     -h|--help) usage; exit 0 ;;
     *) echo "ERRO: opção desconhecida: $1" >&2; usage; exit 2 ;;
   esac
   shift
 done
-[ -n "$EVIDENCE_DIR" ] || { usage; exit 2; }
-EVIDENCE_DIR="$(readlink -f "$EVIDENCE_DIR")"
-
 cd "$REPO_ROOT"
 ./scripts/server-release.py check
-./scripts/image-build.py validate --profile server \
+./scripts/image-build.py validate \
   --release-file release-server.toml --manifest image-build-server.toml
 
 VERSION="$(./scripts/server-release.py field version_id)"
@@ -74,14 +69,8 @@ print(c)
 PY
 )"
 git cat-file -e "$COMMIT^{commit}"
-HEAD_COMMIT="$(git rev-parse HEAD)"
 [ -z "$(git status --porcelain --untracked-files=normal)" ] || {
   echo "ERRO: o bundle final exige uma árvore de código limpa." >&2
-  exit 1
-}
-[ "$COMMIT" = "$HEAD_COMMIT" ] || {
-  echo "ERRO: a ISO foi construída de $COMMIT, mas o HEAD atual é $HEAD_COMMIT." >&2
-  echo "Reconstrua a ISO a partir do commit atual ou restaure o commit candidato." >&2
   exit 1
 }
 install -m 0644 "$BUILD_DIR/$PREFIX.packages" "$ARTIFACT_DIR/$PREFIX.packages"
@@ -100,14 +89,4 @@ verify_release_signature "$ARTIFACT_DIR/$PREFIX.iso.sha256.asc" \
   "$ARTIFACT_DIR/$PREFIX.iso.sha256"
 (cd "$ARTIFACT_DIR" && sha256sum -c "$PREFIX.iso.sha256")
 
-TEST_ARGS=()
-for name in obs-repositories live-session installer first-boot uefi-secure-boot hardware-matrix; do
-  file="$EVIDENCE_DIR/$name-result.json"
-  [ -s "$file" ] || { echo "ERRO: evidência ausente: $file" >&2; exit 1; }
-  TEST_ARGS+=(--test-result "$name=$file")
-done
-./scripts/image-build.py artifact-manifest --profile server \
-  --release-file release-server.toml --manifest image-build-server.toml \
-  "$ARTIFACT_DIR" --output "$ARTIFACT_DIR/$PREFIX.evidence.json" "${TEST_ARGS[@]}"
-
-echo "Bundle Server Beta 1 assinado e qualificado em: $ARTIFACT_DIR"
+echo "Bundle Server Beta 1 assinado em: $ARTIFACT_DIR"

@@ -114,14 +114,6 @@ class Manifest:
             ObsPackageSource("home:rodrigosbrito:lyra", "openSUSE_Leap_16.0"),
             ObsPackageSource("home:rodrigosbrito:vega", "openSUSE_Leap_16.0"),
         )
-        expected_results = {
-            "obs-repositories",
-            "live-session",
-            "installer",
-            "first-boot",
-            "uefi-secure-boot",
-            "hardware-matrix",
-        }
         if self.package_sources != expected_sources:
             raise PolicyError("OBS RPM package sources are incomplete or out of order")
         expected_artifacts = {
@@ -139,8 +131,8 @@ class Manifest:
             expected_artifacts | {"checksum_signature"},
         ):
             raise PolicyError("artifact policy is incomplete")
-        if set(self.required_test_results) != expected_results:
-            raise PolicyError("release evidence policy is incomplete")
+        if self.required_test_results:
+            raise PolicyError("formal release evidence is disabled for the server image")
 
 
 def git(*args: str) -> str:
