@@ -119,7 +119,10 @@ o GitHub e falha fechado se houver issue Server P0/P1; depois baixa novamente a
 ISO publicada e verifica checksum e assinatura. Teste em hardware físico real
 permanece como risco residual; a cobertura aceita foi em VM.
 
-O ciclo está em Beta 1 e sob congelamento funcional. O cronograma completo
+O ciclo está em Beta 1. Melhorias estão autorizadas nas Betas da 27.02 quando
+os ganhos compensarem os riscos, desde que benefício, impacto, testes de
+regressão e reversão sejam registrados. A RC1 inicia o congelamento estrito.
+O cronograma completo
 até a Server 27.02 “Delos” e os critérios de saída estão em
 [`release-versioning.md`](release-versioning.md#lyra-os-server-10).
 
