@@ -98,6 +98,7 @@ class ServerRepositoryMetadataTests(unittest.TestCase):
 class ServerBeta1GateTests(unittest.TestCase):
     def test_builder_requires_a_clean_tree_and_valid_iso_source_commit(self) -> None:
         builder = (ROOT / "scripts/build-server-beta1.sh").read_text(encoding="utf-8")
+        self.assertIn("python3 ./scripts/image-build.py validate", builder)
         self.assertIn('git cat-file -e "$COMMIT^{commit}"', builder)
         self.assertIn("git status --porcelain --untracked-files=normal", builder)
 

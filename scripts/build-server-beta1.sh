@@ -35,7 +35,7 @@ while [ "$#" -gt 0 ]; do
 done
 cd "$REPO_ROOT"
 ./scripts/server-release.py check
-./scripts/image-build.py validate \
+python3 ./scripts/image-build.py validate \
   --release-file release-server.toml --manifest image-build-server.toml
 
 VERSION="$(./scripts/server-release.py field version_id)"
