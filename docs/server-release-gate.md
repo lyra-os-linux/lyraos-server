@@ -156,9 +156,9 @@ O arquivo de decisão usa schema 1 e vincula o GO ao candidato exato:
   "schema": 1,
   "decision": "GO",
   "source_commit": "COMMIT_SHA_COMPLETO",
-  "iso_filename": "lyra-os-server.x86_64-2026.08-beta1.iso",
+  "iso_filename": "lyra-os-server.x86_64-27.02-beta1.iso",
   "iso_sha256": "SHA256_DA_ISO",
-  "evidence_manifest": "lyra-os-server.x86_64-2026.08-beta1.evidence.json",
+  "evidence_manifest": "lyra-os-server.x86_64-27.02-beta1.evidence.json",
   "coordinator": "NOME",
   "decided_at_utc": "AAAA-MM-DDTHH:MM:SSZ",
   "accepted_p2_p3": [],
@@ -172,7 +172,7 @@ físico real permanece como risco residual (a cobertura aceita foi em VM) — ve
 `[[hardware_matrix_single_machine_risk]]`.
 
 O ciclo está em Beta 1 e sob congelamento funcional. O cronograma completo
-até a Server 1.0 “Delos” e os critérios de saída estão em
+até a Server 27.02 “Delos” e os critérios de saída estão em
 [`release-versioning.md`](release-versioning.md#lyra-os-server-10).
 
 ## Referências

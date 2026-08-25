@@ -24,21 +24,25 @@ repositório nem incorporados ao script.
 
 ## Bootstrap da estação
 
-Na instalação nova, execute como usuário normal, sem `sudo` antes de `bash`:
+Na instalação nova, obtenha um checkout, revise o script e execute como usuário
+normal, sem `sudo` antes de `bash`:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/lyra-os-linux/lyraos-desktop/main/scripts/bootstrap-development.sh | bash
+git clone https://github.com/lyra-os-linux/lyraos-desktop.git
+cd lyraos-desktop
+less scripts/bootstrap-development.sh
+./scripts/bootstrap-development.sh --dry-run
+./scripts/bootstrap-development.sh
 ```
 
 O próprio script solicita `sudo` somente para instalar pacotes, configurar
 libvirt e habilitar o serviço necessário. Ele é idempotente e pode ser
 executado novamente após uma atualização.
 
-Para conferir as ações sem modificar o sistema:
+Para conferir novamente as ações sem modificar o sistema:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/lyra-os-linux/lyraos-desktop/main/scripts/bootstrap-development.sh \
-  | bash -s -- --dry-run
+./scripts/bootstrap-development.sh --dry-run
 ```
 
 Outras opções podem ser vistas com:

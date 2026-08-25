@@ -19,7 +19,7 @@ ServerRelease = server_release_module.ServerRelease
 
 def sample_release(**overrides: object) -> ServerRelease:
     values: dict[str, object] = {
-        "calendar_version": "2026.08",
+        "calendar_version": "27.02",
         "stage": "alpha",
         "iteration": 1,
         "image_name": "lyra-os-server",
@@ -34,11 +34,11 @@ def sample_release(**overrides: object) -> ServerRelease:
 class ServerReleaseConventionTests(unittest.TestCase):
     def test_alpha_identifiers(self) -> None:
         release = sample_release()
-        self.assertEqual(release.version_id, "2026.08-alpha1")
-        self.assertEqual(release.tag, "server-v2026.08-alpha1")
-        self.assertEqual(release.iso_filename, "lyra-os-server.x86_64-2026.08-alpha1.iso")
-        self.assertEqual(release.volume_id, "LYRA_OS_SERVER_2026_08_ALPHA1")
-        self.assertEqual(release.pretty_name, "Lyra OS Server Alpha 1")
+        self.assertEqual(release.version_id, "27.02-alpha1")
+        self.assertEqual(release.tag, "server-v27.02-alpha1")
+        self.assertEqual(release.iso_filename, "lyra-os-server.x86_64-27.02-alpha1.iso")
+        self.assertEqual(release.volume_id, "LYRA_OS_SERVER_27_02_ALPHA1")
+        self.assertEqual(release.pretty_name, "Lyra OS Server 27.02 Alpha 1")
 
     def test_no_codename_field_exists(self) -> None:
         release = sample_release()
@@ -47,9 +47,9 @@ class ServerReleaseConventionTests(unittest.TestCase):
 
     def test_final_identifiers(self) -> None:
         release = sample_release(stage="release", iteration=0)
-        self.assertEqual(release.version_id, "2026.08")
-        self.assertEqual(release.tag, "server-v2026.08")
-        self.assertEqual(release.pretty_name, "Lyra OS Server 2026.08")
+        self.assertEqual(release.version_id, "27.02")
+        self.assertEqual(release.tag, "server-v27.02")
+        self.assertEqual(release.pretty_name, "Lyra OS Server 27.02")
 
     def test_prerelease_requires_iteration(self) -> None:
         with self.assertRaisesRegex(ValueError, "positive iteration"):

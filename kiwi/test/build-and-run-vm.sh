@@ -26,8 +26,8 @@
 # automatically on tty1 via autologin - see docs/server-edition.md).
 #
 # All output is logged (with timestamps) below a private per-user directory
-# under kiwi/.kiwi, in addition to your terminal. Set LYRA_TEST_WORK_DIR to
-# use another persistent location.
+# outside the checkout, in addition to your terminal. Set LYRA_TEST_WORK_DIR
+# to use another persistent location outside the repository.
 
 set -euo pipefail
 
@@ -45,6 +45,7 @@ REPO_ROOT="$(dirname "$KIWI_DESC")"
 PACKAGE_SIGNING_KEYRING="$KIWI_DESC/keys/obs-package-signing-keyring.asc"
 CURRENT_UID="$(id -u)"
 RELEASE_TOOL="$REPO_ROOT/scripts/server-release.py"
+ROOTFS_AUDIT="$REPO_ROOT/scripts/audit-live-rootfs.py"
 # There is no GNOME session or Rust installer to keep resident here - the
 # console installer (scripts/server-install.sh) and package installation are
 # what the live session actually runs.
@@ -106,7 +107,7 @@ done
 # Keep the large KIWI tree, ISO and VM disk on the persistent filesystem.
 # On many systems /tmp is a small RAM-backed tmpfs and cannot hold a full
 # image build plus an expanding qcow2 installation disk.
-WORK_DIR="${LYRA_TEST_WORK_DIR:-$KIWI_DESC/.kiwi/test-$CURRENT_UID}"
+WORK_DIR="${LYRA_TEST_WORK_DIR:-/var/tmp/lyraos-server-test-$CURRENT_UID}"
 BUILD_DIR="$WORK_DIR/build"
 ISO_DIR="$WORK_DIR/iso"
 ISO_ARCHIVE_DIR="$ISO_DIR/archive"
@@ -145,6 +146,12 @@ fi
 
 # The build runs partly through sudo. Keep every root-written path below a
 # directory owned by this user and inaccessible to other local users.
+case "$(readlink -m "$WORK_DIR")/" in
+  "$(readlink -f "$REPO_ROOT")/"*)
+    echo "Work directory must be outside the repository: $WORK_DIR" >&2
+    exit 1
+    ;;
+esac
 if [ -L "$WORK_DIR" ]; then
   echo "Refusing symbolic-link work directory: $WORK_DIR" >&2
   exit 1
@@ -155,6 +162,18 @@ if [ -e "$WORK_DIR" ] && [ "$(stat -c '%u' "$WORK_DIR")" -ne "$CURRENT_UID" ]; t
 fi
 mkdir -p -m 0700 "$WORK_DIR"
 chmod 0700 "$WORK_DIR"
+
+audit_live_rootfs() {
+  local extracted_root="$1"
+  local report="$2"
+
+  if ! "$ROOTFS_AUDIT" "$extracted_root" --output "$report"; then
+    echo "!!! live rootfs contains unexpected homes or build-host paths" >&2
+    echo "!!! refusing an ISO that may contain host build data" >&2
+    echo "!!! evidence: $report" >&2
+    return 1
+  fi
+}
 
 # Timestamp every line, tee to log file and terminal.
 exec > >(while IFS= read -r line; do printf '%s %s\n' "$(date '+%H:%M:%S')" "$line"; done | tee -a "$LOG") 2>&1
@@ -539,6 +558,12 @@ if [ "$SKIP_BUILD" -eq 0 ]; then
     rm -rf "$SQUASHFS_VERIFY_DIR"
     exit 1
   fi
+  if ! audit_live_rootfs \
+      "$SQUASHFS_VERIFY_DIR" "$WORK_DIR/generated-rootfs-audit.json"; then
+    chmod -R u+rwX "$SQUASHFS_VERIFY_DIR" 2>/dev/null || true
+    rm -rf "$SQUASHFS_VERIFY_DIR"
+    exit 1
+  fi
   chmod -R u+rwX "$SQUASHFS_VERIFY_DIR" 2>/dev/null || true
   rm -rf "$SQUASHFS_VERIFY_DIR"
   echo "--- validated live SquashFS by full extraction ---"
@@ -602,6 +627,12 @@ if [ "$SKIP_BUILD" -eq 1 ]; then
       -d "$SQUASHFS_VERIFY_DIR" "$ISO_SQUASHFS" >/dev/null; then
     echo "!!! existing ISO contains an unreadable/corrupt live SquashFS" >&2
     echo "!!! refusing to boot with --skip-build: $ISO_PATH" >&2
+    chmod -R u+rwX "$SQUASHFS_VERIFY_DIR" 2>/dev/null || true
+    rm -rf "$SQUASHFS_VERIFY_DIR"
+    exit 1
+  fi
+  if ! audit_live_rootfs \
+      "$SQUASHFS_VERIFY_DIR" "$WORK_DIR/reused-rootfs-audit.json"; then
     chmod -R u+rwX "$SQUASHFS_VERIFY_DIR" 2>/dev/null || true
     rm -rf "$SQUASHFS_VERIFY_DIR"
     exit 1

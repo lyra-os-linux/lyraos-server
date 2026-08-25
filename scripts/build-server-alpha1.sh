@@ -20,4 +20,4 @@ echo "Autenticando sudo para o build KIWI..."
 sudo -v
 
 echo "Iniciando o build da ISO server (a VM existente não será alterada)..."
-exec ./kiwi/test/build-and-run-vm.sh --build-only --profile server
+exec ./kiwi/test/build-and-run-vm.sh --build-only

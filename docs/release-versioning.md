@@ -7,15 +7,15 @@ diretamente no KIWI ou no arquivo gerado
 
 ## Convenção
 
-O Server usa uma versão de calendário `AAAA.MM` e acrescenta o estágio
+O Server usa uma versão de calendário no padrão Ubuntu, `AA.MM`, e acrescenta o estágio
 enquanto a imagem ainda é uma pré-release:
 
 | Estágio | `release-server.toml` | Versão, tag e exemplo de ISO |
 |---|---|---|
-| Alpha | `stage = "alpha"`, `iteration = N` | `2026.08-alphaN`, `server-v2026.08-alphaN`, `lyra-os-server.x86_64-2026.08-alphaN.iso` |
-| Beta | `stage = "beta"`, `iteration = N` | `2026.08-betaN`, `server-v2026.08-betaN`, `lyra-os-server.x86_64-2026.08-betaN.iso` |
-| RC | `stage = "rc"`, `iteration = N` | `2026.08-rcN`, `server-v2026.08-rcN`, `lyra-os-server.x86_64-2026.08-rcN.iso` |
-| Final | `stage = "release"`, `iteration = 0` | `2026.08`, `server-v2026.08`, `lyra-os-server.x86_64-2026.08.iso` |
+| Alpha | `stage = "alpha"`, `iteration = N` | `27.02-alphaN`, `server-v27.02-alphaN`, `lyra-os-server.x86_64-27.02-alphaN.iso` |
+| Beta | `stage = "beta"`, `iteration = N` | `27.02-betaN`, `server-v27.02-betaN`, `lyra-os-server.x86_64-27.02-betaN.iso` |
+| RC | `stage = "rc"`, `iteration = N` | `27.02-rcN`, `server-v27.02-rcN`, `lyra-os-server.x86_64-27.02-rcN.iso` |
+| Final | `stage = "release"`, `iteration = 0` | `27.02`, `server-v27.02`, `lyra-os-server.x86_64-27.02.iso` |
 
 ## Contrato de maturidade
 
@@ -77,7 +77,7 @@ As notas devem registrar o nome da ISO, o SHA-256 e os campos `built_at` e
 `source.commit` do manifesto. Uma árvore marcada como `source.dirty: true` é
 adequada para desenvolvimento local, mas não para publicação.
 
-## Lyra OS Server 1.0 "Delos"
+## Lyra OS Server 27.02 "Delos"
 
 **Delos** é o codinome de produto deste ciclo do Server. Ele não é acrescentado
 ao schema mecânico de `release-server.toml`, aos nomes de pacote nem ao volume
@@ -97,7 +97,7 @@ aberto.
 | beta3 | 4 semanas | 08/dez/2026 → 05/jan/2027 | Internacionalização dos componentes próprios aplicáveis ao Server e fechamento da documentação operacional. |
 | rc1 | 2 semanas | 05/jan/2027 → 19/jan/2027 | Candidato completo, assinado e exercitado em VM e hardware físico, sem P0/P1. |
 | rc2 | 2 semanas | 19/jan/2027 → 02/fev/2027 | Somente correções bloqueantes e repetição integral do gate. |
-| final (buffer) | 2 semanas | 02/fev/2027 → **~16/fev/2027** | Publicação da Lyra OS Server 1.0 "Delos" e verificação dos artefatos baixados. |
+| final (buffer) | 2 semanas | 02/fev/2027 → **~16/fev/2027** | Publicação da Lyra OS Server 27.02 "Delos" e verificação dos artefatos baixados. |
 
 O mantenedor encerrou o desenvolvimento funcional e iniciou a Beta 1 em
 15/08/2026. O conteúdo antes atribuído à Alpha 3 ficou restrito a correções
@@ -123,9 +123,9 @@ Alpha 1:
 - registrar a matriz de hardware, incluindo ao menos o risco explícito da
   cobertura física disponível.
 
-## Lyra OS Server 1.1 "Tebas"
+## Lyra OS Server 27.10 "Tebas"
 
-O ciclo Server 1.1 usa o codinome de produto **Tebas** e faz o rebase para
+O ciclo Server 27.10 usa o codinome de produto **Tebas** e faz o rebase para
 openSUSE Leap 16.1. O codinome não altera o schema mecânico de
 `release-server.toml`, os nomes de pacote ou o volume da imagem.
 
@@ -139,7 +139,11 @@ openSUSE Leap 16.1. O codinome não altera o schema mecânico de
 | beta3 | 4 semanas | 28/jun/2027 → 26/jul/2027 | QA linguístico, documentação operacional e correções finais. |
 | rc1 | 2 semanas | 26/jul/2027 → 09/ago/2027 | Candidato completo, assinado e exercitado em VM e hardware. |
 | rc2 | 2 semanas | 09/ago/2027 → 23/ago/2027 | Somente bloqueadores P0/P1 e repetição integral do gate. |
-| final estável (buffer) | 2 semanas | 23/ago/2027 → **~06/set/2027** | Publicação do Lyra OS Server 1.1 "Tebas" e verificação dos artefatos. |
+| final estável (buffer) | até 2 meses | 23/ago/2027 → **out/2027** | Estabilização final e publicação do Lyra OS Server 27.10 "Tebas" em outubro. |
+
+`27.02` e `27.10` são as versões canônicas dos ciclos, tanto para o produto
+quanto para o campo mecânico `calendar_version` (`AA.MM`) em
+`release-server.toml`. Não há uma numeração semântica `1.x` paralela.
 
 ## Campos sincronizados
 

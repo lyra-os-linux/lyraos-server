@@ -5,7 +5,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
 REPO_ROOT="$(dirname "$SCRIPT_DIR")"
-ARTIFACT_DIR="$REPO_ROOT/kiwi/.kiwi/test-$(id -u)-server/iso"
+ARTIFACT_DIR="${LYRA_TEST_WORK_DIR:-/var/tmp/lyraos-server-test-$(id -u)}/iso"
 EXPECTED_VERSION="2026.08-alpha2"
 REMOTE_USER="rodrigobritosoa"
 REMOTE_HOST="frs.sourceforge.net"

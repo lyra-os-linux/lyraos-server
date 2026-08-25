@@ -4,9 +4,9 @@
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
 REPO_ROOT="$(dirname "$SCRIPT_DIR")"
-ARTIFACT_DIR="$REPO_ROOT/kiwi/.kiwi/test-$(id -u)-server/iso"
-REMOTE="rodrigobritosoa@frs.sourceforge.net:/home/frs/project/lyra/releases/1.0/server/beta1/"
-DOWNLOAD_URL="https://downloads.sourceforge.net/project/lyra/releases/1.0/server/beta1"
+ARTIFACT_DIR="${LYRA_TEST_WORK_DIR:-/var/tmp/lyraos-server-test-$(id -u)}/iso"
+REMOTE="rodrigobritosoa@frs.sourceforge.net:/home/frs/project/lyra/releases/27.02/server/beta1/"
+DOWNLOAD_URL="https://downloads.sourceforge.net/project/lyra/releases/27.02/server/beta1"
 CHECK_ONLY=0
 DECISION_FILE=""
 RELEASE_SIGNING_FINGERPRINT="01B63EEDBE6B079126A0116EFA7353A131ECEFEB"
@@ -38,7 +38,7 @@ DECISION_FILE="$(readlink -f "$DECISION_FILE")"
 cd "$REPO_ROOT"
 VERSION="$(./scripts/server-release.py field version_id)"
 ISO_NAME="$(./scripts/server-release.py field iso_filename)"
-[ "$VERSION" = 2026.08-beta1 ] || { echo "ERRO: versão não é Beta 1" >&2; exit 1; }
+[ "$VERSION" = 27.02-beta1 ] || { echo "ERRO: versão não é Beta 1" >&2; exit 1; }
 PREFIX="${ISO_NAME%.iso}"
 FILES=(README.md "$PREFIX.cdx.json" "$PREFIX.evidence.json" "$PREFIX.iso"
   "$PREFIX.iso.manifest.json" "$PREFIX.iso.sha256" "$PREFIX.iso.sha256.asc"
