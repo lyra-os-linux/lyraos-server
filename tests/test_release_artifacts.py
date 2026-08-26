@@ -26,8 +26,8 @@ class ReleaseArtifactsTests(unittest.TestCase):
         self.packages.write_text(
             "fina|(none)|0.4.0|12.1|x86_64|obs://build.opensuse.org/"
             "home:rodrigosbrito:fina/repo/revision-fina|MIT\n"
-            "Leap-release|(none)|16.0+leap|lp160.263.1|x86_64|obs://build.opensuse.org/"
-            "openSUSE:Leap:16.0/standard/revision-leap|MIT\n",
+            "Leap-release|(none)|16.1+leap|lp161.263.1|x86_64|obs://build.opensuse.org/"
+            "openSUSE:Leap:16.1/standard/revision-leap|MIT\n",
             encoding="utf-8",
         )
         self.verified = self.root / "lyra-os.x86_64-27.02-beta2.verified"

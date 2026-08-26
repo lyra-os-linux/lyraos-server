@@ -21,11 +21,11 @@ role = "packages-only"
 
 [[obs.package_sources]]
 project = "home:rodrigosbrito:lyra"
-repository = "openSUSE_Leap_16.0"
+repository = "openSUSE_Leap_16.1"
 
 [[obs.package_sources]]
 project = "home:rodrigosbrito:vega"
-repository = "openSUSE_Leap_16.0"
+repository = "openSUSE_Leap_16.1"
 
 # No home:rodrigosbrito:fina (Fina is desktop-only) and no
 # Virtualization:Appliances:Builder (desktop image test tooling only) -

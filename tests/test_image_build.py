@@ -6,6 +6,7 @@ import os
 import subprocess
 import sys
 import tempfile
+import tomllib
 import unittest
 import xml.etree.ElementTree as ET
 from pathlib import Path
@@ -146,6 +147,30 @@ class ImagePolicyTests(unittest.TestCase):
             self.assertIsNotNone(source)
             assert source is not None
             self.assertTrue(source.attrib["path"].startswith("https://"))
+
+    def test_all_repositories_target_leap_16_1(self) -> None:
+        root = ET.parse(ROOT / "kiwi/config.xml").getroot()
+        urls = [repo.find("source").attrib["path"] for repo in root.findall("repository")]
+        self.assertTrue(all("16.1" in url for url in urls))
+        self.assertTrue(all("16.0" not in url for url in urls))
+        self.assertEqual(
+            [source.repository for source in self.manifest.package_sources],
+            ["openSUSE_Leap_16.1", "openSUSE_Leap_16.1"],
+        )
+
+    def test_obs_projects_only_mark_leap_16_1_as_an_iso_consumer(self) -> None:
+        with (ROOT / "obs/projects.toml").open("rb") as stream:
+            projects = tomllib.load(stream)["projects"]
+        for project in projects:
+            self.assertTrue(project["iso_consumer"])
+            consumers = [target["name"] for target in project["targets"] if target["iso_consumer"]]
+            self.assertEqual(consumers, ["openSUSE_Leap_16.1"])
+
+    def test_bootstrap_selects_the_classic_leap_product(self) -> None:
+        root = ET.parse(ROOT / "kiwi/config.xml").getroot()
+        bootstrap = {node.attrib["name"] for node in root.findall("packages[@type='bootstrap']/package")}
+        self.assertIn("Leap-release", bootstrap)
+        self.assertNotIn("Leap_immutable-release", bootstrap)
 
     def test_no_gnome_or_desktop_only_packages_are_installed(self) -> None:
         root = ET.parse(ROOT / "kiwi/config.xml").getroot()
