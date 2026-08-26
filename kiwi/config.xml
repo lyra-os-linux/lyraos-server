@@ -66,11 +66,11 @@
   -->
   <repository alias="repo-oss" priority="20" type="rpm-md" imageinclude="true"
               repository_gpgcheck="true" package_gpgcheck="true">
-    <source path="https://download.opensuse.org/distribution/leap/16.0/repo/oss/"/>
+    <source path="https://download.opensuse.org/distribution/leap/16.1/repo/oss/"/>
   </repository>
   <repository alias="repo-non-oss" priority="21" type="rpm-md" imageinclude="true"
               repository_gpgcheck="true" package_gpgcheck="true">
-    <source path="https://download.opensuse.org/distribution/leap/16.0/repo/non-oss/"/>
+    <source path="https://download.opensuse.org/distribution/leap/16.1/repo/non-oss/"/>
   </repository>
 
   <!--
@@ -87,11 +87,11 @@
   -->
   <repository alias="repo-lyra" priority="1" type="rpm-md" imageinclude="true"
               repository_gpgcheck="true" package_gpgcheck="true">
-    <source path="https://download.opensuse.org/repositories/home:/rodrigosbrito:/lyra/openSUSE_Leap_16.0/"/>
+    <source path="https://download.opensuse.org/repositories/home:/rodrigosbrito:/lyra/openSUSE_Leap_16.1/"/>
   </repository>
   <repository alias="repo-vega" priority="2" type="rpm-md" imageinclude="true"
               repository_gpgcheck="true" package_gpgcheck="true">
-    <source path="https://download.opensuse.org/repositories/home:/rodrigosbrito:/vega/openSUSE_Leap_16.0/"/>
+    <source path="https://download.opensuse.org/repositories/home:/rodrigosbrito:/vega/openSUSE_Leap_16.1/"/>
   </repository>
 
   <packages type="bootstrap">

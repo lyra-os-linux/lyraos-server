@@ -111,8 +111,8 @@ class Manifest:
         # Virtualization:Appliances:Builder (desktop image test tooling
         # only) - both per docs/server-edition.md.
         expected_sources = (
-            ObsPackageSource("home:rodrigosbrito:lyra", "openSUSE_Leap_16.0"),
-            ObsPackageSource("home:rodrigosbrito:vega", "openSUSE_Leap_16.0"),
+            ObsPackageSource("home:rodrigosbrito:lyra", "openSUSE_Leap_16.1"),
+            ObsPackageSource("home:rodrigosbrito:vega", "openSUSE_Leap_16.1"),
         )
         if self.package_sources != expected_sources:
             raise PolicyError("OBS RPM package sources are incomplete or out of order")

@@ -1,7 +1,7 @@
 # Lyra OS Server
 
 Este documento é a arquitetura da edição **server** do Lyra OS: uma imagem
-headless, baseada na mesma base openSUSE Leap 16.0, sem GNOME e sem os
+headless, baseada na base openSUSE Leap 16.1, sem GNOME e sem os
 componentes de desktop do ecossistema Lyra, com `vegad` + `vega-cli` +
 `vega-web` como interface de administração.
 
@@ -51,7 +51,7 @@ Decisões tomadas em conversa (2026-08-11):
 
 A ISO desktop já decide o conjunto GNOME + Vega (GTK4) + Sheliak + Fina +
 Beam/Sulafat como experiência padrão (`kiwi/config.xml`,
-`PROMPT-LYRA-OS.md`). A edição server inverte isso: mesma base (Leap 16.0,
+`PROMPT-LYRA-OS.md`). A edição server inverte isso: mesma base (Leap 16.1,
 kernel-default, repositórios oficiais + OBS do Lyra, mesma política de
 assinatura), mas sem ambiente gráfico e sem os componentes de desktop —
 administração por console e por `vega-web`. O sistema de arquivos instalado

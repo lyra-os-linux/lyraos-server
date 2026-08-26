@@ -37,14 +37,14 @@ name = "openSUSE_Leap_16.0"
 upstream_project = "openSUSE:Leap:16.0"
 upstream_repository = "standard"
 architectures = ["x86_64"]
-iso_consumer = true
+iso_consumer = false
 
 [[projects.targets]]
 name = "openSUSE_Leap_16.1"
 upstream_project = "openSUSE:Leap:16.1"
 upstream_repository = "standard"
 architectures = ["x86_64"]
-iso_consumer = false
+iso_consumer = true
 
 [[projects]]
 id = "vega"
@@ -58,11 +58,11 @@ name = "openSUSE_Leap_16.0"
 upstream_project = "openSUSE:Leap:16.0"
 upstream_repository = "standard"
 architectures = ["x86_64"]
-iso_consumer = true
+iso_consumer = false
 
 [[projects.targets]]
 name = "openSUSE_Leap_16.1"
 upstream_project = "openSUSE:Leap:16.1"
 upstream_repository = "standard"
 architectures = ["x86_64"]
-iso_consumer = false
+iso_consumer = true

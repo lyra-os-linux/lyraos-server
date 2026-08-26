@@ -115,13 +115,25 @@ e mudanças amplas de arquitetura continuam dependendo de aprovação explícita
 
 ### Rebase planejado para o Server 27.02
 
-O Server 27.02 migra de Leap 16.0 para Leap 16.1 na Beta 2. A Beta 1 já
-publicada permanece reproduzível na base anterior. A primeira candidata na
-nova base só pode ser promovida depois de reconstruir os RPMs consumidos pela
-imagem e repetir os gates de instalação em disco inteiro/ext4, UEFI Secure
-Boot, primeiro boot, atualização, rollback, DHCP, SSH, firewall, `vegad`,
-`vega-cli` e `vega-web`. O rebase é uma exceção de infraestrutura aprovada
-para este ciclo; não autoriza novas funcionalidades.
+O trabalho de migração do Server 27.02 de Leap 16.0 para Leap 16.1 começa
+durante a Beta 1 upstream; a primeira candidata Lyra promovida nessa base será
+a Beta 2. A Beta 1 do Lyra já publicada permanece reproduzível na base
+anterior pela tag `server-v27.02-beta1`. A primeira candidata na nova base só
+pode ser promovida depois de reconstruir os RPMs consumidos pela imagem e
+repetir os gates de instalação em disco inteiro/ext4, UEFI Secure Boot,
+primeiro boot, atualização, DHCP, SSH, firewall, `vegad`, `vega-cli` e
+`vega-web`. O rebase é uma exceção de infraestrutura aprovada para este ciclo;
+não autoriza novas funcionalidades.
+
+O benefício concreto é entregar a série 27.02 sobre a base que continuará
+mantida no ciclo seguinte. O impacto abrange todos os pacotes oficiais, kernel,
+firmware, dracut, bootloader e os RPMs próprios. Os riscos principais são
+mudanças de dependências, seleção incorreta de produto pelos patterns e
+regressões de boot/instalação. A reversão consiste em restaurar atomicamente as
+fontes e targets 16.0; a tag da Beta 1 preserva o último candidato qualificado.
+Além dos testes automatizados do repositório, a validação exige resolução real
+do conjunto de pacotes, build KIWI, instalação, primeiro boot, atualização e
+Secure Boot antes da promoção.
 
 ### Estado na entrada da Alpha 1
 

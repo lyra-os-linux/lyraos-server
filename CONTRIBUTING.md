@@ -1,7 +1,7 @@
 # Contribuindo com o Lyra OS
 
 Este repositório inclui um bootstrap para preparar uma instalação nova do
-Lyra OS ou do openSUSE Leap 16.0 para desenvolvimento do sistema e das
+Lyra OS ou do openSUSE Leap 16.1 para desenvolvimento do sistema e das
 ferramentas do ecossistema.
 
 ## Antes de formatar
@@ -223,7 +223,7 @@ OSC. O projeto, repositório e arquitetura devem corresponder ao pacote:
 ```bash
 osc checkout home:rodrigosbrito:lyra NOME-DO-PACOTE
 cd home:rodrigosbrito:lyra/NOME-DO-PACOTE
-osc build openSUSE_Leap_16.0 x86_64
+osc build openSUSE_Leap_16.1 x86_64
 ```
 
 Antes de `osc commit`, confira `osc status`, revise `osc diff` e valide o spec
