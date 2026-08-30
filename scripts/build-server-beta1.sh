@@ -40,8 +40,8 @@ python3 ./scripts/image-build.py validate \
 
 VERSION="$(./scripts/server-release.py field version_id)"
 ISO_NAME="$(./scripts/server-release.py field iso_filename)"
-[ "$VERSION" = 27.02-beta1 ] || {
-  echo "ERRO: release-server.toml não aponta para 27.02-beta1." >&2
+[ "$VERSION" = 1.0-beta.1 ] || {
+  echo "ERRO: release-server.toml não aponta para 1.0-beta.1." >&2
   exit 1
 }
 
@@ -61,7 +61,7 @@ COMMIT="$(python3 - "$BUILD_MANIFEST" <<'PY'
 import json, pathlib, re, sys
 d = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
 c = d.get("source", {}).get("commit", "")
-if d.get("version") != "27.02-beta1" or d.get("source", {}).get("dirty") is not False:
+if d.get("version") != "1.0-beta.1" or d.get("source", {}).get("dirty") is not False:
     raise SystemExit("ERRO: manifesto não representa uma Beta 1 de árvore limpa")
 if not re.fullmatch(r"[0-9a-f]{40}", c):
     raise SystemExit("ERRO: commit inválido")
@@ -79,7 +79,7 @@ install -m 0644 "$BUILD_DIR/$PREFIX.verified" "$ARTIFACT_DIR/$PREFIX.verified"
   --packages "$ARTIFACT_DIR/$PREFIX.packages" \
   --verified "$ARTIFACT_DIR/$PREFIX.verified" --output-dir "$ARTIFACT_DIR" \
   --commit "$COMMIT" --release-file release-server.toml --product "Lyra OS Server"
-install -m 0644 "$REPO_ROOT/docs/releases/lyra-os-server-27.02-beta1.md" \
+install -m 0644 "$REPO_ROOT/docs/releases/lyra-os-server-1.0-beta.1.md" \
   "$ARTIFACT_DIR/README.md"
 
 gpg --batch --local-user "$RELEASE_SIGNING_FINGERPRINT" --detach-sign --armor \

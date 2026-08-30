@@ -36,12 +36,12 @@ Decisões tomadas em conversa (2026-08-11):
   via `vega-cli`/`vega-web`, se necessário;
 - **firewall padrão: só SSH e `vega-web` (porta 9090/tcp) abertos**, mais
   nenhuma porta;
-- **nome da edição: "Lyra OS Server"; codinome do ciclo 27.02: "Delos"** — o
+- **nome da edição: "Lyra OS Server"; geração: "Lyra OS Server 1 — Delos"** — o
   codinome é identidade humana do produto e não altera nome de pacote, volume,
-  tag ou o schema mecânico de `release-server.toml`; o ciclo Server 27.10 usa
-  o codinome **"Tebas"** sob a mesma regra;
-- **ciclo de release próprio**, não compartilha `release.toml`/calendar
-  version com a ISO desktop, mas segue o mesmo esquema alpha/beta/rc/final
+  tag ou o schema mecânico de `release-server.toml`; todas as releases 1.x
+  pertencem à geração Server **Delos**;
+- **ciclo de release próprio**, não compartilha o manifesto da ISO desktop,
+  mas segue o mesmo esquema semântico alpha/beta/rc/final
   já usado pelo desktop (`docs/release-versioning.md`) — começa em alpha1;
 - **RAID/LVM/Snapper/Btrfs ficam fora de escopo sem critério de entrada
   definido** — não é "quando X acontecer, entra"; fica simplesmente para
@@ -82,7 +82,7 @@ Fora de escopo até decisão em contrário:
 | Instalador | Lyra Installer nativo (Rust/Tauri, GUI WebKitGTK) | script shell em console, interativo |
 | Storage do instalador | disco único, RAID novo/existente, LVM, Btrfs+Snapper+rollback | v1: disco único, ext4, sem RAID/LVM/rollback |
 | Perfil/target KIWI | único (`config.xml` sem `<profiles>`) | segundo profile reaproveitando a base |
-| Nome/volid da imagem | `lyra-os` "Odisseia" / `LYRA_OS_...` | "Lyra OS Server 27.02 Delos" na comunicação; nome técnico e volid permanecem sem codinome; ciclo alpha/beta/rc/final próprio, começando em alpha1 |
+| Nome/volid da imagem | `LyraOS-Desktop` / `LYRA_OS_...` | “Lyra OS Server 1.0 — Delos” na comunicação; Delos é o codename da geração Server 1.x; nome técnico e volid permanecem sem codename; ciclo alpha/beta/rc/final próprio |
 
 ## Mecânica de build (KIWI)
 

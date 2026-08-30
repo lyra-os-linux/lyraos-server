@@ -1,4 +1,4 @@
-// Lyra OS - Odisseia (v1)
+// Lyra OS Server - Delos (v1)
 //
 // polkit's stock /usr/share/polkit-1/rules.d/50-default.rules starts
 // polkit._suse_admin_groups as an empty array; empty means its

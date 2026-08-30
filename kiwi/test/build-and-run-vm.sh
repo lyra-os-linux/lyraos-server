@@ -51,6 +51,15 @@ ROOTFS_AUDIT="$REPO_ROOT/scripts/audit-live-rootfs.py"
 # what the live session actually runs.
 RAM_MB="${LYRA_VM_RAM_MB:-8192}"
 SMP="${LYRA_VM_CPUS:-4}"
+PRIVILEGE_TOOL="${LYRA_PRIVILEGE_TOOL:-sudo}"
+
+run_privileged() {
+  case "$PRIVILEGE_TOOL" in
+    sudo) sudo "$@" ;;
+    pkexec) pkexec "$@" ;;
+    *) echo "LYRA_PRIVILEGE_TOOL must be sudo or pkexec" >&2; return 2 ;;
+  esac
+}
 
 SKIP_BUILD=0
 BUILD_ONLY=0
@@ -66,6 +75,7 @@ Sem opções, valida e constrói a ISO, cria uma VM descartável nova e a inicia
 Opções:
   --build-only   constrói e valida a ISO sem encerrar ou alterar a VM existente
   --skip-build    reutiliza a ISO já construída
+  --audit-only    audita a ISO existente sem abrir ou alterar a VM
   --boot-installed
                   inicia o disco já instalado sem anexar ISO e sem recriar
                   disco ou estado UEFI
@@ -78,6 +88,7 @@ Recursos podem ser ajustados sem editar o script:
   LYRA_VM_RAM_MB=8192    memória da VM em MiB (padrão: 8192)
   LYRA_VM_CPUS=4         CPUs virtuais (padrão: 4)
   LYRA_TEST_WORK_DIR=... diretório persistente de build, ISO, VM e logs
+  LYRA_PRIVILEGE_TOOL=... sudo (padrão) ou pkexec para as etapas privilegiadas
 
 Cada execução que inicia QEMU encerra a VM anterior e apaga seu disco e estado
 UEFI somente depois de uma ISO válida estar disponível. Depois da instalação,
@@ -96,6 +107,7 @@ while [ "$#" -gt 0 ]; do
   case "$1" in
     --build-only) BUILD_ONLY=1; shift ;;
     --skip-build) SKIP_BUILD=1; shift ;;
+    --audit-only) SKIP_BUILD=1; BUILD_ONLY=1; shift ;;
     --boot-installed) BOOT_INSTALLED=1; shift ;;
     --fresh-disk) shift ;;
     --secure-boot) SECURE_BOOT=1; shift ;;
@@ -108,6 +120,15 @@ done
 # On many systems /tmp is a small RAM-backed tmpfs and cannot hold a full
 # image build plus an expanding qcow2 installation disk.
 WORK_DIR="${LYRA_TEST_WORK_DIR:-/var/tmp/lyraos-server-test-$CURRENT_UID}"
+if [ -z "${LYRA_TEST_WORK_DIR+x}" ]; then
+  WORK_PROBE="$WORK_DIR/.write-probe-$$"
+  if ! mkdir -p "$WORK_DIR" 2>/dev/null || ! : > "$WORK_PROBE" 2>/dev/null; then
+    WORK_DIR="/tmp/lyraos-server-test-$CURRENT_UID"
+    mkdir -p "$WORK_DIR"
+  else
+    rm -f "$WORK_PROBE"
+  fi
+fi
 BUILD_DIR="$WORK_DIR/build"
 ISO_DIR="$WORK_DIR/iso"
 ISO_ARCHIVE_DIR="$ISO_DIR/archive"
@@ -119,10 +140,6 @@ OVMF_VARS_SECURE="$VM_DIR/ovmf-secure-vars.bin"
 VM_PID_FILE="$VM_DIR/qemu.pid"
 LOG="$WORK_DIR/lyra-os-test.log"
 
-if [ "$BUILD_ONLY" -eq 1 ] && [ "$SKIP_BUILD" -eq 1 ]; then
-  echo "--build-only cannot be combined with --skip-build" >&2
-  exit 1
-fi
 if [ "$BOOT_INSTALLED" -eq 1 ] &&
    { [ "$BUILD_ONLY" -eq 1 ] || [ "$SKIP_BUILD" -eq 1 ]; }; then
   echo "--boot-installed cannot be combined with --build-only or --skip-build" >&2
@@ -221,6 +238,7 @@ if [ ! -x "$RELEASE_TOOL" ]; then
 fi
 "$RELEASE_TOOL" check
 EXPECTED_ISO_NAME="$("$RELEASE_TOOL" field iso_filename)"
+EXPECTED_KIWI_ISO_NAME="lyra-os.x86_64-$("$RELEASE_TOOL" field version_id).iso"
 BUILD_SOURCE_COMMIT="$(git -C "$REPO_ROOT" rev-parse HEAD)"
 BUILD_SOURCE_EPOCH="$(git -C "$REPO_ROOT" show -s --format=%ct "$BUILD_SOURCE_COMMIT")"
 if [ -n "$(git -C "$REPO_ROOT" status --porcelain --untracked-files=normal)" ]; then
@@ -319,7 +337,7 @@ if [ "$BOOT_INSTALLED" -eq 1 ]; then
 fi
 
 if [ "$SKIP_BUILD" -eq 0 ]; then
-  for command in kiwi-ng ldconfig ldd lsinitrd strings sudo xorriso unsquashfs; do
+  for command in kiwi-ng ldconfig ldd lsinitrd strings "$PRIVILEGE_TOOL" xorriso unsquashfs; do
     if ! command -v "$command" >/dev/null 2>&1; then
       echo "required build command not found: $command" >&2
       exit 1
@@ -352,7 +370,11 @@ repair_host_loader_cache() {
     return 0
   fi
   echo "!!! host loader cache became inconsistent; regenerating it with ldconfig"
-  sudo -n ldconfig
+  if [ "$PRIVILEGE_TOOL" = sudo ]; then
+    sudo -n ldconfig
+  else
+    pkexec /usr/sbin/ldconfig
+  fi
   if ! host_loader_is_healthy; then
     echo "!!! host loader cache is still inconsistent after ldconfig" >&2
     return 1
@@ -372,14 +394,18 @@ stop_loader_guard() {
 start_loader_guard() {
   # Acquire credentials in the foreground so recovery never blocks on an
   # invisible password prompt in the background watcher.
-  sudo -v
+  if [ "$PRIVILEGE_TOOL" = sudo ]; then
+    sudo -v
+  else
+    pkexec /usr/bin/true
+  fi
   repair_host_loader_cache
   LOADER_GUARD_PARENT_PID="$BASHPID"
   (
     refresh_count=0
     while sleep 2; do
       refresh_count=$((refresh_count + 1))
-      if [ "$refresh_count" -ge 30 ]; then
+      if [ "$PRIVILEGE_TOOL" = sudo ] && [ "$refresh_count" -ge 30 ]; then
         if ! sudo -n -v; then
           echo "!!! loader guard could not renew its sudo credential; aborting build" >&2
           kill -TERM "$LOADER_GUARD_PARENT_PID"
@@ -421,14 +447,14 @@ fi
 
 if [ "$SKIP_BUILD" -eq 0 ]; then
   echo "--- wiping the previous build dir; preserving the current ISO ---"
-  sudo rm -rf "$BUILD_DIR"
+  run_privileged rm -rf "$BUILD_DIR"
   ISO_PATH=""
 
-  echo "--- building ISO with kiwi-ng (will prompt for sudo password) ---"
+  echo "--- building ISO with kiwi-ng via $PRIVILEGE_TOOL ---"
   start_loader_guard
   trap 'stop_loader_guard' EXIT
   trap 'stop_loader_guard; exit 130' INT TERM
-  if sudo kiwi-ng \
+  if run_privileged kiwi-ng \
       --setenv="LYRA_BUILD_SOURCE_COMMIT=$BUILD_SOURCE_COMMIT" \
       --setenv="LYRA_BUILD_SOURCE_DIRTY=$BUILD_SOURCE_DIRTY" \
       --setenv="LYRA_BUILD_SOURCE_EPOCH=$BUILD_SOURCE_EPOCH" \
@@ -488,12 +514,16 @@ if [ "$SKIP_BUILD" -eq 0 ]; then
   fi
   echo "--- validated console installer overlay (getty autologin, pinned script, release metadata) ---"
 
-  BUILT_ISO="$(sudo find "$BUILD_DIR" -maxdepth 1 -type f -name '*.iso' -print -quit)"
+  BUILT_ISO="$(find "$BUILD_DIR" -maxdepth 1 -type f -name '*.iso' -print -quit)"
   if [ -z "$BUILT_ISO" ]; then
     echo "!!! kiwi-ng reported success but no .iso found under $BUILD_DIR"
     exit 1
   fi
   if [ "$(basename "$BUILT_ISO")" != "$EXPECTED_ISO_NAME" ]; then
+    if [ "$(basename "$BUILT_ISO")" != "$EXPECTED_KIWI_ISO_NAME" ]; then
+      echo "!!! KIWI generated an unrecognized ISO name: $(basename "$BUILT_ISO")" >&2
+      exit 1
+    fi
     # kiwi-ng always names its output from <image name="..."> at the
     # document root of kiwi/config.xml, which stays "lyra-os"
     # (image-build-server.toml explains why). release-server.toml's own
@@ -506,17 +536,10 @@ if [ "$SKIP_BUILD" -eq 0 ]; then
     echo "--- renaming kiwi-ng output: $KIWI_ISO_STEM -> $EXPECTED_ISO_STEM ---"
     for SIBLING in "$BUILD_DIR/$KIWI_ISO_STEM".*; do
       [ -e "$SIBLING" ] || continue
-      sudo mv "$SIBLING" "$BUILD_DIR/$EXPECTED_ISO_STEM.${SIBLING##*.}"
+      run_privileged mv "$SIBLING" "$BUILD_DIR/$EXPECTED_ISO_STEM.${SIBLING##*.}"
     done
     BUILT_ISO="$BUILD_DIR/$EXPECTED_ISO_NAME"
   fi
-  if [ "$(basename "$BUILT_ISO")" != "$EXPECTED_ISO_NAME" ]; then
-    echo "!!! KIWI generated an unexpected ISO name:" >&2
-    echo "  expected: $EXPECTED_ISO_NAME" >&2
-    echo "  found:    $(basename "$BUILT_ISO")" >&2
-    exit 1
-  fi
-
   ISO_GRUB_CFG="$WORK_DIR/iso-grub.cfg"
   ISO_INITRD="$WORK_DIR/iso-initrd"
   ISO_SQUASHFS="$WORK_DIR/iso-squashfs.img"
@@ -573,8 +596,8 @@ if [ "$SKIP_BUILD" -eq 0 ]; then
   ISO_STAGED="$ISO_DIR/.$ISO_NAME.new"
   rm -f "$ISO_STAGED"
   echo "--- staging $BUILT_ISO -> $ISO_STAGED ---"
-  sudo cp "$BUILT_ISO" "$ISO_STAGED"
-  sudo chown "$(id -u):$(id -g)" "$ISO_STAGED"
+  run_privileged cp "$BUILT_ISO" "$ISO_STAGED"
+  run_privileged chown "$(id -u):$(id -g)" "$ISO_STAGED"
 
   EXISTING_ISOS=()
   mapfile -d '' -t EXISTING_ISOS < <(

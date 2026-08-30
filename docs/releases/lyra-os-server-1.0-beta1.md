@@ -1,7 +1,7 @@
-# Lyra OS Server 27.02 Beta 1
+# Lyra OS Server 1.0 Beta 1
 
-Esta é a primeira versão sob congelamento funcional do Lyra OS Server 27.02
-“Delos”. O fluxo suportado permanece instalação UEFI em disco inteiro, com
+Esta é a primeira versão sob congelamento funcional do Lyra OS Server 1.0
+“Odisseia”. O fluxo suportado permanece instalação UEFI em disco inteiro, com
 GPT, ESP e raiz ext4; RAID, LVM, Btrfs, Snapper, BIOS legado e instalação
 desassistida continuam fora de escopo.
 
