@@ -1,8 +1,12 @@
 schema = 1
 
 [release]
-calendar_version = "27.02"
+version = "1.0"
+base_distribution = "opensuse-leap"
+base_version = "16.1"
 stage = "beta"
 iteration = 1
-image_name = "lyra-os-server"
+codename = "Delos"
+codename_id = "delos"
+image_name = "LyraOS-Server"
 architecture = "x86_64"

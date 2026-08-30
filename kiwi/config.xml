@@ -17,7 +17,7 @@
   <description type="system">
     <author>Rodrigo Brito</author>
     <contact>rodrigo@lyraos.com.br</contact>
-    <specification>Lyra OS Server "Delos" Beta 1 - headless live/installer ISO, openSUSE Leap 16 base, vega-cli/vegad/vega-web administration, x86_64</specification>
+    <specification>Lyra OS Server 1.0 Beta 1 (Delos) - console/installer ISO, openSUSE Leap 16.1 base, headless, x86_64</specification>
   </description>
 
   <preferences>
@@ -31,7 +31,7 @@
     <!-- Generated from release-server.toml by scripts/server-release.py.
          Server runs its own alpha/beta/rc/final cycle
          (docs/release-versioning.md), independent from the desktop repo. -->
-    <version>27.02-beta1</version>
+    <version>1.0-beta.1</version>
     <type
       image="iso"
       primary="true"
@@ -40,7 +40,7 @@
       squashfscompression="zstd"
       firmware="uefi"
       editbootconfig="edit_boot_config.sh"
-      volid="LYRA_OS_SERVER_27_02_BETA1"
+      volid="LYRA_OS_SERVER_1_0_BETA_1"
       application_id="LyraOSServer"
       publisher="Lyra OS Project">
       <bootloader name="grub2" timeout="10"/>
