@@ -51,9 +51,9 @@ Decisões tomadas em conversa (2026-08-11):
 
 A ISO desktop já decide o conjunto GNOME + Vega (GTK4) + Sheliak + Fina +
 Beam/Sulafat como experiência padrão (`kiwi/config.xml`,
-`PROMPT-LYRA-OS.md`). A edição server inverte isso: mesma base (Leap 16.1,
-kernel-default, repositórios oficiais + OBS do Lyra, mesma política de
-assinatura), mas sem ambiente gráfico e sem os componentes de desktop —
+`PROMPT-LYRA-OS.md`). A edição server inverte isso e fixa sua base em Leap
+16.1: kernel-default, repositórios oficiais + OBS do Lyra e a mesma política
+de assinatura, mas sem ambiente gráfico e sem os componentes de desktop —
 administração por console e por `vega-web`. O sistema de arquivos instalado
 diverge também: o desktop usa Btrfs+Snapper, o server v1 usa ext4 simples
 (sem rollback).
@@ -82,7 +82,7 @@ Fora de escopo até decisão em contrário:
 | Instalador | Lyra Installer nativo (Rust/Tauri, GUI WebKitGTK) | script shell em console, interativo |
 | Storage do instalador | disco único, RAID novo/existente, LVM, Btrfs+Snapper+rollback | v1: disco único, ext4, sem RAID/LVM/rollback |
 | Perfil/target KIWI | único (`config.xml` sem `<profiles>`) | segundo profile reaproveitando a base |
-| Nome/volid da imagem | `LyraOS-Desktop` / `LYRA_OS_...` | “Lyra OS Server 1.0 — Delos” na comunicação; Delos é o codename da geração Server 1.x; nome técnico e volid permanecem sem codename; ciclo alpha/beta/rc/final próprio |
+| Nome/volid da imagem | `LyraOS-Desktop` / `LYRA_OS_...` | “Lyra OS Server 1.1 — Delos” na comunicação; Delos é o codename da geração Server 1.x; nome técnico e volid permanecem sem codename; ciclo alpha/beta/rc/final próprio |
 
 ## Mecânica de build (KIWI)
 
@@ -370,21 +370,16 @@ no server: Lyra Installer gráfico, Btrfs/Snapper/rollback). Resumo:
   limitação de mantenedor solo com uma única máquina física — mesma restrição
   se aplica aqui, provavelmente via VM/QEMU como cobertura primária).
 
-A evidência é coletada pelo mesmo `kiwi/root/usr/bin/lyra-system-smoke`
-usado no desktop, agora com uma flag `--profile {desktop,server}`: o modo
-`first-boot` compara o filesystem raiz contra `ext4` (não `btrfs`), pula o
-check de Snapper, checa a lista de unidades do server
-(`sshd`/`vegad`/`vega-web`/`firewalld`/`NetworkManager` em vez de
-`gdm`/`cups`/`graphical.target`) e usa uma lista própria de artefatos
-"live-only" (autologin do tty1, o instalador pinado). O pipeline de
-evidência ponta a ponta (`scripts/image-build.py`, `scripts/
-release-artifacts.py`) também ganhou um `--profile`/`--release-file` e um
-manifesto próprio, `image-build-server.toml` (sem `fina`/
-`Virtualization:Appliances:Builder` nas fontes OBS, sem `rollback` nos
-resultados exigidos). `scripts/obs-release.py` não precisou de nenhuma
-mudança: ele opera nos projetos OBS de pacote (lyra/vega/fina), que são
-compartilhados entre as duas edições — não há projeto OBS separado para o
-server.
+A imagem Server não inclui os coletores `lyra-live-smoke` e
+`lyra-system-smoke` do desktop. A evidência de live, primeiro boot, ext4,
+unidades, ativação D-Bus e firewall é coletada com ferramentas da base,
+seguindo os comandos de `docs/server-release-gate.md`. O pipeline de artefatos
+(`scripts/image-build.py` e `scripts/release-artifacts.py`) usa o manifesto
+próprio `image-build-server.toml`, sem `fina` ou
+`Virtualization:Appliances:Builder` nas fontes OBS e sem resultado de rollback.
+`scripts/obs-release.py` não precisou de mudança: ele opera nos projetos OBS
+de pacote compartilhados entre as duas edições — não há projeto OBS separado
+para o server.
 
 ## Referências
 

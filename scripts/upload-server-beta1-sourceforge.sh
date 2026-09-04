@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# Validate and publish the signed Server Beta 1 bundle to SourceForge.
+# Validate and publish the signed Server 1.1 Beta 1.1 bundle to SourceForge.
 
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
 REPO_ROOT="$(dirname "$SCRIPT_DIR")"
 ARTIFACT_DIR="${LYRA_TEST_WORK_DIR:-/var/tmp/lyraos-server-test-$(id -u)}/iso"
-REMOTE="rodrigobritosoa@frs.sourceforge.net:/home/frs/project/lyra/releases/1.0/server/beta1/"
-DOWNLOAD_URL="https://downloads.sourceforge.net/project/lyra/releases/1.0/server/beta1"
+REMOTE="rodrigobritosoa@frs.sourceforge.net:/home/frs/project/lyra/releases/1.1/server/beta1.1/"
+DOWNLOAD_URL="https://downloads.sourceforge.net/project/lyra/releases/1.1/server/beta1.1"
 CHECK_ONLY=0
 RELEASE_SIGNING_FINGERPRINT="01B63EEDBE6B079126A0116EFA7353A131ECEFEB"
 verify_release_signature() {
@@ -32,7 +32,7 @@ done
 cd "$REPO_ROOT"
 VERSION="$(./scripts/server-release.py field version_id)"
 ISO_NAME="$(./scripts/server-release.py field iso_filename)"
-[ "$VERSION" = 1.0-beta.1 ] || { echo "ERRO: versão não é Beta 1" >&2; exit 1; }
+[ "$VERSION" = 1.1-beta.1.1 ] || { echo "ERRO: versão não é Server 1.1 Beta 1.1" >&2; exit 1; }
 PREFIX="${ISO_NAME%.iso}"
 FILES=(README.md "$PREFIX.cdx.json" "$PREFIX.iso"
   "$PREFIX.iso.manifest.json" "$PREFIX.iso.sha256" "$PREFIX.iso.sha256.asc"
@@ -66,7 +66,7 @@ printf '%s\n' 'frs.sourceforge.net ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOQD35Uja
 chmod 0600 "$KNOWN_HOSTS"
 rsync -avP --partial -e "ssh -o UserKnownHostsFile=$KNOWN_HOSTS -o StrictHostKeyChecking=yes" "${FILES[@]}" "$REMOTE"
 
-DOWNLOAD_DIR="$(mktemp -d /tmp/lyra-server-beta1-download.XXXXXX)"
+DOWNLOAD_DIR="$(mktemp -d /tmp/lyra-server-beta1-1-download.XXXXXX)"
 trap 'rm -rf -- "$DOWNLOAD_DIR"' EXIT
 curl --fail --location --retry 5 --output "$DOWNLOAD_DIR/$PREFIX.iso.sha256" "$DOWNLOAD_URL/$PREFIX.iso.sha256"
 curl --fail --location --retry 5 --output "$DOWNLOAD_DIR/$PREFIX.iso.sha256.asc" "$DOWNLOAD_URL/$PREFIX.iso.sha256.asc"
@@ -74,4 +74,4 @@ curl --fail --location --retry 5 --output "$DOWNLOAD_DIR/$PREFIX.iso" "$DOWNLOAD
 (cd "$DOWNLOAD_DIR" && sha256sum -c "$PREFIX.iso.sha256")
 verify_release_signature "$DOWNLOAD_DIR/$PREFIX.iso.sha256.asc" \
   "$DOWNLOAD_DIR/$PREFIX.iso.sha256"
-echo "Publicação Beta 1 verificada após download."
+echo "Publicação Server 1.1 Beta 1.1 verificada após download."

@@ -61,7 +61,10 @@ def version_id(release_file: Path = RELEASE) -> str:
     release = release_values(release_file)
     if release["stage"] == "release":
         return str(release["version"])
-    return f'{release["version"]}-{release["stage"]}.{release["iteration"]}'
+    value = f'{release["version"]}-{release["stage"]}.{release["iteration"]}'
+    if revision := release.get("revision", 0):
+        value += f".{revision}"
+    return value
 
 
 def commit_identity(commit: str) -> tuple[str, int, str]:

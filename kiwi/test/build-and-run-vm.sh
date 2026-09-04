@@ -43,6 +43,7 @@ SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
 KIWI_DESC="$(dirname "$SCRIPT_DIR")"
 REPO_ROOT="$(dirname "$KIWI_DESC")"
 PACKAGE_SIGNING_KEYRING="$KIWI_DESC/keys/obs-package-signing-keyring.asc"
+LDCONFIG=/usr/sbin/ldconfig
 CURRENT_UID="$(id -u)"
 RELEASE_TOOL="$REPO_ROOT/scripts/server-release.py"
 ROOTFS_AUDIT="$REPO_ROOT/scripts/audit-live-rootfs.py"
@@ -337,12 +338,16 @@ if [ "$BOOT_INSTALLED" -eq 1 ]; then
 fi
 
 if [ "$SKIP_BUILD" -eq 0 ]; then
-  for command in kiwi-ng ldconfig ldd lsinitrd strings "$PRIVILEGE_TOOL" xorriso unsquashfs; do
+  for command in kiwi-ng ldd lsinitrd strings "$PRIVILEGE_TOOL" xorriso unsquashfs; do
     if ! command -v "$command" >/dev/null 2>&1; then
       echo "required build command not found: $command" >&2
       exit 1
     fi
   done
+  if [ ! -x "$LDCONFIG" ]; then
+    echo "required build command not found: $LDCONFIG" >&2
+    exit 1
+  fi
   if [ ! -r "$PACKAGE_SIGNING_KEYRING" ]; then
     echo "required RPM package signing keyring is missing: $PACKAGE_SIGNING_KEYRING" >&2
     exit 1
@@ -371,9 +376,9 @@ repair_host_loader_cache() {
   fi
   echo "!!! host loader cache became inconsistent; regenerating it with ldconfig"
   if [ "$PRIVILEGE_TOOL" = sudo ]; then
-    sudo -n ldconfig
+    sudo -n "$LDCONFIG"
   else
-    pkexec /usr/sbin/ldconfig
+    pkexec "$LDCONFIG"
   fi
   if ! host_loader_is_healthy; then
     echo "!!! host loader cache is still inconsistent after ldconfig" >&2
@@ -481,7 +486,7 @@ if [ "$SKIP_BUILD" -eq 0 ]; then
   fi
 
   IMAGE_OS_RELEASE="$BUILD_DIR/build/image-root/etc/os-release"
-  if ! grep -Fx "VERSION_ID=\"$("$RELEASE_TOOL" field version_id)\"" \
+  if ! grep -Fx "VERSION_ID=\"$("$RELEASE_TOOL" field product_version)\"" \
       "$IMAGE_OS_RELEASE" >/dev/null; then
     echo "!!! built image /etc/os-release does not match release-server.toml" >&2
     exit 1
@@ -527,7 +532,7 @@ if [ "$SKIP_BUILD" -eq 0 ]; then
     # kiwi-ng always names its output from <image name="..."> at the
     # document root of kiwi/config.xml, which stays "lyra-os"
     # (image-build-server.toml explains why). release-server.toml's own
-    # image_name ("lyra-os-server") is the source of truth for the actual
+    # image_name ("LyraOS-Server") is the source of truth for the actual
     # output ISO filename - rename the ISO and its sibling artifact files
     # (.changes/.packages/.verified) to match instead of trying to make the
     # KIWI description itself aware of this one attribute.

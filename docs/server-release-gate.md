@@ -1,4 +1,4 @@
-# Gate de release — Lyra OS Server Beta 1
+# Gate de release — Lyra OS Server 1.1 Beta 1.1
 
 Este checklist é o contrato de go/no-go da edição server, análogo a
 `docs/release-gate.md` (edição desktop) mas recortado para o que realmente se
@@ -27,7 +27,7 @@ server:
   um cenário suportado. Precisa ter issue de acompanhamento quando não
   corrigido.
 
-Nenhum P0 ou P1 pode ficar aberto na publicação. Sendo Beta 1, somente P2/P3
+Nenhum P0 ou P1 pode ficar aberto na publicação. Sendo Beta 1.1, somente P2/P3
 documentadas nas notas podem ser aceitas.
 
 ## Identidade do candidato
@@ -56,43 +56,47 @@ Diferente do desktop, **não há item `rollback`**:
   instalador rodar;
 - [ ] `installer`: `lyra-server-install` completa via `dialog` (partição,
   cópia, chroot, grub) sem cair para um fallback manual;
-- [ ] `first-boot`: `kiwi/root/usr/bin/lyra-system-smoke first-boot
-  --profile server` — disco instalado boota, root em ext4, conta criada
-  funciona, `sshd`/`vega-web`/`firewalld`/`NetworkManager` ativos, `vegad`
-  disponível por ativação D-Bus (`org.lyraos.Vega1`),
-  nenhum artefato live remanescente;
+- [ ] `first-boot`: disco instalado boota, raiz está em ext4, conta criada
+  funciona, `sshd`/`vega-web`/`firewalld`/`NetworkManager` estão ativos,
+  `vegad` está disponível por ativação D-Bus (`org.lyraos.Vega1`) e nenhum
+  artefato live permanece instalado;
 - [ ] `uefi-secure-boot`: cenários suportados de UEFI e Secure Boot passam
-  (`lyra-system-smoke secure-boot` — mesmo check do desktop, não é
-  profile-específico);
+  (`mokutil --sb-state` confirma o estado esperado dentro do convidado);
 - [ ] `hardware-matrix`: cenários reais/virtuais obrigatórios registrados —
   ver `docs/hardware-matrix.md` e a limitação de mantenedor solo com uma
   única máquina física (mesma restrição do desktop; cobertura primária via
   VM/QEMU é aceita como risco documentado).
 
-Na sessão live Server, antes de iniciar a instalação, gere a evidência de
-console, autologin, identidade da imagem, instalador e journal:
+Esta imagem não distribui os coletores `lyra-live-smoke` ou
+`lyra-system-smoke`. Na sessão live Server, antes de iniciar a instalação,
+registre a identidade, unidades com falha e erros do boot com as ferramentas
+presentes na própria base:
 
 ```sh
-lyra-live-smoke --profile server --output live-session-result.json
+cat /usr/lib/lyra-os/server-release
+systemctl --failed --no-legend
+journalctl -b -p err..alert --no-pager
 ```
 
 Depois de reiniciar pelo disco e entrar com o usuário administrativo criado,
-gere a evidência do sistema instalado (o `sudo -v` permite apenas as leituras
-privilegiadas não interativas usadas pelo coletor):
+valide o primeiro boot manualmente:
 
 ```sh
 sudo -v
-lyra-system-smoke first-boot --profile server --output first-boot-result.json
+findmnt -no SOURCE,FSTYPE /
+systemctl is-active sshd vega-web firewalld NetworkManager
+busctl --system introspect org.lyraos.Vega1 /org/lyraos/Vega1 >/dev/null
+sudo firewall-cmd --list-services
+sudo journalctl -b -p err..alert --no-pager
 ```
 
-Ambos os comandos retornam status diferente de zero e escrevem
-`"status": "failed"` se qualquer check obrigatório falhar. Entradas críticas
-do journal só podem ser aceitas explicitamente com `--acknowledge-journal`
-apontando para a issue ou workaround revisado.
+Cada comando obrigatório deve retornar zero. Entradas críticas do journal só
+podem ser aceitas com issue ou workaround revisado e registrado nas notas de
+release.
 
 ## Chave de assinatura do release
 
-A assinatura destacada é obrigatória nesta Beta 1, conforme a ADR 0005. É
+A assinatura destacada é obrigatória nesta Beta 1.1, conforme a ADR 0005. É
 usada a mesma chave do desktop — não há uma chave separada por edição. Ver
 `docs/release-gate.md` (seção "Release signing key") para a fingerprint e o
 UID atuais; importar `docs/release-signing-key.asc` antes de confiar em
@@ -110,21 +114,25 @@ UID atuais; importar `docs/release-signing-key.asc` antes de confiar em
 - [ ] ISO e artefatos sobem para o SourceForge e são baixados de novo para
   verificação de checksum/assinatura;
 
-## Estado atual (Beta 1)
+## Estado atual (Server 1.1 Beta 1.1)
 
-**GO condicionado aos controles técnicos** — a imagem candidata foi gerada de
-árvore limpa e aprovada em VM. Antes do upload, `scripts/build-server-beta1.sh`
-gera SBOMs e checksum assinado. O uploader valida a assinatura oficial, consulta
+**NO-GO enquanto a nova base não for requalificada** — a evidência anterior em
+VM pertence à base Leap 16.0 e não promove automaticamente esta candidata.
+`scripts/build-server-beta1.sh` deve gerar a imagem 1.1 Beta 1.1 de árvore limpa,
+os SBOMs e o checksum assinado. O uploader valida a assinatura oficial, consulta
 o GitHub e falha fechado se houver issue Server P0/P1; depois baixa novamente a
 ISO publicada e verifica checksum e assinatura. Teste em hardware físico real
-permanece como risco residual; a cobertura aceita foi em VM.
+permanece como risco residual; a cobertura aceita pode ser feita em VM, desde
+que todos os itens bloqueantes sejam repetidos sobre Leap 16.1.
 
-O ciclo está em Beta 1. Melhorias estão autorizadas nas Betas da 1.0 quando
+O ciclo está na Beta 1.1 do Server 1.1. Esta revisão migra exclusivamente a
+base para openSUSE Leap 16.1 e não promove o produto para Beta 2. Melhorias
+estão autorizadas nas Betas do Server 1.1 quando
 os ganhos compensarem os riscos, desde que benefício, impacto, testes de
 regressão e reversão sejam registrados. A RC1 inicia o congelamento estrito.
 O cronograma completo
-até a Server 1.0 “Delos” e os critérios de saída estão em
-[`release-versioning.md`](release-versioning.md#lyra-os-server-10).
+até a Server 1.1 “Delos” e os critérios de saída estão em
+[`release-versioning.md`](release-versioning.md).
 
 ## Referências
 
