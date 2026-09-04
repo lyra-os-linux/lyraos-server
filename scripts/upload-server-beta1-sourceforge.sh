@@ -5,8 +5,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
 REPO_ROOT="$(dirname "$SCRIPT_DIR")"
 ARTIFACT_DIR="${LYRA_TEST_WORK_DIR:-/var/tmp/lyraos-server-test-$(id -u)}/iso"
-REMOTE="rodrigobritosoa@frs.sourceforge.net:/home/frs/project/lyra/releases/1.1/server/beta1.1/"
-DOWNLOAD_URL="https://downloads.sourceforge.net/project/lyra/releases/1.1/server/beta1.1"
+REMOTE="rodrigobritosoa@frs.sourceforge.net:/home/frs/project/lyra/releases/1.1/beta1.1/server/"
+DOWNLOAD_URL="https://downloads.sourceforge.net/project/lyra/releases/1.1/beta1.1/server"
 CHECK_ONLY=0
 RELEASE_SIGNING_FINGERPRINT="01B63EEDBE6B079126A0116EFA7353A131ECEFEB"
 GITHUB_REPOSITORY="lyra-os-linux/lyraos-server"

@@ -144,7 +144,7 @@ class ServerBeta1GateTests(unittest.TestCase):
         for script in (builder, uploader):
             self.assertIn("1.1-beta.1.1", script)
             self.assertNotIn("1.1-beta.2", script)
-        self.assertIn("/releases/1.1/server/beta1.1/", uploader)
+        self.assertIn("/releases/1.1/beta1.1/server/", uploader)
         self.assertIn("lyra-os-server-1.1-beta.1.1.md", builder)
 
     def test_gate_does_not_require_collectors_missing_from_the_server_image(self) -> None:
