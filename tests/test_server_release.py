@@ -130,6 +130,8 @@ class ServerBeta1GateTests(unittest.TestCase):
         )
         self.assertNotIn("--decision-file", uploader)
         self.assertIn("sha256sum -c", uploader)
+        self.assertIn('GITHUB_REPOSITORY="lyra-os-linux/lyraos-server"', uploader)
+        self.assertIn('GH_REPO="$GITHUB_REPOSITORY" gh issue list', uploader)
         self.assertIn("gh issue list --state open --label server", uploader)
         self.assertIn('test("\\\\[P[01]\\\\]"; "i")', uploader)
         self.assertNotIn("release-decision.json", uploader)

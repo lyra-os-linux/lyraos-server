@@ -9,6 +9,7 @@ REMOTE="rodrigobritosoa@frs.sourceforge.net:/home/frs/project/lyra/releases/1.1/
 DOWNLOAD_URL="https://downloads.sourceforge.net/project/lyra/releases/1.1/server/beta1.1"
 CHECK_ONLY=0
 RELEASE_SIGNING_FINGERPRINT="01B63EEDBE6B079126A0116EFA7353A131ECEFEB"
+GITHUB_REPOSITORY="lyra-os-linux/lyraos-server"
 verify_release_signature() {
   local signature="$1" signed_file="$2" valid_fingerprint
   valid_fingerprint="$(gpg --batch --status-fd 1 --verify "$signature" "$signed_file" 2>/dev/null \
@@ -47,7 +48,7 @@ verify_release_signature "$PREFIX.iso.sha256.asc" "$PREFIX.iso.sha256"
 
 # GitHub is authoritative. Failure to query it also blocks publication because
 # an unknown blocker state must never be treated as GO.
-OPEN_BLOCKERS="$(gh issue list --state open --label server --limit 200 \
+OPEN_BLOCKERS="$(GH_REPO="$GITHUB_REPOSITORY" gh issue list --state open --label server --limit 200 \
   --json number,title --jq '.[] | select(.title | test("\\[P[01]\\]"; "i")) | "#\\(.number) \\(.title)"')"
 [ -z "$OPEN_BLOCKERS" ] || {
   echo "ERRO: há P0/P1 Server aberta; publicação bloqueada:" >&2
