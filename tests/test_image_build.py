@@ -62,6 +62,8 @@ class ImagePolicyTests(unittest.TestCase):
     def test_vm_helper_renames_kiwi_output_to_the_server_release_name(self) -> None:
         helper = (ROOT / "kiwi/test/build-and-run-vm.sh").read_text(encoding="utf-8")
         self.assertIn("scripts/server-release.py", helper)
+        self.assertIn('field product_version', helper)
+        self.assertIn("LDCONFIG=/usr/sbin/ldconfig", helper)
         self.assertIn("IMAGE_SERVER_INSTALL", helper)
         self.assertIn("IMAGE_GETTY_OVERRIDE", helper)
         self.assertIn("kiwi-ng output:", helper)
@@ -157,6 +159,16 @@ class ImagePolicyTests(unittest.TestCase):
             [source.repository for source in self.manifest.package_sources],
             ["openSUSE_Leap_16.1", "openSUSE_Leap_16.1"],
         )
+
+    def test_current_candidate_is_server_1_1_beta_1_1_on_leap_16_1(self) -> None:
+        with (ROOT / "release-server.toml").open("rb") as stream:
+            release = tomllib.load(stream)["release"]
+        self.assertEqual(release["version"], "1.1")
+        self.assertEqual(release["base_version"], "16.1")
+        self.assertEqual(release["stage"], "beta")
+        self.assertEqual(release["iteration"], 1)
+        self.assertEqual(release["revision"], 1)
+        self.assertEqual(image_build.version_id(), "1.1-beta.1.1")
 
     def test_obs_projects_only_mark_leap_16_1_as_an_iso_consumer(self) -> None:
         with (ROOT / "obs/projects.toml").open("rb") as stream:

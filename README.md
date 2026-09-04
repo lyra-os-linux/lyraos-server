@@ -1,10 +1,11 @@
 # Lyra OS Server
 
-Lyra OS Server é a edição headless do Lyra OS, baseada no mesmo openSUSE Leap
-16 do desktop ([`github.com/lyra-os-linux/lyraos-desktop`](https://github.com/lyra-os-linux/lyraos-desktop)),
+Lyra OS Server é a edição headless do Lyra OS, baseada no openSUSE Leap 16.1,
+independentemente da base atualmente usada pelo desktop
+([`github.com/lyra-os-linux/lyraos-desktop`](https://github.com/lyra-os-linux/lyraos-desktop)),
 sem GNOME e sem os componentes desktop do ecossistema Lyra. Este repositório
 contém a descrição KIWI usada para gerar a ISO live e o instalador em console
-da edição **Beta 1** para computadores x86_64.
+do **Lyra OS Server 1.1 “Delos” Beta 1.1** para computadores x86_64.
 
 > [!IMPORTANT]
 > O projeto ainda está em desenvolvimento. A ISO não deve ser considerada uma
@@ -14,7 +15,7 @@ da edição **Beta 1** para computadores x86_64.
 
 ## Principais características
 
-- openSUSE Leap 16, sem ambiente gráfico;
+- openSUSE Leap 16.1, sem ambiente gráfico;
 - administração via `vega-cli` (linha de comando), `vegad` (daemon) e
   `vega-web` (interface web, porta 9090/tcp), publicados no projeto OBS
   `home:rodrigosbrito:vega`;

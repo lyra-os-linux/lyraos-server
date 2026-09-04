@@ -2,7 +2,7 @@ schema = 1
 
 [image]
 # Must match the literal top-level <image name="..."> in kiwi/config.xml.
-# release-server.toml's own image_name ("lyra-os-server") is the source of
+# release-server.toml's own image_name ("LyraOS-Server") is the source of
 # truth for the actual output ISO filename; kiwi/test/build-and-run-vm.sh
 # renames the kiwi-ng output to match it after the build.
 name = "lyra-os"

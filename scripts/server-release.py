@@ -26,6 +26,7 @@ class ServerRelease:
     base_version: str
     stage: str
     iteration: int
+    revision: int
     image_name: str
     architecture: str
     codename: str
@@ -43,6 +44,7 @@ class ServerRelease:
                 base_version=values["base_version"],
                 stage=values["stage"],
                 iteration=values.get("iteration", 0),
+                revision=values.get("revision", 0),
                 image_name=values["image_name"],
                 architecture=values["architecture"],
                 codename=values["codename"],
@@ -68,6 +70,8 @@ class ServerRelease:
             raise ValueError("release text fields must be strings")
         if isinstance(self.iteration, bool) or not isinstance(self.iteration, int):
             raise ValueError("iteration must be an integer")
+        if isinstance(self.revision, bool) or not isinstance(self.revision, int):
+            raise ValueError("revision must be an integer")
         if not re.fullmatch(r"(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)(?:\.(?:0|[1-9]\d*))?", self.product_version):
             raise ValueError("version must use MAJOR.MINOR or MAJOR.MINOR.PATCH")
         if self.base_distribution != "opensuse-leap":
@@ -78,8 +82,12 @@ class ServerRelease:
             raise ValueError("stage must be alpha, beta, rc, or release")
         if self.stage == "release" and self.iteration != 0:
             raise ValueError("a final release must use iteration = 0")
+        if self.stage == "release" and self.revision != 0:
+            raise ValueError("a final release must use revision = 0")
         if self.stage != "release" and self.iteration < 1:
-            raise ValueError("beta and rc releases require a positive iteration")
+            raise ValueError("prereleases require a positive iteration")
+        if self.revision < 0:
+            raise ValueError("revision must not be negative")
         if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9-]*", self.image_name):
             raise ValueError("image_name must be filename-safe")
         if not re.fullmatch(r"[A-Z][A-Za-z0-9-]*", self.codename):
@@ -93,14 +101,20 @@ class ServerRelease:
     def version_id(self) -> str:
         if self.stage == "release":
             return self.product_version
-        return f"{self.product_version}-{self.stage}.{self.iteration}"
+        value = f"{self.product_version}-{self.stage}.{self.iteration}"
+        if self.revision:
+            value += f".{self.revision}"
+        return value
 
     @property
     def stage_label(self) -> str:
         if self.stage == "release":
             return "Release"
         prefix = {"alpha": "Alpha", "beta": "Beta", "rc": "RC"}[self.stage]
-        return f"{prefix} {self.iteration}"
+        value = f"{prefix} {self.iteration}"
+        if self.revision:
+            value += f".{self.revision}"
+        return value
 
     @property
     def display_version(self) -> str:
@@ -153,6 +167,7 @@ class ServerRelease:
             "iso_filename": self.iso_filename,
             "pretty_name": self.pretty_name,
             "release_iteration": str(self.iteration),
+            "release_revision": str(self.revision),
             "stage": self.stage,
             "stage_label": self.stage_label,
             "tag": self.tag,
@@ -201,6 +216,7 @@ def release_environment(release: ServerRelease) -> str:
         "LYRA_PRETTY_NAME": release.pretty_name,
         "LYRA_RELEASE_STAGE": release.stage,
         "LYRA_RELEASE_ITERATION": str(release.iteration),
+        "LYRA_RELEASE_REVISION": str(release.revision),
         "LYRA_RELEASE_TAG": release.tag,
         "LYRA_STAGE_LABEL": release.stage_label,
         "LYRA_VERSION_ID": release.product_version,
@@ -311,6 +327,7 @@ def write_build_manifest(release: ServerRelease, iso: Path, output: Path | None)
         "base_version": release.base_version,
         "channel": release.stage,
         "channel_iteration": release.iteration,
+        "channel_revision": release.revision,
         "architecture": release.architecture,
         "release_tag": release.tag,
         "built_at": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
