@@ -77,8 +77,15 @@ def main():
             shutil.copyfile(source, module_root / source.name)
         for name in ("ext4", "vfat", "nls_cp437", "nls_iso8859-1", "nls_utf8", "virtio_blk", "virtio_pci"):
             # Resolve/copy dependencies on the host; load only in the guest.
-            dependencies = subprocess.check_output(["modprobe", "--show-depends", "-S", args.modules_dir.name, name], text=True)
-            for line in dependencies.splitlines():
+            dependencies = subprocess.run(["modprobe", "--show-depends", "-S", args.modules_dir.name, name],
+                                          capture_output=True, text=True)
+            # Leap offers this extra charset; Ubuntu's minimal generic
+            # package can omit it. The fixture uses ASCII names, and real
+            # FAT mounts must still pass with the kernel's default charset.
+            if name == "nls_utf8" and "Module nls_utf8 not found" in dependencies.stderr:
+                continue
+            dependencies.check_returncode()
+            for line in dependencies.stdout.splitlines():
                 if line.startswith("insmod "):
                     source = Path(line.split()[1])
                     relative = source.resolve().relative_to(args.modules_dir.resolve())
