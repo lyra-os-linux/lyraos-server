@@ -49,6 +49,7 @@ msg() {
         pt:live_media_unknown) echo "não foi possível identificar com segurança a mídia live; nenhum disco será apagado" ;;
         pt:live_media_selected) echo "o disco selecionado pertence à mídia live e não pode ser apagado" ;;
         pt:cleanup_failed) echo "não foi possível desmontar completamente o sistema de destino" ;;
+        pt:target_mounted) echo "um ponto de montagem do destino já está em uso" ;;
         pt:summary) printf '%s\n' 'Idioma:    %s\nTeclado:   %s\nFuso:      %s\nHostname:  %s\nDisco:     %s (TODO o conteúdo será apagado)\nUsuário:   %s (grupo wheel/sudo)\n\nConfirma a instalação? Esta operação é IRREVERSÍVEL.' ;;
         pt:install_cancelled) echo "Instalação cancelada." ;; pt:partitioning) echo "Particionando %s..." ;; pt:formatting) echo "Formatando partições..." ;;
         pt:copying) echo "Copiando o sistema para o disco (pode levar alguns minutos)..." ;; pt:copy_failed) echo "cópia do sistema para o disco falhou (tar retornou %s)" ;;
@@ -73,6 +74,7 @@ msg() {
         *:live_media_unknown) echo "the live media could not be identified safely; no disk will be erased" ;;
         *:live_media_selected) echo "the selected disk belongs to the live media and cannot be erased" ;;
         *:cleanup_failed) echo "the target system could not be completely unmounted" ;;
+        *:target_mounted) echo "a target mount point is already in use" ;;
         *:summary) printf '%s\n' 'Language:   %s\nKeyboard:   %s\nTime zone:  %s\nDevice:     %s\nDisk:       %s (ALL contents will be erased)\nUser:       %s (wheel/sudo group)\n\nConfirm installation? This operation is IRREVERSIBLE.' ;;
         *:install_cancelled) echo "Installation cancelled." ;; *:partitioning) echo "Partitioning %s..." ;; *:formatting) echo "Formatting partitions..." ;;
         *:copying) echo "Copying the system to disk (this may take several minutes)..." ;; *:copy_failed) echo "copying the system to disk failed (tar returned %s)" ;;
@@ -112,13 +114,13 @@ log() {
 }
 
 fail() {
-    local message
-    message="$(redact_command "$*")"
+    local message status="${2:-1}"
+    message="$(redact_command "$1")"
     echo "$(msg error): $message" >&2
     msgf log_path "$LOG" >&2
     echo >&2
-    log "FAIL status=1 stage=$CURRENT_STAGE message=$message"
-    exit 1
+    log "FAIL status=$status stage=$CURRENT_STAGE message=$message"
+    exit "$status"
 }
 
 redact_command() {
@@ -141,17 +143,32 @@ report_error() {
     exit "$status"
 }
 
-report_error_with_cleanup() {
-    local status="$1" line="$2" command="$3" cleanup_status
-    trap - ERR
+report_signal() {
+    local status="$1" signal="$2"
+    # Cleanup belongs to EXIT, including explicit fail(), ERR and signals.
+    trap '' HUP INT TERM PIPE
+    log "FAIL status=$status stage=$CURRENT_STAGE signal=$signal"
+    echo "$(msg error): $(msg interrupted) ($signal)" >&2
+    msgf log_path "$LOG" >&2
+    echo >&2
+    exit "$status"
+}
+
+cleanup_on_exit() {
+    local status="$1" cleanup_status
+    trap - EXIT ERR
+    trap '' HUP INT TERM PIPE
     set +e
     cleanup_mounts
     cleanup_status=$?
-    set -e
     if [ "$cleanup_status" -ne 0 ]; then
         log "WARN status=$cleanup_status stage=cleanup message=cleanup-after-failure"
+        echo "$(msg error): $(msg cleanup_failed)" >&2
+        if [ "$status" -eq 0 ]; then
+            status="$cleanup_status"
+        fi
     fi
-    report_error "$status" "$line" "$command"
+    exit "$status"
 }
 
 trap 'report_error $? "$LINENO" "$BASH_COMMAND"' ERR
@@ -467,8 +484,9 @@ ESP="$(partition_path "$DISK" 1)"
 ROOT_PART="$(partition_path "$DISK" 2)"
 
 cleanup_mounts() {
-    local mnt status=0
-    for mnt in "$TARGET/run/udev" "$TARGET/run" "$TARGET/proc" "$TARGET/sys/firmware/efi/efivars" "$TARGET/sys" "$TARGET/dev/pts" "$TARGET/dev" "$TARGET/boot/efi" "$TARGET"; do
+    local index mnt status=0
+    for ((index=${#INSTALL_MOUNTS[@]}-1; index>=0; index--)); do
+        mnt="${INSTALL_MOUNTS[index]}"
         if mountpoint -q "$mnt"; then
             if ! umount -R "$mnt" 2>>"$LOG"; then
                 log "WARN status=1 stage=cleanup mount=$mnt message=unmount-failed"
@@ -477,6 +495,17 @@ cleanup_mounts() {
         fi
     done
     return "$status"
+}
+
+mount_target() {
+    local mnt="${!#}"
+    # Never adopt a pre-existing mount. Record the attempt before mount:
+    # a signal may arrive after the kernel mounted it but before it returns.
+    if mountpoint -q "$mnt"; then
+        fail "$(msg target_mounted)"
+    fi
+    INSTALL_MOUNTS+=("$mnt")
+    mount "$@"
 }
 
 validate_target_disk() {
@@ -501,32 +530,11 @@ validate_target_disk() {
     fi
 }
 
-# Everything from here down runs inside a dialog --gauge (the left side of
-# a pipe always runs in a subshell in bash, which is why cleanup_mounts and
-# the ERR trap - both used below - are defined/registered before this
-# point, so the subshell inherits them). Every real command sends its own
-# stdout/stderr to $LOG instead of the terminal: dialog --gauge only
-# understands its own percent/"XXX"/text protocol on stdin, and anything
-# else reaching the terminal while it is drawn would corrupt the display.
-# A failure anywhere still reaches the (inherited) ERR trap and calls
-# fail(), which prints to the *inherited* stderr (visible around the gauge
-# - a harmless cosmetic artifact for what should be a rare path) and exits
-# just this subshell.
-#
-# The whole { ... } | dialog pipeline itself needs the exact same
-# trap-plus-pipefail treatment already applied to the tar pipe above, one
-# level up: pipefail makes the *pipeline's own* exit status nonzero
-# whenever the subshell fails, and the outer ERR trap (still active out
-# here) fires on that before the PIPESTATUS check below ever runs -
-# verified with an isolated repro before shipping this, since it is
-# exactly the same bug class the tar fix above exists for. Disabling only
-# `set -e` here is not enough for the same reason it wasn't enough there.
-#
-# That disabling is inherited by the subshell too (options/traps are
-# copied at fork time), which would silently turn off error detection for
-# every real command below - also verified with the same repro, the hard
-# way, before catching it. The subshell re-enables both for itself as its
-# first act, independent of whatever the outer script's state was.
+# The worker owns its mounts and installs EXIT cleanup before any attempt.
+# ERR supplies diagnostics; EXIT also covers explicit failures and signals,
+# including the tar pipeline while ERR/errexit are temporarily disabled.
+# Only the parent disables error handling around the gauge pipeline so it
+# can restore the console and return the original worker/gauge status.
 trap - ERR
 set +e
 validate_target_disk
@@ -541,11 +549,21 @@ validate_target_disk
 # instead of assuming a default, so restoring it is exact regardless of
 # what this particular kernel/image started with.
 ORIGINAL_CONSOLE_LOGLEVEL="$(cut -d' ' -f1 /proc/sys/kernel/printk)"
+trap 'dmesg -n "$ORIGINAL_CONSOLE_LOGLEVEL"' EXIT
+trap 'report_signal 129 HUP' HUP
+trap 'report_signal 130 INT' INT
+trap 'report_signal 143 TERM' TERM
 dmesg -n 1
 clear
 {
-    set -euo pipefail
+    set -Eeuo pipefail
+    INSTALL_MOUNTS=()
     trap 'report_error $? "$LINENO" "$BASH_COMMAND"' ERR
+    trap 'cleanup_on_exit $?' EXIT
+    trap 'report_signal 129 HUP' HUP
+    trap 'report_signal 130 INT' INT
+    trap 'report_signal 143 TERM' TERM
+    trap 'report_signal 141 PIPE' PIPE
 
     echo 5
     echo "XXX"
@@ -578,9 +596,9 @@ clear
         mkfs.fat -F32 -n LYRASRVESP "$ESP"
         mkfs.ext4 -F -L lyra-server-root "$ROOT_PART"
         mkdir -p "$TARGET"
-        mount "$ROOT_PART" "$TARGET"
+        mount_target "$ROOT_PART" "$TARGET"
         mkdir -p "$TARGET/boot/efi"
-        mount "$ESP" "$TARGET/boot/efi"
+        mount_target "$ESP" "$TARGET/boot/efi"
     } >>"$LOG" 2>&1
 
     echo 25
@@ -611,16 +629,24 @@ clear
     { tar --one-file-system --xattrs --acls --numeric-owner \
         --exclude=./dev --exclude=./proc --exclude=./run --exclude=./sys \
         --exclude=./mnt -cf - -C / . \
-        | tar --xattrs --acls --numeric-owner -xf - -C "$TARGET"; } >>"$LOG" 2>&1
-    TAR_EXIT_STATUSES=("${PIPESTATUS[@]}")
+        | tar --xattrs --acls --numeric-owner -xf - -C "$TARGET"
+        TAR_EXIT_STATUSES=("${PIPESTATUS[@]}")
+    } >>"$LOG" 2>&1
     set -e
     trap 'report_error $? "$LINENO" "$BASH_COMMAND"' ERR
-    for TAR_EXIT_STATUS in "${TAR_EXIT_STATUSES[@]}"; do
-        if [ "$TAR_EXIT_STATUS" -ne 0 ]; then
-            COPY_ERROR="$(msgf copy_failed "$TAR_EXIT_STATUS")"
-            fail "$COPY_ERROR"
+    # Prefer a writer failure (the reader may only see a truncated archive),
+    # except SIGPIPE caused by the reader failing. Retain both in the log.
+    TAR_EXIT_STATUS="${TAR_EXIT_STATUSES[0]}"
+    if [ "$TAR_EXIT_STATUS" -eq 0 ] || [ "$TAR_EXIT_STATUS" -eq 141 ]; then
+        if [ "${TAR_EXIT_STATUSES[1]}" -ne 0 ]; then
+            TAR_EXIT_STATUS="${TAR_EXIT_STATUSES[1]}"
         fi
-    done
+    fi
+    if [ "$TAR_EXIT_STATUS" -ne 0 ]; then
+        log "FAIL stage=copying writer_status=${TAR_EXIT_STATUSES[0]} reader_status=${TAR_EXIT_STATUSES[1]}"
+        COPY_ERROR="$(msgf copy_failed "$TAR_EXIT_STATUS")"
+        fail "$COPY_ERROR" "$TAR_EXIT_STATUS"
+    fi
 
     echo 70
     CURRENT_STAGE=mounting
@@ -635,22 +661,20 @@ clear
         # $TARGET/dev because that path was absent).
         mkdir -p "$TARGET/dev/pts" "$TARGET/proc" \
             "$TARGET/sys/firmware/efi/efivars" "$TARGET/run/udev"
-        mount --bind /dev "$TARGET/dev"
-        mount --bind /dev/pts "$TARGET/dev/pts"
+        mount_target --bind /dev "$TARGET/dev"
+        mount_target --bind /dev/pts "$TARGET/dev/pts"
         # Bind only sysfs itself. Recursively binding /sys also imports every
         # live-session submount and proved impossible to cleanly unmount in a
         # real Alpha 2 VM. Mount efivarfs explicitly, matching the desktop
         # installer: shim/efibootmgr still sees the UEFI variable store, while
         # cleanup has one deterministic child mount to remove before sysfs.
-        mount --bind /sys "$TARGET/sys"
-        mount -t efivarfs efivarfs "$TARGET/sys/firmware/efi/efivars"
-        mount --bind /proc "$TARGET/proc"
-        mount -t tmpfs tmpfs "$TARGET/run"
+        mount_target --bind /sys "$TARGET/sys"
+        mount_target -t efivarfs efivarfs "$TARGET/sys/firmware/efi/efivars"
+        mount_target --bind /proc "$TARGET/proc"
+        mount_target -t tmpfs tmpfs "$TARGET/run"
         mkdir -p "$TARGET/run/udev"
-        mount --bind /run/udev "$TARGET/run/udev"
+        mount_target --bind /run/udev "$TARGET/run/udev"
     } >>"$LOG" 2>&1
-    trap 'report_error_with_cleanup $? "$LINENO" "$BASH_COMMAND"' ERR
-
     {
         esp_uuid=$(blkid -s UUID -o value "$ESP")
         root_uuid=$(blkid -s UUID -o value "$ROOT_PART")
@@ -771,26 +795,31 @@ CHROOT_SCRIPT
         rm -f "$TARGET/usr/sbin/lyra-server-install"
         rm -f "$TARGET/root/lyra-server-install.log"
     } >>"$LOG" 2>&1
-    trap - ERR
     if ! cleanup_mounts; then
+        trap - EXIT
         fail "$(msg cleanup_failed)"
     fi
+    trap - EXIT
 
     echo 100
     echo "XXX"
     msg completed
     echo "XXX"
 } | dialog --backtitle "$DIALOG_BACKTITLE" --gauge "$(msg preparing)" 10 70 0
-GAUGE_PIPE_STATUS="${PIPESTATUS[0]}"
+GAUGE_PIPE_STATUSES=("${PIPESTATUS[@]}")
 dmesg -n "$ORIGINAL_CONSOLE_LOGLEVEL"
+trap - EXIT HUP INT TERM
 set -e
 trap 'report_error $? "$LINENO" "$BASH_COMMAND"' ERR
 clear
 
-if [ "$GAUGE_PIPE_STATUS" -ne 0 ]; then
+if [ "${GAUGE_PIPE_STATUSES[0]}" -ne 0 ]; then
     # The subshell's own ERR trap already printed/logged the real reason;
     # avoid a second, redundant message here.
-    exit 1
+    exit "${GAUGE_PIPE_STATUSES[0]}"
+fi
+if [ "${GAUGE_PIPE_STATUSES[1]}" -ne 0 ]; then
+    report_error "${GAUGE_PIPE_STATUSES[1]}" "$LINENO" 'dialog --gauge'
 fi
 
 log "install finished successfully"
