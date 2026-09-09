@@ -26,7 +26,7 @@ jobs:
         run: python3 -m unittest discover -s tests -v
       - name: Qualify cleanup with real mounts and interruptions
         run: |
-          vm_kernel="$(find /boot -maxdepth 1 -name 'vmlinuz-*' | sort -V | tail -n 1)"
+          vm_kernel="$(find /boot -maxdepth 1 -name 'vmlinuz-*-generic' | sort -V | tail -n 1)"
           test -n "$vm_kernel"
           sudo install -m 0644 "$vm_kernel" "$RUNNER_TEMP/server-mount-kernel"
           vm_version="${vm_kernel##*/vmlinuz-}"

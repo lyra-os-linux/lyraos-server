@@ -75,7 +75,7 @@ def main():
         (root / "lib/modules").symlink_to("../usr/lib/modules")
         for source in args.modules_dir.glob("modules.*"):
             shutil.copyfile(source, module_root / source.name)
-        for name in ("ext4", "vfat", "nls_cp437", "nls_iso8859-1", "nls_ascii", "nls_utf8", "virtio_blk", "virtio_pci"):
+        for name in ("ext4", "vfat", "nls_cp437", "nls_iso8859-1", "nls_utf8", "virtio_blk", "virtio_pci"):
             # Resolve/copy dependencies on the host; load only in the guest.
             dependencies = subprocess.check_output(["modprobe", "--show-depends", "-S", args.modules_dir.name, name], text=True)
             for line in dependencies.splitlines():
