@@ -136,7 +136,9 @@ Btrfs+Snapper+GRUB rollback que o desktop já tem testado.
 
 **Implementado** (2026-08-11) em [`scripts/server-install.sh`](../scripts/server-install.sh)
 — mesmo diretório de `image-build.py`/`release.py`, não um diretório novo,
-como decidido em conversa. Fluxo real:
+como decidido em conversa. A recuperação após falha está documentada em
+[limpeza das montagens](server-mount-cleanup.md), incluindo testes e limites.
+Fluxo real:
 
 1. boot do live: sem GDM, autologin de root no console (`tty1`) via
    drop-in systemd (`kiwi/server/etc/systemd/system/getty@tty1.service.d/`)

@@ -129,20 +129,12 @@ class ServerInstallerContentTests(unittest.TestCase):
         # A recursive bind imports every /sys submount and failed cleanup in
         # a real VM. A plain bind plus explicit efivarfs gives shim access to
         # NVRAM without inheriting unrelated live-session mounts.
-        sys_index = self.text.index('mount --bind /sys "$TARGET/sys"')
+        sys_index = self.text.index('mount_target --bind /sys "$TARGET/sys"')
         efivars_index = self.text.index(
-            'mount -t efivarfs efivarfs "$TARGET/sys/firmware/efi/efivars"'
+            'mount_target -t efivarfs efivarfs "$TARGET/sys/firmware/efi/efivars"'
         )
         self.assertLess(sys_index, efivars_index)
         self.assertNotIn('mount --rbind /sys "$TARGET/sys"', self.text)
-
-        cleanup = self.text.split("cleanup_mounts()", 1)[1].split(
-            "validate_target_disk()", 1
-        )[0]
-        self.assertLess(
-            cleanup.index('"$TARGET/sys/firmware/efi/efivars"'),
-            cleanup.index('"$TARGET/sys"'),
-        )
 
     def test_virtual_filesystem_mount_points_exist_before_bind_mounts(self) -> None:
         # The tar copy excludes dev/proc/sys/run. They are not guaranteed to
@@ -150,7 +142,7 @@ class ServerInstallerContentTests(unittest.TestCase):
         # destination is absent (reproduced in the Alpha 2 VM installer).
         mkdir_index = self.text.index('mkdir -p "$TARGET/dev/pts" "$TARGET/proc"')
         self.assertIn('"$TARGET/sys/firmware/efi/efivars"', self.text)
-        first_bind_index = self.text.index('mount --bind /dev "$TARGET/dev"')
+        first_bind_index = self.text.index('mount_target --bind /dev "$TARGET/dev"')
         self.assertLess(mkdir_index, first_bind_index)
 
     def test_shim_install_uses_the_mounted_efi_system_partition(self) -> None:
@@ -170,7 +162,7 @@ class ServerInstallerContentTests(unittest.TestCase):
         # /proc/sys/kernel/printk instead of hardcoding a default so the
         # restore is exact regardless of what the image ships as default.
         lower_index = self.text.index("dmesg -n 1")
-        restore_index = self.text.index('dmesg -n "$ORIGINAL_CONSOLE_LOGLEVEL"')
+        restore_index = self.text.index('\ndmesg -n "$ORIGINAL_CONSOLE_LOGLEVEL"')
         self.assertLess(lower_index, restore_index)
         self.assertIn(
             'ORIGINAL_CONSOLE_LOGLEVEL="$(cut -d\' \' -f1 /proc/sys/kernel/printk)"',
@@ -498,7 +490,8 @@ class ServerInstallerFailureReportingTests(unittest.TestCase):
     def test_cleanup_failure_does_not_replace_original_status(self) -> None:
         result = self._run(
             'cleanup_mounts() { return 71; }; '
-            'report_error_with_cleanup 29 789 "configure target"'
+            "trap 'cleanup_on_exit $?' EXIT; "
+            'report_error 29 789 "configure target"'
         )
         self.assertEqual(result.returncode, 29)
         self.assertIn("WARN status=71 stage=cleanup", result.stdout)
@@ -565,8 +558,7 @@ class TarExitStatusHandlingTests(unittest.TestCase):
         # needs or can satisfy in a sandbox (no root, no real disks).
         localization = text[text.index("UI_LANGUAGE=en") : text.index("RELEASE_METADATA=")]
         utilities = text[text.index("log() {") : text.index("if [ \"$(id -u)\"")]
-        tar_step_end = text.index('fail "$COPY_ERROR"')
-        tar_step_end = text.index("done", tar_step_end) + len("done")
+        tar_step_end = text.index("    echo 70\n")
         tar_step = text[text.index("    echo 25\n") : tar_step_end]
         self.functions = localization + utilities + tar_step
 
@@ -651,7 +643,7 @@ class GaugePipeErrorDetectionTests(unittest.TestCase):
             text.index("trap - ERR\nset +e\n")
             : text.index("\n\n    echo 5")
         ]
-        end_marker = "avoid a second, redundant message here.\n    exit 1\nfi"
+        end_marker = '    report_error "${GAUGE_PIPE_STATUSES[1]}" "$LINENO" \'dialog --gauge\'\nfi'
         self.suffix = text[
             text.index('} | dialog --backtitle "$DIALOG_BACKTITLE" --gauge')
             : text.index(end_marker) + len(end_marker)
@@ -662,6 +654,8 @@ class GaugePipeErrorDetectionTests(unittest.TestCase):
             "set -euo pipefail\n"
             "LOG=/dev/null\n"
             "CURRENT_STAGE=test\n"
+            "validate_target_disk() { :; }; dmesg() { :; }; clear() { :; }\n"
+            "cleanup_on_exit() { exit \"$1\"; }\n"
             "DIALOG_BACKTITLE='Test'\n"
             "msg() { echo \"$1\"; }\n"
             'report_error() { local status="$1"; echo "FAIL status=$status" >&2; exit "$status"; }\n'
