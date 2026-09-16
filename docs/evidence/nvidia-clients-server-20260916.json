@@ -1,0 +1,282 @@
+{
+  "date": "2026-09-16",
+  "scope": "NVIDIA official RPM installer in Vega CLI/Web, Server simple ext4 offline recovery",
+  "status": "qualified locally; publication and exact ISO/hardware gates pending",
+  "rpms": [
+    {
+      "name": "vegad",
+      "version": "5.1.29",
+      "release": "0.local1",
+      "file": "vegad-5.1.29-0.local1.x86_64.rpm",
+      "sha256": "d03d55d70f24b345d4a21d1e91e6c0751f49728c7590fa69a3bda696fb616b19",
+      "source_manifest": "vegad-sources.json"
+    },
+    {
+      "name": "vega-cli",
+      "version": "5.1.23",
+      "release": "0.local1",
+      "file": "vega-cli-5.1.23-0.local1.noarch.rpm",
+      "sha256": "a69dd90a48a13cf8214b2739ea30e4951e8e02cfc73dc0c32d5e16e71b405063",
+      "source_manifest": "vega-cli-sources.json"
+    },
+    {
+      "name": "vega-web",
+      "version": "5.1.23",
+      "release": "0.local1",
+      "file": "vega-web-5.1.23-0.local1.x86_64.rpm",
+      "sha256": "0a9939ecd6fde8e581d5407e005dc24b0e382e574ae434443796e849f1494b9b",
+      "source_manifest": "vega-web-sources.json"
+    }
+  ],
+  "tests": {
+    "backend": "Go tests and packaging contracts passed",
+    "sdk": "34 tests passed; 4 ignored; canonical D-Bus XML signature checks passed",
+    "cli": "39 tests passed including private D-Bus transaction observation; 65 literal calls checked against XML",
+    "web": "unit tests, Clippy -D warnings, three private D-Bus authorization tests and real PAM/Polkit/HTTPS administrative-helper VM passed",
+    "server": "113 recipe/installer/artifact tests, 3 skipped",
+    "packaged_clients": "all three RPMs installed with dependency checks and scriptlets; public diagnostics; HTTPS PT/EN/ES; CSRF denial; inactive Web by default; rpm -V differed only in the intentional Server config; zero failed units"
+  },
+  "ext4_vm": {
+    "steps": {
+      "disk-bootstrap": {
+        "rc": 0,
+        "passed": true
+      },
+      "install-vegad": {
+        "rc": 0,
+        "passed": true
+      },
+      "configure": {
+        "rc": 0,
+        "passed": true
+      },
+      "refresh-fixtures": {
+        "rc": 0,
+        "passed": true
+      },
+      "start-vegad": {
+        "rc": 0,
+        "passed": true
+      },
+      "public-NvidiaStatus": {
+        "rc": 0,
+        "passed": true
+      },
+      "public-NvidiaRecovery": {
+        "rc": 0,
+        "passed": true
+      },
+      "baseline": {
+        "rc": 0,
+        "passed": true
+      },
+      "disk-install": {
+        "rc": 0,
+        "passed": true
+      },
+      "real-rpm-with-recovery": {
+        "rc": 0,
+        "passed": true
+      },
+      "recovery-record": {
+        "rc": 0,
+        "passed": true
+      },
+      "installed": {
+        "rc": 0,
+        "passed": true
+      },
+      "verify-installed": {
+        "rc": 0,
+        "passed": true
+      },
+      "private-point": {
+        "rc": 1,
+        "passed": true
+      },
+      "disk-damage": {
+        "rc": 0,
+        "passed": true
+      },
+      "damage": {
+        "rc": 0,
+        "passed": true
+      },
+      "disk-rescue": {
+        "rc": 0,
+        "passed": true
+      },
+      "mount-target": {
+        "rc": 0,
+        "passed": true
+      },
+      "reject-live-root": {
+        "rc": 1,
+        "passed": true
+      },
+      "reject-unconfirmed": {
+        "rc": 1,
+        "passed": true
+      },
+      "restore-offline": {
+        "rc": 0,
+        "passed": true
+      },
+      "offline-denial-checks": {
+        "rc": 0,
+        "passed": true
+      },
+      "restore-repeat": {
+        "rc": 0,
+        "passed": true
+      },
+      "unmount-target": {
+        "rc": 0,
+        "passed": true
+      },
+      "rescue-poweroff": {
+        "rc": 0,
+        "passed": true
+      },
+      "disk-after-recovery": {
+        "rc": 0,
+        "passed": true
+      },
+      "restored-inventory": {
+        "rc": 0,
+        "passed": true
+      },
+      "restored-files": {
+        "rc": 0,
+        "passed": true
+      },
+      "restored-failed-units": {
+        "rc": 0,
+        "passed": true
+      },
+      "final-poweroff": {
+        "rc": 0,
+        "passed": true
+      },
+      "interrupted-restore": {
+        "rc": 0,
+        "passed": true
+      },
+      "disk-packages": {
+        "rc": 0,
+        "passed": true
+      },
+      "install-final-rpms": {
+        "rc": 0,
+        "passed": true
+      },
+      "reload-units": {
+        "rc": 0,
+        "passed": true
+      },
+      "start-final-vegad": {
+        "rc": 0,
+        "passed": true
+      },
+      "verify-final-rpms": {
+        "rc": 1,
+        "passed": true
+      },
+      "disk-package-checks": {
+        "rc": 0,
+        "passed": true
+      },
+      "final-client-versions": {
+        "rc": 0,
+        "passed": true
+      },
+      "packaged-public-NvidiaStatus": {
+        "rc": 0,
+        "passed": true
+      },
+      "packaged-public-NvidiaRecovery": {
+        "rc": 0,
+        "passed": true
+      },
+      "packaged-web-https": {
+        "rc": 0,
+        "passed": true
+      },
+      "packaged-failed-units": {
+        "rc": 0,
+        "passed": true
+      },
+      "packages-poweroff": {
+        "rc": 0,
+        "passed": true
+      }
+    },
+    "nvidia_packages_added": [
+      "lyra-nvidia|610.57.04-lp161.1.1|noarch",
+      "nvidia-common-G07|610.57.04-1|x86_64",
+      "nvidia-compute-G07|610.57.04-1|x86_64",
+      "nvidia-compute-utils-G07|610.57.04-1|x86_64",
+      "nvidia-gl-G07|610.57.04-1|x86_64",
+      "nvidia-modprobe|610.57.04-1|x86_64",
+      "nvidia-open-driver-G07-signed-cuda-kmp-default|610.57.04_k6.12.0_160100.4-160100.1.3|x86_64",
+      "nvidia-open|610.57.04-1|x86_64",
+      "nvidia-persistenced|610.57.04-1|x86_64",
+      "nvidia-video-G07|610.57.04-1|x86_64"
+    ],
+    "recovery_reference": "2b7bee499ff165cefd5f532a0b1f0642",
+    "recovery": "verified encrypted Restic OS backup inside actual Zypper precommit callback; portable RPM header export; offline restore and repeated restore; exact baseline inventory after boot",
+    "faults": "damaged/removed OS files, new OS files, corrupted RPM export, invalid snapshot, wrong UUID/machine, unsafe key, symlink, unexpected mount; real restore interruption and retry",
+    "preserved": "service data, home and ESP markers; no detached Restic writer after interrupted parent"
+  },
+  "fixes_found_in_validation": [
+    "Restic rejects simultaneous include/exclude; restore now operates on each allowed snapshot subtree with narrow exclusions",
+    "CLI bool D-Bus argument encoding corrected",
+    "Web runtime dependency uses systemd plus sysuser-shadow, leaving sysuser-tools as build dependency"
+  ],
+  "local_host": {
+    "installed": [
+      "vegad 5.1.29-0.local1",
+      "vega-cli 5.1.23-0.local1",
+      "vega-web 5.1.23-0.local1"
+    ],
+    "snapshots": [
+      "11",
+      "12"
+    ],
+    "gpu": "GTX 1650, 610.57.04, active",
+    "secure_boot": "enabled",
+    "kernel": "6.12.0-160100.4-default",
+    "gnome_shell_pid": 2075,
+    "nvidia_kernel_other_packages_unchanged": true,
+    "web_service": "installed, disabled and inactive",
+    "integrity": "rpm -V passed for all three RPMs; zero failed system/user units"
+  },
+  "limits": [
+    "VM has no GPU passthrough and boots directly using kernel/initrd; not a GRUB/Secure Boot/CUDA/rendering qualification",
+    "Full positive InstallNvidia client-to-real-GPU path and hardware matrix remain pending; VM installs actual RPMs through the same Zypper precommit path",
+    "Server ext4 requires the qualified simple layout; no general live-system rollback; data/disk-failure backup remains separate",
+    "No new ISO built; no commit/push/OBS in this phase"
+  ],
+  "evidence_sha256": {
+    "real-rpm-with-recovery.json": "e7b8037a41c086a9c2800ccd5a35a33008ec95ee755c8f89bf81e8441e458c18",
+    "offline-denial-checks.json": "0e69b4c4febfd678f8d6eb110fac3f9df8c473208123e6c2df17f6eef8b7e060",
+    "interrupted-restore.json": "5b34c9982a91b0dd4d9fe921b18521e9400ae62d43e820214ee02c2481699546",
+    "restore-offline.json": "955adae6467e56cd1e2460f08372d424cef8eb3e28c486b7e396a16fb9639ed2",
+    "restore-repeat.json": "d9b70289c2a06b2de2d23d75bb7d30b7766f4678b86af3818e540c709c0611d0",
+    "restored-inventory.json": "87d59361c62887969ac50393e6eba22998d64ccace2fc4d69b524d09ad45c2f3",
+    "restored-files.json": "843fc01dc653260eaedaf199847e02bdcb49e071eac514b6397541b815edda7e",
+    "packaged-web-https.json": "cdee5937c1164c52d95c650bb1144023d25c155b2d9cad6a035d7251bb3e54d7",
+    "admin-helper-vm.log": "00088020cb248433b03053cae03ec6ca617ad9626aaaf695b4baf2d3d08dc98a",
+    "local-install.json": "04beb1889595be3b3304e6a0bddeefd208d2b0ce7bb5265186e45c38dfef98d4",
+    "cleanup.json": "7e901bba791783c928f24a9ad6b4379ae8175efaa7f6702b35c7f617d4b851bb"
+  },
+  "cleanup": {
+    "removed": [
+      "/tmp/lyra-nvidia-ext4-20260916",
+      "/tmp/lyra-nvidia-ext4-assets-20260916",
+      "/tmp/vega-admin-vm-5ls10pz4"
+    ],
+    "vm_and_disks_removed": true
+  },
+  "rpm_source_manifests_current": true
+}

@@ -21,7 +21,7 @@ do **Lyra OS Server 1.1 “Delos” Beta 1.1** para computadores x86_64.
   `home:rodrigosbrito:vega`;
 - instalador em shell script, interativo, com TUI via `dialog`, rodando no
   console;
-- disco único, formatado em ext4 (sem RAID/LVM/Btrfs/Snapper/rollback no v1);
+- disco único em ext4, sem RAID/LVM/Btrfs/Snapper ou rollback geral; recuperação offline específica para a instalação NVIDIA;
 - inicialização UEFI e suporte ao Secure Boot com o shim do openSUSE, mesma
   rota do desktop;
 - rede via DHCP automático no v1;
@@ -60,3 +60,6 @@ python3 -m pytest tests/ -v
 A contraparte gráfica desta edição, com GNOME, Vega (GTK4), instalador nativo
 Rust/Tauri e Btrfs/Snapper, vive em
 [`github.com/lyra-os-linux/lyraos-desktop`](https://github.com/lyra-os-linux/lyraos-desktop).
+
+A instalação opcional NVIDIA pelo Vega CLI/Web e sua recuperação offline em
+ext4 estão descritas em [docs/nvidia-recovery.md](docs/nvidia-recovery.md).
