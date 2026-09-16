@@ -207,6 +207,8 @@
     -->
     <package name="vega-cli"/>
     <package name="vegad"/>
+    <!-- NVIDIA recovery on ext4 and in the live rescue environment. -->
+    <package name="restic"/>
     <package name="vega-web"/>
 
     <!-- SSH is the only other port opened by default (alongside

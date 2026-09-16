@@ -28,7 +28,8 @@ Decisões tomadas em conversa (2026-08-11):
   desatendido/autoyast;
 - armazenamento do instalador v1: **disco único, sem RAID/LVM**, formatado em
   **ext4** (sem Btrfs, sem Snapper/rollback — coerente com não ter
-  Snapper/rollback no v1);
+  Snapper/rollback geral no v1; a recuperação offline específica da instalação
+  NVIDIA está em [nvidia-recovery.md](nvidia-recovery.md));
 - **Secure Boot entra no v1**, mesma rota do desktop (shim assinado do
   openSUSE) — não é um trade-off aceito nem fica para v2;
 - **rede via DHCP automático no v1**, sem prompt de IP estático no
