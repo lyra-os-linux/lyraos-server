@@ -139,11 +139,14 @@ class ImagePolicyTests(unittest.TestCase):
         self.assertIsNotNone(image_packages.find("package[@name='dracut-kiwi-live']"))
         self.assertIsNone(root.find("packages[@type='iso']/package[@name='dracut-kiwi-live']"))
 
-    def test_repositories_are_exactly_four_and_all_https(self) -> None:
+    def test_repositories_are_exactly_five_and_all_https(self) -> None:
         root = ET.parse(ROOT / "kiwi/config.xml").getroot()
         repositories = root.findall("repository")
         aliases = {repo.attrib["alias"] for repo in repositories}
-        self.assertEqual(aliases, {"repo-oss", "repo-non-oss", "repo-lyra", "repo-vega"})
+        self.assertEqual(
+            aliases,
+            {"repo-oss", "repo-non-oss", "repo-packman-essentials", "repo-lyra", "repo-vega"},
+        )
         for repository in repositories:
             source = repository.find("source")
             self.assertIsNotNone(source)

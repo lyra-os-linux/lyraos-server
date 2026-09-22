@@ -36,6 +36,8 @@ PACKAGE_SIGNING_FINGERPRINTS = {
     "7F009157B127B994D5CFBE76F74F09BC3FA1D6CE",
     "85E26470357A6391DBA1BC9E0739B8027BF939EF",
     "399218A6E088C4053F4533BE58097F767EDCA82E",
+    # PackMan Project: repo-packman-essentials enables repository_gpgcheck.
+    "F8875B880D518B6B8C530D1345A1D0671ABD1AFB",
 }
 
 
@@ -229,10 +231,16 @@ def validate_sources(manifest: Manifest, *, release_file: Path = RELEASE) -> Non
     if not os.access(KIWI / "edit_boot_config.sh", os.X_OK):
         raise PolicyError("KIWI final boot configuration hook must be executable")
     repositories = root.findall("repository")
-    expected_repositories = {"repo-oss", "repo-non-oss", "repo-lyra", "repo-vega"}
+    expected_repositories = {
+        "repo-oss",
+        "repo-non-oss",
+        "repo-packman-essentials",
+        "repo-lyra",
+        "repo-vega",
+    }
     if len(repositories) != len(expected_repositories):
         raise PolicyError(
-            "canonical KIWI description must contain exactly four repositories"
+            "canonical KIWI description must contain exactly five repositories"
         )
     aliases: set[str] = set()
     for repository in repositories:
@@ -346,8 +354,8 @@ def verify_export(manifest: Manifest, directory: Path) -> None:
         raise PolicyError("export has invalid source identity")
     root = ET.parse(directory / manifest.description).getroot()
     repositories = root.findall("repository")
-    if len(repositories) != 4:
-        raise PolicyError("export must preserve the four canonical repositories")
+    if len(repositories) != 5:
+        raise PolicyError("export must preserve the five canonical repositories")
     for repository in repositories:
         source = repository.find("source")
         url = "" if source is None else source.attrib.get("path", "")
