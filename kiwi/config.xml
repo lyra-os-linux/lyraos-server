@@ -73,6 +73,18 @@
     <source path="https://download.opensuse.org/distribution/leap/16.1/repo/non-oss/"/>
   </repository>
 
+  <!-- Packman Essentials, the same third-party source as the Desktop image:
+       full codec builds (ffmpeg and friends) for media services. Limited to
+       Essentials instead of the full Packman repository; priority 15 lets
+       its builds win over the restricted official variants, and the
+       installer keeps it there. Its signing key is pinned in
+       kiwi/keys/obs-package-signing-keyring.asc. -->
+  <repository alias="repo-packman-essentials" priority="15" type="rpm-md"
+              imageinclude="true" repository_gpgcheck="true"
+              package_gpgcheck="true">
+    <source path="https://ftp.gwdg.de/pub/linux/misc/packman/suse/openSUSE_Leap_16.1/Essentials/"/>
+  </repository>
+
   <!--
     Lyra and Vega OBS projects, hosted on the `rodrigosbrito` OBS account -
     both are approved package sources in image-build-server.toml. vega-cli/

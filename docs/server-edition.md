@@ -53,8 +53,8 @@ Decisões tomadas em conversa (2026-08-11):
 A ISO desktop já decide o conjunto GNOME + Vega (GTK4) + Sheliak + Fina +
 Beam/Sulafat como experiência padrão (`kiwi/config.xml`,
 `PROMPT-LYRA-OS.md`). A edição server inverte isso e fixa sua base em Leap
-16.1: kernel-default, repositórios oficiais + OBS do Lyra e a mesma política
-de assinatura, mas sem ambiente gráfico e sem os componentes de desktop —
+16.1: kernel-default, repositórios oficiais + Packman Essentials + OBS do
+Lyra e a mesma política de assinatura, mas sem ambiente gráfico e sem os componentes de desktop —
 administração por console e por `vega-web`. O sistema de arquivos instalado
 diverge também: o desktop usa Btrfs+Snapper, o server v1 usa ext4 simples
 (sem rollback).
