@@ -5,6 +5,14 @@ headless, baseada na base openSUSE Leap 16.1, sem GNOME e sem os
 componentes de desktop do ecossistema Lyra, com `vegad` + `vega-cli` +
 `vega-web` como interface de administração.
 
+Em 15/09/2026, o mantenedor aprovou o planejamento de **duas ISOs Server**:
+uma padrão sem llama.cpp e outra com **llama.cpp, backend CUDA e driver NVIDIA
+pré-instalados**. O levantamento técnico, os critérios de aceite e a proposta
+de configuração pelo Vega Web estão em [llama.cpp e variantes Server](llama-cpp.md)
+e na [issue #21](https://github.com/lyra-os-linux/lyraos-server/issues/21).
+Essa decisão está em planejamento; não descreve imagens já construídas ou
+alterações já aplicadas à receita KIWI.
+
 Decisões tomadas em conversa (2026-08-11):
 
 - mesmo repositório Lyra, não um repositório novo — **revertido em
