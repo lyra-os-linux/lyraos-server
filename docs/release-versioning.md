@@ -30,6 +30,6 @@ do Leap, o suporte do Lyra Server e o ciclo da geração 1.x são políticas
 distintas; nenhuma data de EOL deve ser prometida sem política formal.
 
 O Lyra OS Server 1.1 terá suporte comunitário, sem prazo contratual ou EOL prometido.
-O lançamento está previsto para **20 de fevereiro de 2027**, sempre condicionado
+O lançamento está previsto para **5 de novembro de 2026**, sempre condicionado
 ao gate completo. Artefatos legados serão preservados e republicados com nomes
 semânticos, mantendo checksums, assinaturas e proveniência verificáveis.
