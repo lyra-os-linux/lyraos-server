@@ -110,7 +110,7 @@ class ServerRepositoryMetadataTests(unittest.TestCase):
             document = json.loads(output.read_text(encoding="utf-8"))
             self.assertEqual(document["version"], release.version_id)
             self.assertEqual(document["channel_iteration"], 1)
-            self.assertEqual(document["channel_revision"], 1)
+            self.assertEqual(document["channel_revision"], 0)
             self.assertEqual(document["product"], "Lyra OS Server")
             self.assertEqual(document["iso"]["filename"], release.iso_filename)
             self.assertRegex(document["source"]["commit"], r"^[0-9a-f]{40}$")
@@ -156,6 +156,55 @@ class ServerBeta1GateTests(unittest.TestCase):
         fingerprint = "01B63EEDBE6B079126A0116EFA7353A131ECEFEB"
         builder = (ROOT / "scripts/build-server-beta1.sh").read_text(encoding="utf-8")
         uploader = (ROOT / "scripts/upload-server-beta1-sourceforge.sh").read_text(
+            encoding="utf-8"
+        )
+        for script in (builder, uploader):
+            self.assertIn(fingerprint, script)
+            self.assertIn("VALIDSIG", script)
+            self.assertIn("verify_release_signature", script)
+        self.assertIn('--local-user "$RELEASE_SIGNING_FINGERPRINT"', builder)
+
+
+class ServerRC1GateTests(unittest.TestCase):
+    def test_builder_requires_a_clean_tree_and_valid_iso_source_commit(self) -> None:
+        builder = (ROOT / "scripts/build-server-rc1.sh").read_text(encoding="utf-8")
+        self.assertIn("python3 ./scripts/image-build.py validate", builder)
+        self.assertIn('git cat-file -e "$COMMIT^{commit}"', builder)
+        self.assertIn('git rev-parse HEAD', builder)
+        self.assertIn("git status --porcelain --untracked-files=normal", builder)
+
+    def test_uploader_requires_signed_bundle_and_open_blocker_query(self) -> None:
+        uploader = (ROOT / "scripts/upload-server-rc1-sourceforge.sh").read_text(
+            encoding="utf-8"
+        )
+        self.assertNotIn("--decision-file", uploader)
+        self.assertIn("sha256sum -c", uploader)
+        self.assertIn('GITHUB_REPOSITORY="lyra-os-linux/lyraos-server"', uploader)
+        self.assertIn('GH_REPO="$GITHUB_REPOSITORY" gh issue list', uploader)
+        self.assertIn("gh issue list --state open --label server", uploader)
+        self.assertIn('test("\\\\[P[01]\\\\]"; "i")', uploader)
+        self.assertNotIn("release-decision.json", uploader)
+
+    def test_release_scripts_target_server_1_1_rc_1_not_beta(self) -> None:
+        builder = (ROOT / "scripts/build-server-rc1.sh").read_text(encoding="utf-8")
+        uploader = (ROOT / "scripts/upload-server-rc1-sourceforge.sh").read_text(
+            encoding="utf-8"
+        )
+        for script in (builder, uploader):
+            self.assertIn("1.1-rc.1", script)
+            self.assertNotIn("1.1-beta", script)
+        self.assertIn("/releases/1.1/rc1/server/", uploader)
+        self.assertIn("lyra-os-server-1.1-rc.1.md", builder)
+
+    def test_gate_does_not_require_collectors_missing_from_the_server_image(self) -> None:
+        gate = (ROOT / "docs/server-release-gate.md").read_text(encoding="utf-8")
+        self.assertIn("não distribui os coletores", gate)
+        self.assertIn("systemctl is-active sshd vega-web firewalld NetworkManager", gate)
+
+    def test_release_scripts_pin_the_canonical_signing_key(self) -> None:
+        fingerprint = "01B63EEDBE6B079126A0116EFA7353A131ECEFEB"
+        builder = (ROOT / "scripts/build-server-rc1.sh").read_text(encoding="utf-8")
+        uploader = (ROOT / "scripts/upload-server-rc1-sourceforge.sh").read_text(
             encoding="utf-8"
         )
         for script in (builder, uploader):

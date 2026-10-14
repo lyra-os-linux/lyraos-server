@@ -1,4 +1,4 @@
-# Gate de release — Lyra OS Server 1.1 Beta 1.1
+# Gate de release — Lyra OS Server 1.1 RC 1
 
 Este checklist é o contrato de go/no-go da edição server, análogo a
 `docs/release-gate.md` (edição desktop) mas recortado para o que realmente se
@@ -27,7 +27,7 @@ server:
   um cenário suportado. Precisa ter issue de acompanhamento quando não
   corrigido.
 
-Nenhum P0 ou P1 pode ficar aberto na publicação. Sendo Beta 1.1, somente P2/P3
+Nenhum P0 ou P1 pode ficar aberto na publicação. Sendo RC 1, somente P2/P3
 documentadas nas notas podem ser aceitas.
 
 ## Identidade do candidato
@@ -96,7 +96,7 @@ release.
 
 ## Chave de assinatura do release
 
-A assinatura destacada é obrigatória nesta Beta 1.1, conforme a ADR 0005. É
+A assinatura destacada é obrigatória nesta RC 1, conforme a ADR 0005. É
 usada a mesma chave do desktop — não há uma chave separada por edição. Ver
 `docs/release-gate.md` (seção "Release signing key") para a fingerprint e o
 UID atuais; importar `docs/release-signing-key.asc` antes de confiar em
@@ -114,24 +114,25 @@ UID atuais; importar `docs/release-signing-key.asc` antes de confiar em
 - [ ] ISO e artefatos sobem para o SourceForge e são baixados de novo para
   verificação de checksum/assinatura;
 
-## Estado atual (Server 1.1 Beta 1.1)
+## Estado atual (Server 1.1 RC 1)
 
 **NO-GO enquanto a nova base não for requalificada** — a evidência anterior em
 VM pertence à base Leap 16.0 e não promove automaticamente esta candidata.
-`scripts/build-server-beta1.sh` deve gerar a imagem 1.1 Beta 1.1 de árvore limpa,
+`scripts/build-server-rc1.sh` deve gerar a imagem 1.1 RC 1 de árvore limpa,
 os SBOMs e o checksum assinado. O uploader valida a assinatura oficial, consulta
 o GitHub e falha fechado se houver issue Server P0/P1; depois baixa novamente a
 ISO publicada e verifica checksum e assinatura. Teste em hardware físico real
 permanece como risco residual; a cobertura aceita pode ser feita em VM, desde
 que todos os itens bloqueantes sejam repetidos sobre Leap 16.1.
 
-O ciclo está na Beta 1.1 do Server 1.1. Esta revisão migra exclusivamente a
-base para openSUSE Leap 16.1 e não promove o produto para Beta 2. Melhorias
-estão autorizadas nas Betas do Server 1.1 quando
-os ganhos compensarem os riscos, desde que benefício, impacto, testes de
-regressão e reversão sejam registrados. A RC1 inicia o congelamento estrito.
-O cronograma completo
-até a Server 1.1 “Delos” e os critérios de saída estão em
+Por decisão do mantenedor em 14/10/2026, o ciclo sai da Beta 1.1 diretamente
+para a RC 1, com publicação até 31/10/2026 e versão estável em 05/11/2026, após
+o GA do Leap 16.1 em 03/11/2026. A RC 1 inicia o congelamento estrito: somente
+correções de bugs, travamentos, segurança e performance crítica em pacotes já
+distribuídos. Um defeito não trivial no gate interrompe a promoção e gera a
+RC 2. O acompanhamento está em
+[#25](https://github.com/lyra-os-linux/lyraos-server/issues/25).
+O cronograma completo e os critérios de saída estão em
 [`release-versioning.md`](release-versioning.md).
 
 ## Referências
