@@ -18,8 +18,10 @@ revisão da candidata, codename, base, nome da imagem e arquitetura. O gerador
 `scripts/server-release.py` mantém o KIWI e
 `/usr/lib/lyra-os/server-release` sincronizados.
 
-Esta candidata usa `LyraOS-Server-1.1-beta.1.1-x86_64.iso`; a release estável
-usará `LyraOS-Server-1.1-x86_64.iso`.
+A candidata atual é a RC 1, `1.1-rc.1`, tag `server-v1.1-rc.1`, arquivo
+`LyraOS-Server-1.1-rc.1-x86_64.iso`; a release estável usará
+`LyraOS-Server-1.1-x86_64.iso`. Por decisão do mantenedor em 14/10/2026 o
+Server sai da Beta 1.1 diretamente para a RC 1, publicada até 31/10/2026.
 
 Versões calendário já publicadas permanecem históricas e podem ser aceitas
 como origens legadas explícitas, mas não são produzidas por novos builds.

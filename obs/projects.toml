@@ -10,10 +10,12 @@ fingerprint = "399218A6E088C4053F4533BE58097F767EDCA82E"
 tag = "v2026.08-beta2-stable-20260809"
 
 [baseline.projects.vega]
-vega-cli = "0399bf5a9f143e3ad42d2e1223e97752"
-vega-gtk = "382c4cbc9e2a2f5ea19c3733609e840e"
-vega-web = "ae93ad319ee2b154b8da878d6f7b9f30"
-vegad = "8b25259ad1aed3a0c03fbbf22160a636"
+# Kept identical to lyraos-desktop/obs/projects.toml (PR #164, 2026-10-14):
+# release revisions reconciled through staging after direct commits.
+vega-cli = "78375ad0baf91277aec167dfe307848e"
+vega-gtk = "9d672c20adef7eeb9cc9076075f5639b"
+vega-web = "cda1fa63a4847971e29c5eff173c1274"
+vegad = "f2759cb38d53f4fb02a16b0ae31dd5be"
 
 [priorities]
 official_oss = 20
