@@ -3,8 +3,8 @@
 Candidata de lançamento do Lyra OS Server 1.1 sobre **openSUSE Leap 16.1**.
 Por decisão do mantenedor em 14/10/2026, o ciclo do Server sai da Beta 1.1
 diretamente para a RC 1, com publicação prevista até **31 de outubro de 2026**
-e a versão estável em **5 de novembro de 2026**, dois dias após o GA do Leap
-16.1. A RC 1 inicia o congelamento estrito: a partir dela só entram correções
+e a versão estável em **19 de novembro de 2026**, após o GA do Leap 16.1 em 3
+de novembro. A RC 1 inicia o congelamento estrito: a partir dela só entram correções
 de bugs, travamentos, segurança e performance crítica.
 
 A identidade técnica é `1.1-rc.1`, tag `server-v1.1-rc.1`, arquivo
@@ -46,6 +46,10 @@ destacada pela chave oficial de release.
 
 ## Versão final
 
-A versão estável `1.1` será reconstruída a partir dos pacotes GA do openSUSE
-Leap 16.1 (3 de novembro de 2026) e passará por um gate reduzido antes da
-publicação em 5 de novembro de 2026.
+Por decisão do mantenedor em 18 de outubro de 2026, esta RC 1 é a candidata
+final. Se o gate completo passar sobre Leap 16.1 sem P0/P1 aberto, a mesma ISO
+é promovida à versão estável `1.1` em 19 de novembro de 2026, com a tag
+`server-v1.1` e a republicação dos artefatos já assinados. Não há rebuild sobre
+os pacotes GA do openSUSE Leap 16.1 (3 de novembro de 2026): a diferença entre
+RC e GA chega pelo repositório `update` após a instalação. Um defeito não
+trivial no gate gera a RC 2, que passa a ser a candidata final.

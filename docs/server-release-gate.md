@@ -126,11 +126,14 @@ permanece como risco residual; a cobertura aceita pode ser feita em VM, desde
 que todos os itens bloqueantes sejam repetidos sobre Leap 16.1.
 
 Por decisão do mantenedor em 14/10/2026, o ciclo sai da Beta 1.1 diretamente
-para a RC 1, com publicação até 31/10/2026 e versão estável em 05/11/2026, após
-o GA do Leap 16.1 em 03/11/2026. A RC 1 inicia o congelamento estrito: somente
+para a RC 1, com publicação até 31/10/2026. Em 18/10/2026 o mantenedor decidiu
+que a RC 1 é a candidata final: com o gate completo verde e sem P0/P1, a mesma
+ISO é promovida à versão estável `1.1` em 19/11/2026, sem rebuild sobre os
+pacotes GA do Leap 16.1 (03/11/2026); as atualizações GA chegam pelo repositório
+`update` após a instalação. A RC 1 inicia o congelamento estrito: somente
 correções de bugs, travamentos, segurança e performance crítica em pacotes já
 distribuídos. Um defeito não trivial no gate interrompe a promoção e gera a
-RC 2. O acompanhamento está em
+RC 2, que então é a nova candidata final. O acompanhamento está em
 [#25](https://github.com/lyra-os-linux/lyraos-server/issues/25).
 O cronograma completo e os critérios de saída estão em
 [`release-versioning.md`](release-versioning.md).
