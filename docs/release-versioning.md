@@ -19,9 +19,15 @@ revisão da candidata, codename, base, nome da imagem e arquitetura. O gerador
 `/usr/lib/lyra-os/server-release` sincronizados.
 
 A candidata atual é a RC 1, `1.1-rc.1`, tag `server-v1.1-rc.1`, arquivo
-`LyraOS-Server-1.1-rc.1-x86_64.iso`; a release estável usará
-`LyraOS-Server-1.1-x86_64.iso`. Por decisão do mantenedor em 14/10/2026 o
+`LyraOS-Server-1.1-rc.1-x86_64.iso`. Por decisão do mantenedor em 14/10/2026 o
 Server sai da Beta 1.1 diretamente para a RC 1, publicada até 31/10/2026.
+
+Por decisão do mantenedor em 18/10/2026, a RC 1 é a candidata final: se o gate
+completo passar sobre Leap 16.1 sem P0/P1, a mesma ISO é promovida à versão
+estável `1.1` por tag (`server-v1.1`) e republicação dos artefatos, sem novo
+build sobre os pacotes GA do Leap 16.1. O produto já está maduro para isso. O
+nome `LyraOS-Server-1.1-x86_64.iso` só é usado se uma RC 2 for necessária e a
+promoção final gerar uma imagem nova.
 
 Versões calendário já publicadas permanecem históricas e podem ser aceitas
 como origens legadas explícitas, mas não são produzidas por novos builds.
@@ -32,6 +38,6 @@ do Leap, o suporte do Lyra Server e o ciclo da geração 1.x são políticas
 distintas; nenhuma data de EOL deve ser prometida sem política formal.
 
 O Lyra OS Server 1.1 terá suporte comunitário, sem prazo contratual ou EOL prometido.
-O lançamento está previsto para **5 de novembro de 2026**, sempre condicionado
-ao gate completo. Artefatos legados serão preservados e republicados com nomes
+O lançamento da versão estável está previsto para **19 de novembro de 2026**,
+sempre condicionado ao gate completo. Artefatos legados serão preservados e republicados com nomes
 semânticos, mantendo checksums, assinaturas e proveniência verificáveis.
