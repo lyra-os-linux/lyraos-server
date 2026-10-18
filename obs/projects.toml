@@ -10,12 +10,17 @@ fingerprint = "399218A6E088C4053F4533BE58097F767EDCA82E"
 tag = "v2026.08-beta2-stable-20260809"
 
 [baseline.projects.vega]
-# Kept identical to lyraos-desktop/obs/projects.toml (PR #164, 2026-10-14):
-# release revisions reconciled through staging after direct commits.
-vega-cli = "78375ad0baf91277aec167dfe307848e"
-vega-gtk = "9d672c20adef7eeb9cc9076075f5639b"
-vega-web = "cda1fa63a4847971e29c5eff173c1274"
-vegad = "f2759cb38d53f4fb02a16b0ae31dd5be"
+# Kept identical to lyraos-desktop/obs/projects.toml (PRs #164 and #165,
+# 2026-10-14): release revisions reconciled through staging after direct
+# commits. The pinned values are the published sourceinfo srcmd5 that
+# `obs-release.py health` compares (service-expanded), not the raw history
+# srcmd5 (vega-cli 78375ad0baf91277aec167dfe307848e, vega-gtk
+# 9d672c20adef7eeb9cc9076075f5639b, vega-web cda1fa63a4847971e29c5eff173c1274,
+# vegad f2759cb38d53f4fb02a16b0ae31dd5be). Health verified green on 2026-10-18.
+vega-cli = "e255465b590cb0342b0c2f0e815e21dc"
+vega-gtk = "23bf96bf5759be4b53f927c287443781"
+vega-web = "99d7e61436e87d6155b4bdb8396a8ca2"
+vegad = "ab2b533d6fa21dbdddf301898306113e"
 
 [priorities]
 official_oss = 20
