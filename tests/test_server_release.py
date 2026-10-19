@@ -109,7 +109,7 @@ class ServerRepositoryMetadataTests(unittest.TestCase):
             self.assertEqual(server_release_module.write_build_manifest(release, iso, output), 0)
             document = json.loads(output.read_text(encoding="utf-8"))
             self.assertEqual(document["version"], release.version_id)
-            self.assertEqual(document["channel_iteration"], 1)
+            self.assertEqual(document["channel_iteration"], 2)
             self.assertEqual(document["channel_revision"], 0)
             self.assertEqual(document["product"], "Lyra OS Server")
             self.assertEqual(document["iso"]["filename"], release.iso_filename)
@@ -217,3 +217,67 @@ class ServerRC1GateTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ServerRCGateTests(unittest.TestCase):
+    """The generic RC scripts serve every 16.1 candidate from release-server.toml."""
+
+    def setUp(self) -> None:
+        self.builder = (ROOT / "scripts/build-server-rc.sh").read_text(encoding="utf-8")
+        self.uploader = (ROOT / "scripts/upload-server-rc-sourceforge.sh").read_text(
+            encoding="utf-8"
+        )
+
+    def test_scripts_take_the_candidate_from_release_metadata(self) -> None:
+        for script in (self.builder, self.uploader):
+            self.assertIn("./scripts/server-release.py field release_iteration", script)
+            self.assertIn("./scripts/server-release.py field stage", script)
+            self.assertIn('[ "$PRODUCT_VERSION" = 16.1 ] && [ "$STAGE" = rc ]', script)
+            self.assertNotIn("16.1-rc.1", script)
+            self.assertNotIn("1.1-rc.1", script)
+            self.assertNotIn("1.1-beta", script)
+        self.assertIn('"$REPO_ROOT/docs/releases/lyra-os-server-$VERSION.md"', self.builder)
+        self.assertIn("/releases/$PRODUCT_VERSION/rc$ITERATION/server/", self.uploader)
+        self.assertIn("releases/$PRODUCT_VERSION/rc$ITERATION/server", self.uploader)
+
+    def test_builder_requires_a_clean_tree_and_valid_iso_source_commit(self) -> None:
+        self.assertIn("python3 ./scripts/image-build.py validate", self.builder)
+        self.assertIn('git cat-file -e "$COMMIT^{commit}"', self.builder)
+        self.assertIn("git rev-parse HEAD", self.builder)
+        self.assertIn("git status --porcelain --untracked-files=normal", self.builder)
+        self.assertIn('if d.get("version") != sys.argv[2]', self.builder)
+
+    def test_uploader_requires_signed_bundle_of_the_current_candidate(self) -> None:
+        self.assertIn("sha256sum -c", self.uploader)
+        self.assertIn('GITHUB_REPOSITORY="lyra-os-linux/lyraos-server"', self.uploader)
+        self.assertIn('GH_REPO="$GITHUB_REPOSITORY" gh issue list', self.uploader)
+        self.assertIn("gh issue list --state open --label server", self.uploader)
+        self.assertIn('test("\\\\[P[01]\\\\]"; "i")', self.uploader)
+        self.assertIn('if d.get("version") != sys.argv[2]', self.uploader)
+        self.assertNotIn("release-decision.json", self.uploader)
+
+    def test_scripts_pin_the_canonical_signing_key(self) -> None:
+        fingerprint = "01B63EEDBE6B079126A0116EFA7353A131ECEFEB"
+        for script in (self.builder, self.uploader):
+            self.assertIn(fingerprint, script)
+            self.assertIn("VALIDSIG", script)
+            self.assertIn("verify_release_signature", script)
+        self.assertIn('--local-user "$RELEASE_SIGNING_FINGERPRINT"', self.builder)
+
+    def test_current_candidate_has_release_notes_and_documented_schedule(self) -> None:
+        notes = ROOT / "docs/releases/lyra-os-server-16.1-rc.2.md"
+        self.assertTrue(notes.is_file())
+        text = notes.read_text(encoding="utf-8")
+        self.assertIn("`16.1-rc.2`", text)
+        self.assertIn("`server-v16.1-rc.2`", text)
+        self.assertIn("vegad 5.1.37", text)
+        self.assertIn("vega-cli 5.1.25", text)
+        self.assertIn("vega-web 5.1.25", text)
+        versioning = (ROOT / "docs/release-versioning.md").read_text(encoding="utf-8")
+        self.assertIn("A candidata atual é a RC 2, `16.1-rc.2`", versioning)
+        self.assertIn("RC 3 (`16.1-rc.3`): publicada em 05/11/2026", versioning)
+        self.assertIn("19/11/2026", versioning)
+        gate = (ROOT / "docs/server-release-gate.md").read_text(encoding="utf-8")
+        self.assertIn("scripts/build-server-rc.sh", gate)
+        self.assertIn("RC 3 (`16.1-rc.3`) é publicada\nem 05/11/2026", gate)
+
