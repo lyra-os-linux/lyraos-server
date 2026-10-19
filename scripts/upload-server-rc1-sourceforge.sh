@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# Validate and publish the signed Server 1.1 RC 1 bundle to SourceForge.
+# Validate and publish the signed Server 16.1 RC 1 bundle to SourceForge.
 
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
 REPO_ROOT="$(dirname "$SCRIPT_DIR")"
 ARTIFACT_DIR="${LYRA_TEST_WORK_DIR:-/var/tmp/lyraos-server-test-$(id -u)}/iso"
-REMOTE="rodrigobritosoa@frs.sourceforge.net:/home/frs/project/lyra/releases/1.1/rc1/server/"
-DOWNLOAD_URL="https://downloads.sourceforge.net/project/lyra/releases/1.1/rc1/server"
+REMOTE="rodrigobritosoa@frs.sourceforge.net:/home/frs/project/lyra/releases/16.1/rc1/server/"
+DOWNLOAD_URL="https://downloads.sourceforge.net/project/lyra/releases/16.1/rc1/server"
 CHECK_ONLY=0
 RELEASE_SIGNING_FINGERPRINT="01B63EEDBE6B079126A0116EFA7353A131ECEFEB"
 GITHUB_REPOSITORY="lyra-os-linux/lyraos-server"
@@ -33,7 +33,7 @@ done
 cd "$REPO_ROOT"
 VERSION="$(./scripts/server-release.py field version_id)"
 ISO_NAME="$(./scripts/server-release.py field iso_filename)"
-[ "$VERSION" = 1.1-rc.1 ] || { echo "ERRO: versão não é Server 1.1 RC 1" >&2; exit 1; }
+[ "$VERSION" = 16.1-rc.1 ] || { echo "ERRO: versão não é Server 16.1 RC 1" >&2; exit 1; }
 PREFIX="${ISO_NAME%.iso}"
 FILES=(README.md "$PREFIX.cdx.json" "$PREFIX.iso"
   "$PREFIX.iso.manifest.json" "$PREFIX.iso.sha256" "$PREFIX.iso.sha256.asc"
@@ -75,4 +75,4 @@ curl --fail --location --retry 5 --output "$DOWNLOAD_DIR/$PREFIX.iso" "$DOWNLOAD
 (cd "$DOWNLOAD_DIR" && sha256sum -c "$PREFIX.iso.sha256")
 verify_release_signature "$DOWNLOAD_DIR/$PREFIX.iso.sha256.asc" \
   "$DOWNLOAD_DIR/$PREFIX.iso.sha256"
-echo "Publicação Server 1.1 RC 1 verificada após download."
+echo "Publicação Server 16.1 RC 1 verificada após download."

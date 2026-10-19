@@ -164,15 +164,16 @@ class ImagePolicyTests(unittest.TestCase):
             ["openSUSE_Leap_16.1", "openSUSE_Leap_16.1"],
         )
 
-    def test_current_candidate_is_server_1_1_rc_1_on_leap_16_1(self) -> None:
+    def test_current_candidate_is_server_16_1_rc_1_on_leap_16_1(self) -> None:
         with (ROOT / "release-server.toml").open("rb") as stream:
             release = tomllib.load(stream)["release"]
-        self.assertEqual(release["version"], "1.1")
+        self.assertEqual(release["version"], "16.1")
         self.assertEqual(release["base_version"], "16.1")
+        self.assertEqual(release["version"], release["base_version"])
         self.assertEqual(release["stage"], "rc")
         self.assertEqual(release["iteration"], 1)
         self.assertEqual(release["revision"], 0)
-        self.assertEqual(image_build.version_id(), "1.1-rc.1")
+        self.assertEqual(image_build.version_id(), "16.1-rc.1")
 
     def test_obs_projects_only_mark_leap_16_1_as_an_iso_consumer(self) -> None:
         with (ROOT / "obs/projects.toml").open("rb") as stream:

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build and qualify the signed Lyra OS Server 1.1 RC 1 publication bundle.
+# Build and qualify the signed Lyra OS Server 16.1 RC 1 publication bundle.
 
 set -euo pipefail
 
@@ -40,8 +40,8 @@ python3 ./scripts/image-build.py validate \
 
 VERSION="$(./scripts/server-release.py field version_id)"
 ISO_NAME="$(./scripts/server-release.py field iso_filename)"
-[ "$VERSION" = 1.1-rc.1 ] || {
-  echo "ERRO: release-server.toml não aponta para 1.1-rc.1." >&2
+[ "$VERSION" = 16.1-rc.1 ] || {
+  echo "ERRO: release-server.toml não aponta para 16.1-rc.1." >&2
   exit 1
 }
 
@@ -68,7 +68,7 @@ COMMIT="$(python3 - "$BUILD_MANIFEST" <<'PY'
 import json, pathlib, re, sys
 d = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
 c = d.get("source", {}).get("commit", "")
-if d.get("version") != "1.1-rc.1" or d.get("source", {}).get("dirty") is not False:
+if d.get("version") != "16.1-rc.1" or d.get("source", {}).get("dirty") is not False:
     raise SystemExit("ERRO: manifesto não representa a RC 1 de árvore limpa")
 if not re.fullmatch(r"[0-9a-f]{40}", c):
     raise SystemExit("ERRO: commit inválido")
@@ -90,7 +90,7 @@ install -m 0644 "$BUILD_DIR/$PREFIX.verified" "$ARTIFACT_DIR/$PREFIX.verified"
   --packages "$ARTIFACT_DIR/$PREFIX.packages" \
   --verified "$ARTIFACT_DIR/$PREFIX.verified" --output-dir "$ARTIFACT_DIR" \
   --commit "$COMMIT" --release-file release-server.toml --product "Lyra OS Server"
-install -m 0644 "$REPO_ROOT/docs/releases/lyra-os-server-1.1-rc.1.md" \
+install -m 0644 "$REPO_ROOT/docs/releases/lyra-os-server-16.1-rc.1.md" \
   "$ARTIFACT_DIR/README.md"
 
 gpg --batch --local-user "$RELEASE_SIGNING_FINGERPRINT" --detach-sign --armor \
@@ -100,4 +100,4 @@ verify_release_signature "$ARTIFACT_DIR/$PREFIX.iso.sha256.asc" \
   "$ARTIFACT_DIR/$PREFIX.iso.sha256"
 (cd "$ARTIFACT_DIR" && sha256sum -c "$PREFIX.iso.sha256")
 
-echo "Bundle Server 1.1 RC 1 assinado em: $ARTIFACT_DIR"
+echo "Bundle Server 16.1 RC 1 assinado em: $ARTIFACT_DIR"

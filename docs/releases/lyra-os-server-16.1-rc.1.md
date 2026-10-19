@@ -1,14 +1,18 @@
-# Lyra OS Server 1.1 “Delos” RC 1
+# Lyra OS Server 16.1 “Delos” RC 1
 
-Candidata de lançamento do Lyra OS Server 1.1 sobre **openSUSE Leap 16.1**.
+Candidata de lançamento do Lyra OS Server 16.1 sobre **openSUSE Leap 16.1**.
+Por decisão do mantenedor em 13/10/2026, a versão do Lyra OS passa a seguir a
+numeração do openSUSE Leap: o que era planejado como Server 1.1 é publicado
+como **16.1**; o codinome Delos identifica a geração Server 16.x.
 Por decisão do mantenedor em 14/10/2026, o ciclo do Server sai da Beta 1.1
 diretamente para a RC 1, com publicação prevista até **31 de outubro de 2026**
 e a versão estável em **19 de novembro de 2026**, após o GA do Leap 16.1 em 3
 de novembro. A RC 1 inicia o congelamento estrito: a partir dela só entram correções
 de bugs, travamentos, segurança e performance crítica.
 
-A identidade técnica é `1.1-rc.1`, tag `server-v1.1-rc.1`, arquivo
-`LyraOS-Server-1.1-rc.1-x86_64.iso`. Estas notas acompanham a candidata; o
+A identidade técnica é `16.1-rc.1`, tag `server-v16.1-rc.1`, arquivo
+`LyraOS-Server-16.1-rc.1-x86_64.iso`. Nenhum artefato `1.1-rc.1` foi assinado
+ou publicado; a Beta 1.1 (`1.1-beta.1.1`) permanece como registro histórico. Estas notas acompanham a candidata; o
 commit, o SHA-256 e a decisão de GO são preenchidos no bundle publicado.
 
 ## Escopo desta candidata
@@ -48,8 +52,8 @@ destacada pela chave oficial de release.
 
 Por decisão do mantenedor em 18 de outubro de 2026, esta RC 1 é a candidata
 final. Se o gate completo passar sobre Leap 16.1 sem P0/P1 aberto, a mesma ISO
-é promovida à versão estável `1.1` em 19 de novembro de 2026, com a tag
-`server-v1.1` e a republicação dos artefatos já assinados. Não há rebuild sobre
+é promovida à versão estável `16.1` em 19 de novembro de 2026, com a tag
+`server-v16.1` e a republicação dos artefatos já assinados. Não há rebuild sobre
 os pacotes GA do openSUSE Leap 16.1 (3 de novembro de 2026): a diferença entre
 RC e GA chega pelo repositório `update` após a instalação. Um defeito não
 trivial no gate gera a RC 2, que passa a ser a candidata final.
