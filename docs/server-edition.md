@@ -83,7 +83,7 @@ Fora de escopo até decisão em contrário:
 | Instalador | Lyra Installer nativo (Rust/Tauri, GUI WebKitGTK) | script shell em console, interativo |
 | Storage do instalador | disco único, RAID novo/existente, LVM, Btrfs+Snapper+rollback | v1: disco único, ext4, sem RAID/LVM/rollback |
 | Perfil/target KIWI | único (`config.xml` sem `<profiles>`) | segundo profile reaproveitando a base |
-| Nome/volid da imagem | `LyraOS-Desktop` / `LYRA_OS_...` | “Lyra OS Server 1.1 — Delos” na comunicação; Delos é o codename da geração Server 1.x; nome técnico e volid permanecem sem codename; ciclo alpha/beta/rc/final próprio |
+| Nome/volid da imagem | `LyraOS-Desktop` / `LYRA_OS_...` | “Lyra OS Server 16.1 — Delos” na comunicação; Delos é o codename da geração Server 16.x; nome técnico e volid permanecem sem codename; ciclo alpha/beta/rc/final próprio |
 
 ## Mecânica de build (KIWI)
 

@@ -1,4 +1,4 @@
-# Gate de release — Lyra OS Server 1.1 RC 1
+# Gate de release — Lyra OS Server 16.1 RC 1
 
 Este checklist é o contrato de go/no-go da edição server, análogo a
 `docs/release-gate.md` (edição desktop) mas recortado para o que realmente se
@@ -114,11 +114,11 @@ UID atuais; importar `docs/release-signing-key.asc` antes de confiar em
 - [ ] ISO e artefatos sobem para o SourceForge e são baixados de novo para
   verificação de checksum/assinatura;
 
-## Estado atual (Server 1.1 RC 1)
+## Estado atual (Server 16.1 RC 1)
 
 **NO-GO enquanto a nova base não for requalificada** — a evidência anterior em
 VM pertence à base Leap 16.0 e não promove automaticamente esta candidata.
-`scripts/build-server-rc1.sh` deve gerar a imagem 1.1 RC 1 de árvore limpa,
+`scripts/build-server-rc1.sh` deve gerar a imagem 16.1 RC 1 de árvore limpa,
 os SBOMs e o checksum assinado. O uploader valida a assinatura oficial, consulta
 o GitHub e falha fechado se houver issue Server P0/P1; depois baixa novamente a
 ISO publicada e verifica checksum e assinatura. Teste em hardware físico real
@@ -128,7 +128,7 @@ que todos os itens bloqueantes sejam repetidos sobre Leap 16.1.
 Por decisão do mantenedor em 14/10/2026, o ciclo sai da Beta 1.1 diretamente
 para a RC 1, com publicação até 31/10/2026. Em 18/10/2026 o mantenedor decidiu
 que a RC 1 é a candidata final: com o gate completo verde e sem P0/P1, a mesma
-ISO é promovida à versão estável `1.1` em 19/11/2026, sem rebuild sobre os
+ISO é promovida à versão estável `16.1` (tag `server-v16.1`) em 19/11/2026, sem rebuild sobre os
 pacotes GA do Leap 16.1 (03/11/2026); as atualizações GA chegam pelo repositório
 `update` após a instalação. A RC 1 inicia o congelamento estrito: somente
 correções de bugs, travamentos, segurança e performance crítica em pacotes já

@@ -185,16 +185,17 @@ class ServerRC1GateTests(unittest.TestCase):
         self.assertIn('test("\\\\[P[01]\\\\]"; "i")', uploader)
         self.assertNotIn("release-decision.json", uploader)
 
-    def test_release_scripts_target_server_1_1_rc_1_not_beta(self) -> None:
+    def test_release_scripts_target_server_16_1_rc_1_not_beta(self) -> None:
         builder = (ROOT / "scripts/build-server-rc1.sh").read_text(encoding="utf-8")
         uploader = (ROOT / "scripts/upload-server-rc1-sourceforge.sh").read_text(
             encoding="utf-8"
         )
         for script in (builder, uploader):
-            self.assertIn("1.1-rc.1", script)
+            self.assertIn("16.1-rc.1", script)
+            self.assertNotIn("1.1-rc.1", script)
             self.assertNotIn("1.1-beta", script)
-        self.assertIn("/releases/1.1/rc1/server/", uploader)
-        self.assertIn("lyra-os-server-1.1-rc.1.md", builder)
+        self.assertIn("/releases/16.1/rc1/server/", uploader)
+        self.assertIn("lyra-os-server-16.1-rc.1.md", builder)
 
     def test_gate_does_not_require_collectors_missing_from_the_server_image(self) -> None:
         gate = (ROOT / "docs/server-release-gate.md").read_text(encoding="utf-8")
