@@ -118,22 +118,30 @@ UID atuais; importar `docs/release-signing-key.asc` antes de confiar em
 
 **NO-GO enquanto a nova base não for requalificada** — a evidência anterior em
 VM pertence à base Leap 16.0 e não promove automaticamente esta candidata.
-`scripts/build-server-rc1.sh` deve gerar a imagem 16.1 RC 1 de árvore limpa,
+`scripts/build-server-rc.sh` deve gerar a imagem 16.1 RC N de árvore limpa,
 os SBOMs e o checksum assinado. O uploader valida a assinatura oficial, consulta
 o GitHub e falha fechado se houver issue Server P0/P1; depois baixa novamente a
 ISO publicada e verifica checksum e assinatura. Teste em hardware físico real
 permanece como risco residual; a cobertura aceita pode ser feita em VM, desde
 que todos os itens bloqueantes sejam repetidos sobre Leap 16.1.
 
-Por decisão do mantenedor em 14/10/2026, o ciclo sai da Beta 1.1 diretamente
-para a RC 1, com publicação até 31/10/2026. Em 18/10/2026 o mantenedor decidiu
-que a RC 1 é a candidata final: com o gate completo verde e sem P0/P1, a mesma
-ISO é promovida à versão estável `16.1` (tag `server-v16.1`) em 19/11/2026, sem rebuild sobre os
-pacotes GA do Leap 16.1 (03/11/2026); as atualizações GA chegam pelo repositório
-`update` após a instalação. A RC 1 inicia o congelamento estrito: somente
-correções de bugs, travamentos, segurança e performance crítica em pacotes já
-distribuídos. Um defeito não trivial no gate interrompe a promoção e gera a
-RC 2, que então é a nova candidata final. O acompanhamento está em
+Por decisão do mantenedor em 14/10/2026, o ciclo saiu da Beta 1.1 diretamente
+para a RC 1. A RC 1 (`16.1-rc.1`) passou pelo gate em VM em 19/10/2026 e não
+foi publicada: a imagem estava sólida, mas `vegad`, `vega-cli` e `vega-web`
+falhavam em ações e leituras administrativas fora da sessão local (#31,
+vegad#79, vega-cli#26, vega-web#17/#18). Em 19/10/2026 o mantenedor definiu o
+cronograma: a RC 2 (`16.1-rc.2`) traz vegad 5.1.37, vega-cli 5.1.25 e
+vega-web 5.1.25 sobre a base RC do Leap 16.1; a RC 3 (`16.1-rc.3`) é publicada
+em 05/11/2026 sobre os pacotes GA do Leap 16.1 (03/11/2026) e é a candidata
+final: com o gate completo verde e sem P0/P1, a mesma ISO é promovida à versão
+estável `16.1` (tag `server-v16.1`) em 19/11/2026, sem rebuild. O congelamento
+estrito continua: somente correções de bugs, travamentos, segurança e
+performance crítica em pacotes já distribuídos. Um defeito não trivial no gate
+interrompe a promoção e gera a próxima RC. Em cada RC o gate repete
+explicitamente os itens que falharam na RC 1: administração via SSH com
+`vega-cli` e pedido de senha, ações e leituras administrativas no `vega-web`
+após a confirmação de senha, `vegad` em perfil `server` e `Firewall.Status`
+fora da sessão local. O acompanhamento está em
 [#25](https://github.com/lyra-os-linux/lyraos-server/issues/25).
 O cronograma completo e os critérios de saída estão em
 [`release-versioning.md`](release-versioning.md).
