@@ -29,7 +29,7 @@ travamentos, segurança e performance crítica em pacotes já distribuídos.
 
 ## O que muda em relação à RC 1
 
-- **vegad 5.1.37**: `Firewall.Status` passa a funcionar fora da sessão local
+- **vegad 5.1.38**: `Firewall.Status` passa a funcionar fora da sessão local
   ([vegad#79](https://github.com/lyra-os-linux/vegad/issues/79)); a edição é
   detectada pelo marcador `/usr/lib/lyra-os/server-release`, então a imagem
   Server deixa de rodar o daemon com perfil desktop e de consultar Flatpak
@@ -37,10 +37,15 @@ travamentos, segurança e performance crítica em pacotes já distribuídos.
   regra polkit `50-vegad-remote-admin.rules` para administradores (`wheel`)
   fora da sessão local: mutações pedem a própria senha (`AUTH_SELF`), leituras
   administrativas de backup, kernel, snapshots e firewall são liberadas e a
-  conta de serviço `vega-web` continua sem privilégio.
-- **vega-cli 5.1.25**: ações administrativas via SSH orientam o usuário e
+  conta de serviço `vega-web` continua sem privilégio. Também tira o
+  `vegad-first-update` da cadeia de boot (deixa de puxar
+  `network-online.target` em todo boot).
+- **vega-cli 5.1.26**: ações administrativas via SSH orientam o usuário e
   passam pelo `pkttyagent` em vez de falhar antes do pedido de senha
-  ([vega-cli#26](https://github.com/lyra-os-linux/vega-cli/issues/26)).
+  ([vega-cli#26](https://github.com/lyra-os-linux/vega-cli/issues/26)); o
+  `pkttyagent` é registrado para o processo que faz a chamada D-Bus, e não
+  para o shell do `vega`, o que a 5.1.25 ainda fazia e impedia o pedido de
+  senha via SSH.
 - **vega-web 5.1.25**: toda ação administrativa pede a senha do usuário e é
   executada pelo broker root com a identidade dele
   ([vega-web#17](https://github.com/lyra-os-linux/vega-web/issues/17));
@@ -65,8 +70,8 @@ continuam fora de escopo e ficam para a 16.2.
 O gate de `../server-release-gate.md` é repetido integralmente sobre Leap
 16.1 na ISO exata: build KIWI de árvore limpa, boot live, instalação,
 primeiro boot, atualização, UEFI/Secure Boot, DHCP, SSH, firewalld, `vegad`,
-`vega-cli` e `vega-web`. O inventário RPM deve conter `vegad` 5.1.37,
-`vega-cli` 5.1.25 e `vega-web` 5.1.25 dos targets `openSUSE_Leap_16.1`, sem
+`vega-cli` e `vega-web`. O inventário RPM deve conter `vegad` 5.1.38,
+`vega-cli` 5.1.26 e `vega-web` 5.1.25 dos targets `openSUSE_Leap_16.1`, sem
 origem Leap 16.0. Os itens que falharam na RC 1 são verificados explicitamente:
 `vega-cli` administrando via SSH com pedido de senha, `vega-web` executando
 ações e leituras administrativas após a confirmação de senha, `vegad` em perfil
