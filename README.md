@@ -52,7 +52,7 @@ critérios de estágio: Alpha, Beta, RC, Estável).
 ## Testes
 
 ```bash
-python3 -m pytest tests/ -v
+python3 -m unittest discover -s tests -v
 ```
 
 ## Repositório desktop
