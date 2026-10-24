@@ -151,6 +151,8 @@ class ServerBeta1GateTests(unittest.TestCase):
         gate = (ROOT / "docs/server-release-gate.md").read_text(encoding="utf-8")
         self.assertIn("não distribui os coletores", gate)
         self.assertIn("systemctl is-active sshd vega-web firewalld NetworkManager", gate)
+        self.assertIn("org.lyraos.Vega1.Firewall Status", gate)
+        self.assertIn("zona `public`", gate)
 
     def test_release_scripts_pin_the_canonical_signing_key(self) -> None:
         fingerprint = "01B63EEDBE6B079126A0116EFA7353A131ECEFEB"

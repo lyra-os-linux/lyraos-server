@@ -87,10 +87,15 @@ findmnt -no SOURCE,FSTYPE /
 systemctl is-active sshd vega-web firewalld NetworkManager
 busctl --system introspect org.lyraos.Vega1 /org/lyraos/Vega1 >/dev/null
 sudo firewall-cmd --list-services
+sudo busctl call org.lyraos.Vega1 /org/lyraos/Vega1 org.lyraos.Vega1.Firewall Status
 sudo journalctl -b -p err..alert --no-pager
 ```
 
-Cada comando obrigatório deve retornar zero. Entradas críticas do journal só
+Cada comando obrigatório deve retornar zero. A partir da RC 3, o
+`Firewall.Status` precisa informar a zona `public`, e o status do firewall no
+`vega-cli` (via SSH) e no `vega-web` também; antes do vegad 5.1.39 ele
+informava a zona `docker` predefinida
+([vegad#83](https://github.com/lyra-os-linux/vegad/issues/83)). Entradas críticas do journal só
 podem ser aceitas com issue ou workaround revisado e registrado nas notas de
 release.
 
@@ -141,7 +146,10 @@ interrompe a promoção e gera a próxima RC. Em cada RC o gate repete
 explicitamente os itens que falharam na RC 1: administração via SSH com
 `vega-cli` e pedido de senha, ações e leituras administrativas no `vega-web`
 após a confirmação de senha, `vegad` em perfil `server` e `Firewall.Status`
-fora da sessão local. O acompanhamento está em
+fora da sessão local. A RC 3 leva o vegad 5.1.39 e também verifica que esse
+status informa a zona `public` no `vega-cli` e no `vega-web`
+([vegad#83](https://github.com/lyra-os-linux/vegad/issues/83)); as notas da
+RC 3 registram a correção como item próprio. O acompanhamento está em
 [#25](https://github.com/lyra-os-linux/lyraos-server/issues/25).
 O cronograma completo e os critérios de saída estão em
 [`release-versioning.md`](release-versioning.md).
