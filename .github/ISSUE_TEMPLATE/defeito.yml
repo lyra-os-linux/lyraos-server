@@ -1,0 +1,50 @@
+name: Defeito
+description: Algo não funciona como deveria no Lyra OS Server
+labels: ["bug", "server"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Obrigado por reportar! Antes, atualize o sistema e procure se o defeito já foi relatado.
+        Dúvidas de uso vão para as [Discussions](https://github.com/lyra-os-linux/lyraos-desktop/discussions/categories/q-a). Falhas de segurança, em [privado](https://github.com/lyra-os-linux/lyraos-desktop/security/advisories/new).
+  - type: input
+    id: versao
+    attributes:
+      label: Versão
+      description: Saída de `grep PRETTY /etc/os-release` e, se for um aplicativo, `rpm -q <pacote>`.
+      placeholder: Lyra OS Server 16.1 (Delos), vega-web-5.2.0
+    validations:
+      required: true
+  - type: textarea
+    id: passos
+    attributes:
+      label: Passos para reproduzir
+      placeholder: |
+        1. Abra ...
+        2. Clique em ...
+    validations:
+      required: true
+  - type: textarea
+    id: esperado
+    attributes:
+      label: O que você esperava
+    validations:
+      required: true
+  - type: textarea
+    id: obtido
+    attributes:
+      label: O que aconteceu
+      description: Mensagens de erro, capturas de tela ou trechos de log.
+    validations:
+      required: true
+  - type: textarea
+    id: vega
+    attributes:
+      label: Texto do "Pedir ajuda" do Vega (opcional)
+      description: Vega → Hardware → Diagnóstico de saúde → relatório → Pedir ajuda. O texto já sai sem dados pessoais.
+      render: markdown
+  - type: input
+    id: hardware
+    attributes:
+      label: Computador (opcional)
+      placeholder: modelo, placa de vídeo, VM ou máquina física

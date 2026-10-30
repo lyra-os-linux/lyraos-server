@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Pergunta ou dúvida de uso
+    url: https://github.com/lyra-os-linux/lyraos-desktop/discussions/categories/q-a
+    about: Pergunte nas Discussions (Perguntas e respostas).
+  - name: Documentação e "Pedir ajuda"
+    url: https://lyraos.com.br/docs/pedir-ajuda.html
+    about: Guia de instalação, notas de versão e como pedir ajuda pelo Vega.
+  - name: Falha de segurança
+    url: https://github.com/lyra-os-linux/lyraos-server/security/advisories/new
+    about: Reporte em privado. Nunca descreva uma vulnerabilidade numa issue pública.
