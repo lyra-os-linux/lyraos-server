@@ -98,6 +98,14 @@ suseInsertService firewalld
 # project website, issue tracker, or a matching icon name to point them at -
 # adding guessed URLs/icon names felt worse than leaving these optional
 # fields out.
+#
+# Leap-release ships /etc/os-release as a symlink to /usr/lib/os-release.
+# Writing through it changed a file owned by Leap-release, so `rpm -V` and
+# the Vega health check saw a modified program and offered to reinstall
+# Leap-release, which brought the openSUSE identity back. Replace the link
+# with a file of our own, as the desktop does, and leave the vendor file
+# untouched.
+rm -f /etc/os-release
 cat > /etc/os-release <<EOF
 NAME="Lyra OS Server"
 PRETTY_NAME="$LYRA_PRETTY_NAME"

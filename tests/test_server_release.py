@@ -274,11 +274,11 @@ class ServerRCGateTests(unittest.TestCase):
         self.assertIn("`server-v16.1-rc.3`", text)
         self.assertIn("vegad 5.6.2", text)
         self.assertIn("vega-cli 5.2.0", text)
-        self.assertIn("vega-web 5.1.25", text)
+        self.assertIn("vega-web 5.2.0", text)
         versioning = (ROOT / "docs/release-versioning.md").read_text(encoding="utf-8")
         self.assertIn("A candidata atual é a RC 3, `16.1-rc.3`", versioning)
         self.assertIn("19/11/2026", versioning)
         gate = (ROOT / "docs/server-release-gate.md").read_text(encoding="utf-8")
         self.assertIn("scripts/build-server-rc.sh", gate)
-        self.assertIn("A RC 3 leva o vegad 5.6.2 e o vega-cli 5.2.0", gate)
+        self.assertIn("A RC 3 leva o vegad 5.6.2, o vega-cli 5.2.0 e o vega-web 5.2.0", gate)
 
