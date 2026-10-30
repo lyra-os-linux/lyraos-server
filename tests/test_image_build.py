@@ -49,6 +49,16 @@ class ImagePolicyTests(unittest.TestCase):
         self.assertIn("download.max_concurrent_connections = 5", config)
         self.assertIn("download.use_deltarpm = false", config)
 
+    def test_identity_is_an_own_file_not_written_through_the_vendor_link(self) -> None:
+        # Writing through Leap-release's /etc/os-release link changed
+        # /usr/lib/os-release; the health check then offered to reinstall
+        # Leap-release, bringing the openSUSE identity back.
+        script = (ROOT / "kiwi/config.sh").read_text(encoding="utf-8")
+        remove = script.index("rm -f /etc/os-release\n")
+        write = script.index("cat > /etc/os-release <<EOF")
+        self.assertLess(remove, write)
+        self.assertNotIn("> /usr/lib/os-release", script)
+
     def test_zram_is_configured(self) -> None:
         config = (ROOT / "kiwi/root/etc/systemd/zram-generator.conf").read_text(
             encoding="utf-8"

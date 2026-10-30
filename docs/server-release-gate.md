@@ -147,8 +147,8 @@ administrativas no `vega-web` após a confirmação de senha, `vegad` em perfil
 `server` e `Firewall.Status` fora da sessão local, que precisa informar a zona
 `public` ([vegad#83](https://github.com/lyra-os-linux/vegad/issues/83)).
 
-A RC 3 leva o vegad 5.6.2 e o vega-cli 5.2.0, e o gate verifica também, via
-SSH com um usuário de `wheel`:
+A RC 3 leva o vegad 5.6.2, o vega-cli 5.2.0 e o vega-web 5.2.0, e o gate
+verifica também, via SSH com um usuário de `wheel`:
 
 - o diagnóstico de saúde pelo `vega-cli` (Hardware e Kernel → Diagnóstico de
   saúde): modo rápido com progresso, relatório depois da senha, Corrigir com
@@ -157,6 +157,12 @@ SSH com um usuário de `wheel`:
   `vegad-health-check.timer` habilitado (`systemctl is-enabled`);
 - Rede e Firewall → Minha internet não funciona, sem pedido de senha;
 - Armazenamento → Liberar espaço, com a medição sem senha.
+
+No `vega-web`, com a senha do mesmo usuário: o diagnóstico de saúde (modo
+rápido, progresso, relatório, Corrigir, Já vi), Minha internet não funciona
+com uma senha só, a medição e a limpeza do Liberar espaço e o texto redigido
+do Pedir ajuda. No sistema instalado, `rpm -V Leap-release` não acusa nada e o
+`/etc/os-release` é um arquivo, não um link.
 
 O acompanhamento está em
 [#25](https://github.com/lyra-os-linux/lyraos-server/issues/25).
