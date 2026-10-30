@@ -1,5 +1,10 @@
 # Contribuindo com o Lyra OS
 
+> Este guia é sobre a estação de desenvolvimento. Para pedir ajuda, reportar
+> um defeito, sugerir uma melhoria ou entender o fluxo de PR, veja o
+> [guia de contribuição da organização](https://github.com/lyra-os-linux/.github/blob/main/CONTRIBUTING.md)
+> e o [código de conduta](https://github.com/lyra-os-linux/.github/blob/main/CODE_OF_CONDUCT.md).
+
 Este repositório inclui um bootstrap para preparar uma instalação nova do
 Lyra OS ou do openSUSE Leap 16.1 para desenvolvimento do sistema e das
 ferramentas do ecossistema.

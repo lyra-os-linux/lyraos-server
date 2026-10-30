@@ -1,0 +1,19 @@
+name: Sugestão
+description: Uma ideia para melhorar o Lyra OS
+labels: ["enhancement", "server"]
+body:
+  - type: textarea
+    id: problema
+    attributes:
+      label: Qual problema você quer resolver?
+      description: Conte a situação em que sentiu falta disso.
+    validations:
+      required: true
+  - type: textarea
+    id: ideia
+    attributes:
+      label: Como você imagina a solução?
+  - type: textarea
+    id: alternativas
+    attributes:
+      label: Alternativas que você já usa ou considerou
