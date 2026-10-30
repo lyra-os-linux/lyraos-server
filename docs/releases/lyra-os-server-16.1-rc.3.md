@@ -74,8 +74,8 @@ O inventário RPM deve conter `vegad` 5.6.2, `vega-cli` 5.2.0 e `vega-web`
 5.2.0 dos targets `openSUSE_Leap_16.1`. Além dos itens das RCs anteriores, o
 gate verifica pelo SSH o diagnóstico de saúde, o resumo da verificação semanal,
 o teste de rede e o Liberar espaço no `vega-cli`, as mesmas funções no
-`vega-web` pelo navegador, e que `rpm -V Leap-release` não acusa nada no
-sistema instalado. Teste em hardware físico
+`vega-web` pelo navegador, e que o teste de pacotes do diagnóstico não propõe
+reinstalar o `Leap-release` no sistema instalado. Teste em hardware físico
 permanece risco residual declarado.
 
 Esta RC 3 não deve ser publicada enquanto houver P0/P1 aberto. O bundle
