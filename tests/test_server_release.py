@@ -109,7 +109,7 @@ class ServerRepositoryMetadataTests(unittest.TestCase):
             self.assertEqual(server_release_module.write_build_manifest(release, iso, output), 0)
             document = json.loads(output.read_text(encoding="utf-8"))
             self.assertEqual(document["version"], release.version_id)
-            self.assertEqual(document["channel_iteration"], 2)
+            self.assertEqual(document["channel_iteration"], 3)
             self.assertEqual(document["channel_revision"], 0)
             self.assertEqual(document["product"], "Lyra OS Server")
             self.assertEqual(document["iso"]["filename"], release.iso_filename)
@@ -267,19 +267,18 @@ class ServerRCGateTests(unittest.TestCase):
         self.assertIn('--local-user "$RELEASE_SIGNING_FINGERPRINT"', self.builder)
 
     def test_current_candidate_has_release_notes_and_documented_schedule(self) -> None:
-        notes = ROOT / "docs/releases/lyra-os-server-16.1-rc.2.md"
+        notes = ROOT / "docs/releases/lyra-os-server-16.1-rc.3.md"
         self.assertTrue(notes.is_file())
         text = notes.read_text(encoding="utf-8")
-        self.assertIn("`16.1-rc.2`", text)
-        self.assertIn("`server-v16.1-rc.2`", text)
-        self.assertIn("vegad 5.1.38", text)
-        self.assertIn("vega-cli 5.1.26", text)
+        self.assertIn("`16.1-rc.3`", text)
+        self.assertIn("`server-v16.1-rc.3`", text)
+        self.assertIn("vegad 5.6.2", text)
+        self.assertIn("vega-cli 5.2.0", text)
         self.assertIn("vega-web 5.1.25", text)
         versioning = (ROOT / "docs/release-versioning.md").read_text(encoding="utf-8")
-        self.assertIn("A candidata atual é a RC 2, `16.1-rc.2`", versioning)
-        self.assertIn("RC 3 (`16.1-rc.3`): publicada em 05/11/2026", versioning)
+        self.assertIn("A candidata atual é a RC 3, `16.1-rc.3`", versioning)
         self.assertIn("19/11/2026", versioning)
         gate = (ROOT / "docs/server-release-gate.md").read_text(encoding="utf-8")
         self.assertIn("scripts/build-server-rc.sh", gate)
-        self.assertIn("RC 3 (`16.1-rc.3`) é publicada\nem 05/11/2026", gate)
+        self.assertIn("A RC 3 leva o vegad 5.6.2 e o vega-cli 5.2.0", gate)
 
