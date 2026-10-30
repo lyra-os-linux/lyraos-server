@@ -134,22 +134,31 @@ Por decisão do mantenedor em 14/10/2026, o ciclo saiu da Beta 1.1 diretamente
 para a RC 1. A RC 1 (`16.1-rc.1`) passou pelo gate em VM em 19/10/2026 e não
 foi publicada: a imagem estava sólida, mas `vegad`, `vega-cli` e `vega-web`
 falhavam em ações e leituras administrativas fora da sessão local (#31,
-vegad#79, vega-cli#26, vega-web#17/#18). Em 19/10/2026 o mantenedor definiu o
-cronograma: a RC 2 (`16.1-rc.2`) traz vegad 5.1.37, vega-cli 5.1.25 e
-vega-web 5.1.25 sobre a base RC do Leap 16.1; a RC 3 (`16.1-rc.3`) é publicada
-em 05/11/2026 sobre os pacotes GA do Leap 16.1 (03/11/2026) e é a candidata
-final: com o gate completo verde e sem P0/P1, a mesma ISO é promovida à versão
-estável `16.1` (tag `server-v16.1`) em 19/11/2026, sem rebuild. O congelamento
-estrito continua: somente correções de bugs, travamentos, segurança e
-performance crítica em pacotes já distribuídos. Um defeito não trivial no gate
-interrompe a promoção e gera a próxima RC. Em cada RC o gate repete
-explicitamente os itens que falharam na RC 1: administração via SSH com
-`vega-cli` e pedido de senha, ações e leituras administrativas no `vega-web`
-após a confirmação de senha, `vegad` em perfil `server` e `Firewall.Status`
-fora da sessão local. A RC 3 leva o vegad 5.1.39 e também verifica que esse
-status informa a zona `public` no `vega-cli` e no `vega-web`
-([vegad#83](https://github.com/lyra-os-linux/vegad/issues/83)); as notas da
-RC 3 registram a correção como item próprio. O acompanhamento está em
+vegad#79, vega-cli#26, vega-web#17/#18). A RC 2 (`16.1-rc.2`) foi
+publicada em 22/10/2026. Em 30/10/2026 o mantenedor decidiu antecipar a RC 3
+(`16.1-rc.3`), a candidata final: com o gate completo verde e sem P0/P1, a mesma
+ISO fica congelada e é promovida à versão estável `16.1` (tag `server-v16.1`)
+em 19/11/2026, sem rebuild. O congelamento estrito continua: somente correções
+de bugs, travamentos, segurança e performance crítica em pacotes já
+distribuídos. Um defeito não trivial no gate interrompe a promoção e gera a
+próxima RC. Em cada RC o gate repete explicitamente os itens que falharam na
+RC 1: administração via SSH com `vega-cli` e pedido de senha, ações e leituras
+administrativas no `vega-web` após a confirmação de senha, `vegad` em perfil
+`server` e `Firewall.Status` fora da sessão local, que precisa informar a zona
+`public` ([vegad#83](https://github.com/lyra-os-linux/vegad/issues/83)).
+
+A RC 3 leva o vegad 5.6.2 e o vega-cli 5.2.0, e o gate verifica também, via
+SSH com um usuário de `wheel`:
+
+- o diagnóstico de saúde pelo `vega-cli` (Hardware e Kernel → Diagnóstico de
+  saúde): modo rápido com progresso, relatório depois da senha, Corrigir com
+  a lista de achados;
+- o resumo da verificação semanal ao abrir o `vega` e o
+  `vegad-health-check.timer` habilitado (`systemctl is-enabled`);
+- Rede e Firewall → Minha internet não funciona, sem pedido de senha;
+- Armazenamento → Liberar espaço, com a medição sem senha.
+
+O acompanhamento está em
 [#25](https://github.com/lyra-os-linux/lyraos-server/issues/25).
 O cronograma completo e os critérios de saída estão em
 [`release-versioning.md`](release-versioning.md).

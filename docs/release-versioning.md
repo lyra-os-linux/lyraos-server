@@ -25,23 +25,22 @@ revisão da candidata, codename, base, nome da imagem e arquitetura. O gerador
 `/usr/lib/lyra-os/server-release` sincronizados; `LYRA_BASE_VERSION_ID`
 conserva a versão do Leap base, que coincide com `MAJOR.MINOR` do Lyra.
 
-A candidata atual é a RC 2, `16.1-rc.2`, tag `server-v16.1-rc.2`, arquivo
-`LyraOS-Server-16.1-rc.2-x86_64.iso`. Por decisão do mantenedor em 14/10/2026 o
+A candidata atual é a RC 3, `16.1-rc.3`, tag `server-v16.1-rc.3`, arquivo
+`LyraOS-Server-16.1-rc.3-x86_64.iso`. Por decisão do mantenedor em 14/10/2026 o
 Server saiu da Beta 1.1 diretamente para a RC 1 (`16.1-rc.1`), construída e
 submetida ao gate em VM em 19/10/2026, mas não publicada: o gate encontrou
-defeitos nos componentes Vega fora da sessão local, corrigidos em vegad 5.1.37,
-vega-cli 5.1.25 e vega-web 5.1.25.
+defeitos nos componentes Vega fora da sessão local, corrigidos na RC 2
+(`16.1-rc.2`), publicada em 22/10/2026.
 
-Cronograma decidido pelo mantenedor em 19/10/2026:
+Cronograma decidido pelo mantenedor em 30/10/2026:
 
-- RC 2 (`16.1-rc.2`): sobre os pacotes RC do Leap 16.1, publicada em outubro
-  de 2026 após o gate em VM;
-- RC 3 (`16.1-rc.3`): publicada em 05/11/2026 sobre os pacotes GA do Leap 16.1
-  (GA em 03/11/2026); é a candidata final;
+- RC 3 (`16.1-rc.3`): publicada antes do previsto (entre 30/10 e 01/11/2026);
+  é a candidata final e fica congelada;
 - estável `16.1`: 19/11/2026, a mesma ISO da RC 3 promovida por tag
-  (`server-v16.1`) e republicação dos artefatos, sem novo build. O nome
-  `LyraOS-Server-16.1-x86_64.iso` só é usado se a promoção final exigir uma
-  imagem nova.
+  (`server-v16.1`) e republicação dos artefatos, sem novo build. As
+  atualizações do Leap 16.1 GA chegam pelo repositório `update` depois da
+  instalação. O nome `LyraOS-Server-16.1-x86_64.iso` só é usado se a promoção
+  final exigir uma imagem nova.
 
 Cada RC do ciclo 16.1 é produzida por `scripts/build-server-rc.sh` e publicada
 por `scripts/upload-server-rc-sourceforge.sh`; ambos leem o número da candidata
