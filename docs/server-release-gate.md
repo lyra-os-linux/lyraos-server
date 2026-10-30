@@ -161,8 +161,10 @@ verifica também, via SSH com um usuário de `wheel`:
 No `vega-web`, com a senha do mesmo usuário: o diagnóstico de saúde (modo
 rápido, progresso, relatório, Corrigir, Já vi), Minha internet não funciona
 com uma senha só, a medição e a limpeza do Liberar espaço e o texto redigido
-do Pedir ajuda. No sistema instalado, `rpm -V Leap-release` não acusa nada e o
-`/etc/os-release` é um arquivo, não um link.
+do Pedir ajuda. No sistema instalado, o `/etc/os-release` é um arquivo, não um
+link; `rpm -V Leap-release` só o aponta como configuração alterada (`SM5`),
+como no Desktop, e o teste de pacotes do diagnóstico fica saudável, sem
+propor reinstalar o `Leap-release`.
 
 O acompanhamento está em
 [#25](https://github.com/lyra-os-linux/lyraos-server/issues/25).
