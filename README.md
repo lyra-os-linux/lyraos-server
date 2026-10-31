@@ -21,7 +21,7 @@ do **Lyra OS Server 16.1 “Delos” RC 3** para computadores x86_64.
   `home:rodrigosbrito:vega`;
 - instalador em shell script, interativo, com TUI via `dialog`, rodando no
   console;
-- disco único em ext4, sem RAID/LVM/Btrfs/Snapper ou rollback geral; recuperação offline específica para a instalação NVIDIA;
+- disco único em ext4, sem RAID/LVM/Btrfs/Snapper ou rollback geral;
 - inicialização UEFI e suporte ao Secure Boot com o shim do openSUSE, mesma
   rota do desktop;
 - rede via DHCP automático no v1;
@@ -61,5 +61,6 @@ A contraparte gráfica desta edição, com GNOME, Vega (GTK4), instalador nativo
 Rust/Tauri e Btrfs/Snapper, vive em
 [`github.com/lyra-os-linux/lyraos-desktop`](https://github.com/lyra-os-linux/lyraos-desktop).
 
-A instalação opcional NVIDIA pelo Vega CLI/Web e sua recuperação offline em
-ext4 estão descritas em [docs/nvidia-recovery.md](docs/nvidia-recovery.md).
+O driver NVIDIA é instalado pelo [guia](https://github.com/lyra-os-linux/lyraos-desktop/discussions/366); o Vega CLI/Web não o
+instala mais. Pontos de recuperação criados por versões anteriores do Vega
+estão em [docs/nvidia-recovery.md](docs/nvidia-recovery.md).
