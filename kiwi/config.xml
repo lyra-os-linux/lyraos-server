@@ -219,7 +219,7 @@
     -->
     <package name="vega-cli"/>
     <package name="vegad"/>
-    <!-- NVIDIA recovery on ext4 and in the live rescue environment. -->
+    <!-- Vega backups (Restic), also in the live rescue environment. -->
     <package name="restic"/>
     <package name="vega-web"/>
 

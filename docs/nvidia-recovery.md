@@ -1,5 +1,15 @@
 # NVIDIA opcional no Server/ext4
 
+> [!IMPORTANT]
+> Desde 31/10/2026 (vegad 5.7.0, Vega CLI/Web 5.3.0) o Vega não instala nem
+> recupera o driver NVIDIA, e o subcomando `vegad nvidia-recover` foi retirado.
+> Para instalar o driver, siga o [guia](https://github.com/lyra-os-linux/lyraos-desktop/discussions/366).
+>
+> Pontos de recuperação criados antes continuam no disco. Para restaurar um
+> deles, inicie a **ISO do Server 16.1 RC 3** como mídia de recuperação: o
+> `vegad` do ambiente live ainda tem o subcomando descrito abaixo. O restante
+> deste documento descreve o fluxo antigo e é mantido como histórico.
+
 Decisão aprovada em 16/09/2026: incluir agora a instalação pelo Vega CLI e
 Vega Web, com recuperação no layout ext4 simples. O Server mantém o instalador
 em disco único e não ganha um sistema geral de snapshots/rollback.
