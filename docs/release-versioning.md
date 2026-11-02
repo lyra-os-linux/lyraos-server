@@ -36,7 +36,7 @@ Cronograma decidido pelo mantenedor em 30/10/2026:
 
 - RC 3 (`16.1-rc.3`): publicada antes do previsto (entre 30/10 e 01/11/2026);
   é a candidata final e fica congelada;
-- estável `16.1`: 19/11/2026, a mesma ISO da RC 3 promovida por tag
+- estável `16.1`: 03/11/2026 (data antecipada em 02/11/2026), a mesma ISO da RC 3 promovida por tag
   (`server-v16.1`) e republicação dos artefatos, sem novo build. As
   atualizações do Leap 16.1 GA chegam pelo repositório `update` depois da
   instalação. O nome `LyraOS-Server-16.1-x86_64.iso` só é usado se a promoção
@@ -58,7 +58,7 @@ do Leap, o suporte do Lyra Server e o ciclo da geração 16.x são políticas
 distintas; nenhuma data de EOL deve ser prometida sem política formal.
 
 O Lyra OS Server 16.1 terá suporte comunitário, sem prazo contratual ou EOL
-prometido. O lançamento da versão estável está previsto para **19 de novembro
+prometido. O lançamento da versão estável está previsto para **3 de novembro
 de 2026**, sempre condicionado ao gate completo. Artefatos legados serão
 preservados e republicados com nomes semânticos, mantendo checksums,
 assinaturas e proveniência verificáveis.

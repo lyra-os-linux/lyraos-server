@@ -138,7 +138,7 @@ vegad#79, vega-cli#26, vega-web#17/#18). A RC 2 (`16.1-rc.2`) foi
 publicada em 22/10/2026. Em 30/10/2026 o mantenedor decidiu antecipar a RC 3
 (`16.1-rc.3`), a candidata final: com o gate completo verde e sem P0/P1, a mesma
 ISO fica congelada e é promovida à versão estável `16.1` (tag `server-v16.1`)
-em 19/11/2026, sem rebuild. O congelamento estrito continua: somente correções
+em 03/11/2026 (data antecipada em 02/11/2026), sem rebuild. O congelamento estrito continua: somente correções
 de bugs, travamentos, segurança e performance crítica em pacotes já
 distribuídos. Um defeito não trivial no gate interrompe a promoção e gera a
 próxima RC. Em cada RC o gate repete explicitamente os itens que falharam na
