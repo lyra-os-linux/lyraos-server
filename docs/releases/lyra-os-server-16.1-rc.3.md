@@ -10,7 +10,7 @@ Terceira e última candidata de lançamento do Lyra OS Server 16.1 sobre
 | Marco | Data |
 | --- | --- |
 | RC 3 (`16.1-rc.3`) | antecipada, entre 30/10 e 01/11/2026 |
-| Versão estável `16.1` | **19 de novembro de 2026**, a mesma ISO da RC 3 promovida por tag |
+| Versão estável `16.1` | **3 de novembro de 2026** (antecipada em 02/11/2026), a mesma ISO da RC 3 promovida por tag |
 
 A RC 3 é a candidata final e fica congelada: com o gate completo verde e sem
 P0/P1, a mesma ISO vira a versão estável `16.1` (tag `server-v16.1`) sem
