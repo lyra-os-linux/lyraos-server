@@ -54,11 +54,34 @@ builds.
 
 Uma release só é promovida com o gate de qualidade verde. Datas são metas de
 planejamento ou identificadores de build, não componentes da versão. O suporte
-do Leap, o suporte do Lyra Server e o ciclo da geração 16.x são políticas
-distintas; nenhuma data de EOL deve ser prometida sem política formal.
+do Leap e o suporte do Lyra Server são políticas distintas.
 
-O Lyra OS Server 16.1 terá suporte comunitário, sem prazo contratual ou EOL
-prometido. O lançamento da versão estável está previsto para **3 de novembro
+O Lyra OS Server **não é uma rolling release**: cada versão `MAJOR.MINOR` é
+uma release fixa. **Cada release da geração 16.x tem 2 anos de suporte**,
+contados da publicação da versão estável. A política vale para toda a organização
+([ciclo de releases e suporte](https://github.com/lyra-os-linux/.github/blob/main/SUPPORT.md#ciclo-de-releases-e-suporte)).
+
+## Fluxo de git da release
+
+Só as edições têm release. Componentes como o Vega, o Beam e o Sulafat não
+pertencem a uma release: continuam sendo desenvolvidos na `main` de cada
+repositório, com versão própria.
+
+- `main`: desenvolvimento da próxima versão (16.2).
+- `server-v16.1`: tag anotada no commit promovido, igual ao da última RC. Ela nunca é
+  apagada nem movida.
+- `release/16.1`: criada a partir de `server-v16.1` para manter a release durante os
+  2 anos de suporte. As correções entram por pull request. Uma correção que
+  também vale para a `main` entra primeiro nela e vai para a release com
+  `git cherry-pick -x`. Cada versão de correção recebe a tag `server-v16.1.N`.
+- Rulesets do GitHub: as tags `server-v*` não podem ser apagadas nem movidas; as
+  branches `release/*` não podem ser apagadas nem receber force-push, e
+  mudanças entram só por pull request.
+
+Quando o suporte da 16.1 terminar, a branch `release/16.1` e as tags continuam
+no repositório, como registro.
+
+O lançamento da versão estável está previsto para **3 de novembro
 de 2026**, sempre condicionado ao gate completo. Artefatos legados serão
 preservados e republicados com nomes semânticos, mantendo checksums,
 assinaturas e proveniência verificáveis.
