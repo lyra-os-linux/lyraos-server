@@ -54,11 +54,17 @@ builds.
 
 Uma release só é promovida com o gate de qualidade verde. Datas são metas de
 planejamento ou identificadores de build, não componentes da versão. O suporte
-do Leap, o suporte do Lyra Server e o ciclo da geração 16.x são políticas
-distintas; nenhuma data de EOL deve ser prometida sem política formal.
+do Leap e o suporte do Lyra Server são políticas distintas.
 
-O Lyra OS Server 16.1 terá suporte comunitário, sem prazo contratual ou EOL
-prometido. O lançamento da versão estável está previsto para **3 de novembro
+O Lyra OS Server **não é uma rolling release**: cada versão `MAJOR.MINOR` é
+uma release fixa. **Cada release da geração 16.x tem 2 anos de suporte**,
+contados da publicação da versão estável. O fonte de cada release publicada é
+mantido para sustentar esse suporte: as tags de release (`server-v16.1`, …) não
+são apagadas nem movidas, e as correções de uma release suportada partem do
+fonte dessa release. A política vale para toda a organização
+([ciclo de releases e suporte](https://github.com/lyra-os-linux/.github/blob/main/SUPPORT.md#ciclo-de-releases-e-suporte)).
+
+O lançamento da versão estável está previsto para **3 de novembro
 de 2026**, sempre condicionado ao gate completo. Artefatos legados serão
 preservados e republicados com nomes semânticos, mantendo checksums,
 assinaturas e proveniência verificáveis.
