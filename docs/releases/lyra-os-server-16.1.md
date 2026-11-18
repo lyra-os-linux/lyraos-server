@@ -2,23 +2,23 @@
 
 Versão estável do Lyra OS Server sobre **openSUSE Leap 16.1**, publicada em
 **3 de novembro de 2026**: edição sem interface gráfica, com instalador em
-console e administração pelo Vega. É a própria ISO da
-[RC 3](lyra-os-server-16.1-rc.3.md), a candidata final, promovida por tag sem
-rebuild. O arquivo mantém o nome da RC 3, com o mesmo checksum e a mesma
-assinatura.
+console e administração pelo Vega. Em 03/11 a ISO da
+[RC 3](lyra-os-server-16.1-rc.3.md), a candidata final, foi promovida por tag
+sem rebuild, mas ainda se identificava como "16.1 RC 3". Em 14/11/2026 a ISO
+estável foi reconstruída com a identidade `16.1`.
 
 | Campo | Valor |
 | --- | --- |
 | Versão | `16.1` |
-| Tag | `server-v16.1` (o mesmo commit da `server-v16.1-rc.3`) |
-| Commit | `9c49dba334c9f935e39d1ae550ddf40170d91c5a` |
-| Arquivo | `LyraOS-Server-16.1-rc.3-x86_64.iso` |
-| SHA-256 | `1bcb55a7842487ee463bf40640b882f34dd00e1a9a1a31d539a8de39919b7a45` |
+| Arquivo | `LyraOS-Server-16.1-x86_64.iso` |
+| Build | 14/11/2026; metadados registrados na `main` em `b6658c8` |
+| Assinatura | `LyraOS-Server-16.1-x86_64.iso.asc`, chave Lyra OS Release |
 | Download | [releases/16.1/stable/server/](https://sourceforge.net/projects/lyra/files/releases/16.1/stable/server/) no SourceForge |
-| Publicação da RC 3 | 30/10/2026 |
+| Tag | `server-v16.1` (o mesmo commit da `server-v16.1-rc.3`, `9c49dba`) |
+| ISO da RC 3 | `LyraOS-Server-16.1-rc.3-x86_64.iso`, mantida na mesma pasta; publicada em 30/10/2026 |
 
-Quem instalou a RC 3 já tem o sistema da versão estável e só precisa seguir
-atualizando. As atualizações do Leap 16.1 final chegam pelo repositório
+Quem instalou a RC 3 tem o mesmo sistema da versão estável e só precisa seguir
+atualizando; o `/etc/os-release` dessas instalações continua dizendo "16.1 RC 3". As atualizações do Leap 16.1 final chegam pelo repositório
 `update` depois da instalação.
 
 ## Suporte
@@ -69,9 +69,15 @@ O teste em hardware físico continua como risco residual declarado.
 
 ## Integridade
 
-O bundle publicado inclui a ISO, o inventário RPM, a verificação KIWI, os SBOMs
-CycloneDX/SPDX, o checksum e a assinatura destacada. Baixe a ISO, o `.sha256` e
-o `.sha256.asc` da mesma pasta e confira:
+A ISO estável vem com a assinatura destacada da própria ISO. Baixe a ISO e o
+`.asc` da mesma pasta e confira:
+
+```sh
+gpg --verify LyraOS-Server-16.1-x86_64.iso.asc LyraOS-Server-16.1-x86_64.iso
+```
+
+A ISO da RC 3, mantida na pasta, segue com o bundle completo (inventário RPM,
+verificação KIWI, SBOMs CycloneDX/SPDX, `.sha256` e `.sha256.asc`):
 
 ```sh
 sha256sum -c LyraOS-Server-16.1-rc.3-x86_64.iso.sha256
