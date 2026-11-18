@@ -11,7 +11,7 @@ estável foi reconstruída com a identidade `16.1`.
 | --- | --- |
 | Versão | `16.1` |
 | Arquivo | `LyraOS-Server-16.1-x86_64.iso` |
-| Build | 14/11/2026; metadados registrados na `main` em `b6658c8` |
+| Build | 14/11/2026, commit `b6658c8` (tag `server-v16.1-iso.20261114`) |
 | Assinatura | `LyraOS-Server-16.1-x86_64.iso.asc`, chave Lyra OS Release |
 | Download | [releases/16.1/stable/server/](https://sourceforge.net/projects/lyra/files/releases/16.1/stable/server/) no SourceForge |
 | Tag | `server-v16.1` (o mesmo commit da `server-v16.1-rc.3`, `9c49dba`) |
