@@ -5,13 +5,12 @@ independentemente da base atualmente usada pelo desktop
 ([`github.com/lyra-os-linux/lyraos-desktop`](https://github.com/lyra-os-linux/lyraos-desktop)),
 sem GNOME e sem os componentes desktop do ecossistema Lyra. Este repositório
 contém a descrição KIWI usada para gerar a ISO live e o instalador em console
-do **Lyra OS Server 16.1 “Delos” RC 3** para computadores x86_64.
+do **Lyra OS Server 16.1 “Delos”** para computadores x86_64.
 
 > [!IMPORTANT]
-> O projeto ainda está em desenvolvimento. A ISO não deve ser considerada uma
-> versão final até que o ciclo completo de build, instalação e inicialização
-> do sistema instalado seja validado novamente após as correções mais
-> recentes.
+> A versão estável 16.1 foi publicada em 3 de novembro de 2026. A ISO estável
+> usa a identidade `16.1`; consulte as notas de lançamento para checksum,
+> assinatura e instruções de verificação.
 
 ## Principais características
 

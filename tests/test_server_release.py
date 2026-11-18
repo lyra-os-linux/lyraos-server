@@ -109,7 +109,7 @@ class ServerRepositoryMetadataTests(unittest.TestCase):
             self.assertEqual(server_release_module.write_build_manifest(release, iso, output), 0)
             document = json.loads(output.read_text(encoding="utf-8"))
             self.assertEqual(document["version"], release.version_id)
-            self.assertEqual(document["channel_iteration"], 3)
+            self.assertEqual(document["channel_iteration"], release.iteration)
             self.assertEqual(document["channel_revision"], 0)
             self.assertEqual(document["product"], "Lyra OS Server")
             self.assertEqual(document["iso"]["filename"], release.iso_filename)
@@ -266,7 +266,7 @@ class ServerRCGateTests(unittest.TestCase):
             self.assertIn("verify_release_signature", script)
         self.assertIn('--local-user "$RELEASE_SIGNING_FINGERPRINT"', self.builder)
 
-    def test_current_candidate_has_release_notes_and_documented_schedule(self) -> None:
+    def test_stable_release_has_historical_rc_notes_and_documented_schedule(self) -> None:
         notes = ROOT / "docs/releases/lyra-os-server-16.1-rc.3.md"
         self.assertTrue(notes.is_file())
         text = notes.read_text(encoding="utf-8")
@@ -276,7 +276,8 @@ class ServerRCGateTests(unittest.TestCase):
         self.assertIn("vega-cli 5.2.0", text)
         self.assertIn("vega-web 5.2.0", text)
         versioning = (ROOT / "docs/release-versioning.md").read_text(encoding="utf-8")
-        self.assertIn("A candidata atual é a RC 3, `16.1-rc.3`", versioning)
+        self.assertIn("O Server 16.1 está estável desde 03/11/2026", versioning)
+        self.assertIn("LyraOS-Server-16.1-x86_64.iso", versioning)
         self.assertIn("03/11/2026", versioning)
         gate = (ROOT / "docs/server-release-gate.md").read_text(encoding="utf-8")
         self.assertIn("scripts/build-server-rc.sh", gate)

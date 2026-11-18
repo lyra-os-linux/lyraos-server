@@ -25,8 +25,9 @@ revisão da candidata, codename, base, nome da imagem e arquitetura. O gerador
 `/usr/lib/lyra-os/server-release` sincronizados; `LYRA_BASE_VERSION_ID`
 conserva a versão do Leap base, que coincide com `MAJOR.MINOR` do Lyra.
 
-A candidata atual é a RC 3, `16.1-rc.3`, tag `server-v16.1-rc.3`, arquivo
-`LyraOS-Server-16.1-rc.3-x86_64.iso`. Por decisão do mantenedor em 14/10/2026 o
+O Server 16.1 está estável desde 03/11/2026, com versão `16.1`, tag
+`server-v16.1` e arquivo `LyraOS-Server-16.1-x86_64.iso`. A RC 3 permanece
+registrada nas notas históricas. Por decisão do mantenedor em 14/10/2026 o
 Server saiu da Beta 1.1 diretamente para a RC 1 (`16.1-rc.1`), construída e
 submetida ao gate em VM em 19/10/2026, mas não publicada: o gate encontrou
 defeitos nos componentes Vega fora da sessão local, corrigidos na RC 2
